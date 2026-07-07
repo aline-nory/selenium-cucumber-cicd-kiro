@@ -38,17 +38,20 @@ public class RunnerTest {
     /**
      * Configura o truststore customizado antes de qualquer teste.
      *
-     * Necessário porque o Avast Antivirus intercepta conexões HTTPS e substitui
-     * os certificados SSL. O Java 8 rejeita esses certificados por padrão.
-     * Ao rodar pela IDE, não há Maven para passar o -D via argLine, então
-     * configuramos programaticamente aqui.
+     * Necessário em ambientes onde um proxy SSL (ex: antivírus corporativo)
+     * intercepta conexões HTTPS e o Java 8 rejeita os certificados substituídos.
+     * O arquivo ~/.maven-cacerts deve conter o certificado raiz do proxy importado.
      *
-     * O arquivo ~/.maven-cacerts foi gerado com o certificado do Avast importado.
+     * Em CI (GitHub Actions) este truststore não existe e não é necessário,
+     * pois o Java no Linux tem cacerts atualizados e sem interferência de proxy.
      */
     @BeforeClass
     public static void configurarSSL() {
+        // Só aplica o truststore customizado se o arquivo existir (ambiente local)
         String cacertsPath = System.getProperty("user.home") + "/.maven-cacerts";
-        System.setProperty("javax.net.ssl.trustStore", cacertsPath);
-        System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
+        if (new java.io.File(cacertsPath).exists()) {
+            System.setProperty("javax.net.ssl.trustStore", cacertsPath);
+            System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
+        }
     }
 }

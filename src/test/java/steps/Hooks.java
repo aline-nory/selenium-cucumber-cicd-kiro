@@ -22,11 +22,17 @@ import org.openqa.selenium.chrome.ChromeOptions;
 public class Hooks {
 
     /**
-     * Caminho local do ChromeDriver (usado apenas fora do CI).
-     * No CI o ChromeDriver é instalado pelo workflow do GitHub Actions.
+     * Caminho local do ChromeDriver.
+     * Pode ser sobrescrito pela variável de ambiente CHROME_DRIVER_PATH.
+     * Valor padrão: C:\chromedriver\chromedriver-win64\chromedriver.exe
+     *
+     * Para customizar sem alterar o código:
+     *   set CHROME_DRIVER_PATH=C:\seu\caminho\chromedriver.exe
      */
     private static final String CHROME_DRIVER_PATH_LOCAL =
-            "C:\\chromedriver\\chromedriver-win64\\chromedriver.exe";
+            System.getenv("CHROME_DRIVER_PATH") != null
+                    ? System.getenv("CHROME_DRIVER_PATH")
+                    : "C:\\chromedriver\\chromedriver-win64\\chromedriver.exe";
 
     private static final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<WebDriver>();
 

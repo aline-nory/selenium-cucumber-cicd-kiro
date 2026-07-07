@@ -94,8 +94,9 @@
                         <include>**/*Runner.java</include>
                     </includes>
                     <!-- Passa o truststore customizado para a JVM forked do Surefire.
-                         Necessário porque o Avast substitui certificados SSL e o
-                         Java 8 não reconhece o certificado gerado pelo antivírus. -->
+                         Necessário em ambientes onde um proxy SSL (ex: antivírus)
+                         intercepta conexões HTTPS e o Java 8 rejeita os certificados.
+                         O arquivo .maven-cacerts deve existir localmente (ver README). -->
                     <argLine>
                         -Djavax.net.ssl.trustStore=${user.home}/.maven-cacerts
                         -Djavax.net.ssl.trustStorePassword=changeit
