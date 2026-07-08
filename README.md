@@ -1,6 +1,6 @@
-# selenium-cucumber-kiro-github-actions
+# selenium-restassured-cucumber-kiro-github-actions
 
-![CI](https://github.com/aline-nory/selenium-cucumber-kiro-github-actions/actions/workflows/testes.yml/badge.svg)
+![CI](https://github.com/aline-nory/selenium-restassured-cucumber-kiro-github-actions/actions/workflows/testes.yml/badge.svg)
 ![Java](https://img.shields.io/badge/Java-8-orange?logo=java)
 ![Maven](https://img.shields.io/badge/Maven-3.9-blue?logo=apachemaven)
 ![Selenium](https://img.shields.io/badge/Selenium-3.141-green?logo=selenium)
