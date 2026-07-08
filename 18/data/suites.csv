@@ -1,0 +1,37 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","43","Deletar um post","","2026-07-08","passed","2026-07-08","","API de Posts","Deletar um post",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","42","Buscar post inexistente retorna 404","","2026-07-08","passed","2026-07-08","","API de Posts","Buscar post inexistente retorna 404",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","3797","Login com senha incorreta","","2026-07-08","passed","2026-07-08","","Login no sistema","Login com senha incorreta",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","74","Atualizar um post existente","","2026-07-08","passed","2026-07-08","","API de Posts","Atualizar um post existente",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","3426","Login com credenciais inválidas","","2026-07-08","passed","2026-07-08","","Login no sistema","Login com credenciais inválidas",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","99","Buscar posts de um usuário específico","","2026-07-08","passed","2026-07-08","","API de Posts","Buscar posts de um usuário específico",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","744","Validar contrato (schema) do post","","2026-07-08","passed","2026-07-08","","API de Posts","Validar contrato (schema) do post",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","32721","Login com credenciais válidas","","2026-07-08","passed","2026-07-08","","Login no sistema","Login com credenciais válidas",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","3738","Listar todos os posts","","2026-07-08","passed","2026-07-08","","API de Posts","Listar todos os posts",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","111","Criar um novo post","","2026-07-08","passed","2026-07-08","","API de Posts","Criar um novo post",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","3380","Login com credenciais inválidas","","2026-07-08","passed","2026-07-08","","Login no sistema","Login com credenciais inválidas",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","572","Buscar um post por ID","","2026-07-08","passed","2026-07-08","","API de Posts","Buscar um post por ID",""
