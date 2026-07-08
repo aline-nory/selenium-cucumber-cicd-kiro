@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"06952c1cc7386748383625d4f1597ea1","name":"API de Posts","statistic":{"failed":0,"broken":0,"skipped":0,"passed":8,"unknown":0,"total":8}},{"uid":"e4181b99fad31de69507ef3d1a243ff2","name":"Login no sistema","statistic":{"failed":0,"broken":0,"skipped":0,"passed":4,"unknown":0,"total":4}}]}
