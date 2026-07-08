@@ -7,26 +7,123 @@
 ![Cucumber](https://img.shields.io/badge/Cucumber-7.18-brightgreen?logo=cucumber)
 ![REST Assured](https://img.shields.io/badge/REST_Assured-4.5-teal)
 ![Allure](https://img.shields.io/badge/Report-Allure-orange)
-![Kiro AI](https://img.shields.io/badge/Generated%20with-Kiro%20AI-blueviolet)
 
-Projeto de automacao de testes **Web (UI)** e **API REST** com pipeline CI/CD. Desenvolvido com Kiro AI como portfolio de QA.
+Framework profissional de automacao de testes UI + API com arquitetura enterprise, pipeline CI/CD e relatorios Allure.
 
 ---
 
-## Destaques do projeto
+## Arquitetura
 
-- **BDD em portugues** com Cucumber — cenarios legiveis para qualquer pessoa do time
-- **Page Object Pattern** com heranca (`BasePage`) — codigo reutilizavel e facil de manter
-- **Testes de UI** com Selenium WebDriver — validacao de fluxos no navegador
-- **Testes de API** com REST Assured — cobertura completa dos verbos HTTP (GET, POST, PUT, DELETE)
-- **Validacao de contrato** com JSON Schema — garante que a API respeita o formato esperado
-- **Templates JSON externalizados** — payloads de request em arquivos `.json` separados do codigo
-- **Separacao por camadas** — pages, steps, services, support (padrao enterprise)
-- **CI/CD com GitHub Actions** — testes executados automaticamente a cada push
-- **Allure Report** — relatorio interativo com graficos, historico e screenshots
-- **Screenshots automaticas** — capturadas em todos os cenarios de UI (sucesso e falha)
-- **Configuracao por ambiente** — troca entre DEV/HQA sem alterar codigo
-- **Deteccao automatica de CI** — modo headless ativado automaticamente em servidores
+```
+                 Feature (.feature)
+                        |
+                   Step Layer
+                        |
+           -------------------------
+           |                       |
+       UI Layer               API Layer
+           |                       |
+     Page Objects           Services / Client
+           |                       |
+      Selenium              REST Assured
+           |
+     Infrastructure
+           |
+  Config / Drivers / Logs / Reports / CI
+```
+
+---
+
+## Destaques
+
+- **Separacao UI / API** — steps, features e camadas isoladas por tipo
+- **Injecao de Dependencia** — PicoContainer (uma instancia por cenario)
+- **Page Object Pattern** — BasePage + heranca por funcionalidade
+- **Service + Client** — camada de negocio separada do HTTP
+- **Models + Builders** — objetos tipados com Faker para dados dinamicos
+- **Configuracao por ambiente** — arquivos .properties por ambiente (dev/hml)
+- **Logging corporativo** — SLF4J + Logback (console + arquivo)
+- **Excecoes customizadas** — FrameworkException com contexto claro
+- **Allure Report** — request/response anexados automaticamente
+- **Screenshots configuraveis** — failure_only ou always
+- **CI/CD** — GitHub Actions com Chrome headless
+- **JSON Schema validation** — contrato de API garantido
+
+---
+
+## Estrutura do projeto
+
+```
+src/test/java/
+├── runners/
+│   └── TestRunner.java
+├── steps/
+│   ├── ui/
+│   │   └── LoginSteps.java
+│   └── api/
+│       └── PostSteps.java
+├── pages/
+│   ├── base/
+│   │   └── BasePage.java
+│   └── login/
+│       └── LoginPage.java
+├── api/
+│   ├── clients/
+│   │   └── RestClient.java
+│   ├── services/
+│   │   └── PostService.java
+│   ├── models/
+│   │   └── PostRequest.java
+│   └── builders/
+│       └── PostBuilder.java
+├── hooks/
+│   ├── UiHooks.java
+│   └── ApiHooks.java
+├── config/
+│   ├── Environment.java
+│   └── ConfigReader.java
+├── drivers/
+│   ├── DriverFactory.java
+│   └── DriverManager.java
+├── utils/
+│   ├── LogUtils.java
+│   ├── JsonUtils.java
+│   └── ScreenshotUtils.java
+└── exceptions/
+    └── FrameworkException.java
+
+src/test/resources/
+├── features/
+│   ├── ui/
+│   │   └── login.feature
+│   └── api/
+│       └── posts.feature
+├── environments/
+│   ├── dev.properties
+│   └── hml.properties
+├── payloads/
+│   └── posts/
+│       ├── create-post.json
+│       └── update-post.json
+├── schemas/
+│   └── post-schema.json
+├── testdata/
+│   └── login.json
+└── logback.xml
+```
+
+---
+
+## Comandos
+
+```bash
+mvn test                                    # todos os cenarios
+mvn test -Dcucumber.filter.tags="@smoke"    # smoke
+mvn test -Dcucumber.filter.tags="@api"      # apenas API
+mvn test -Dcucumber.filter.tags="@ui"       # apenas UI
+mvn test -Denvironment=hml                  # ambiente HML
+mvn allure:serve                            # relatorio Allure
+```
 
 ---
 
@@ -35,139 +132,44 @@ Projeto de automacao de testes **Web (UI)** e **API REST** com pipeline CI/CD. D
 | Tecnologia | Versao | Funcao |
 |---|---|---|
 | Java | 8 | Linguagem |
-| Maven | 3.9 | Build e dependencias |
-| Selenium WebDriver | 3.141.59 | Automacao de UI |
-| Cucumber | 7.18 | BDD em portugues |
-| JUnit | 4.13 | Runner e assertions |
-| REST Assured | 4.5.1 | Automacao de API REST |
-| Allure Report | 2.24 | Relatorio interativo |
-| GitHub Actions | - | Pipeline CI/CD |
-
----
-
-## Estrutura do projeto
-
-```
-src/test/java/
-├── pages/                          # Page Objects
-│   ├── BasePage.java               # Classe base (acoes comuns)
-│   └── LoginPage.java             # PO da tela de login
-├── services/                       # Servicos de API
-│   └── PostService.java           # Chamadas do endpoint /posts
-├── steps/                          # Step Definitions
-│   ├── LoginSteps.java            # Steps de UI
-│   └── ApiPostsSteps.java        # Steps de API
-├── support/
-│   ├── communication/             # Comunicacao HTTP
-│   │   └── RestApi.java           # Wrapper REST Assured
-│   ├── environment/               # Configuracoes de ambiente
-│   │   └── Environment.java      # Leitura do config.properties
-│   ├── helpers/                   # Utilitarios
-│   │   ├── LogUtils.java         # Log formatado
-│   │   └── JsonTemplate.java     # Leitura de templates JSON
-│   ├── hooks/                     # Hooks do Cucumber
-│   │   ├── WebHooks.java         # Ciclo de vida WebDriver (@ui)
-│   │   └── ApiHooks.java         # Setup de API (@api)
-│   ├── testEvidence/              # Evidencias de teste
-│   │   └── ScreenshotUtils.java  # Captura de screenshots
-│   └── webDriver/                 # Fabrica de drivers
-│       └── DriverFactory.java    # Criacao Chrome/headless
-└── Runner.java                    # Runner principal
-
-src/test/resources/
-├── features/
-│   ├── login.feature              # Cenarios de UI
-│   └── api_posts.feature          # Cenarios de API
-├── schemas/
-│   └── post-schema.json           # Contrato JSON da API
-└── template.api/
-    ├── POST_CriarPost.json        # Payload de criacao
-    └── PUT_AtualizarPost.json     # Payload de atualizacao
-
-config.properties                  # Configuracoes por ambiente (raiz)
-```
-
----
-
-## Tags
-
-| Tag | Tipo | Como rodar |
-|---|---|---|
-| `@ui` | Cenarios Web (Chrome) | `mvn test -Dcucumber.filter.tags="@ui"` |
-| `@api` | Cenarios de API | `mvn test -Dcucumber.filter.tags="@api"` |
-| `@smoke` | Validacao rapida | `mvn test -Dcucumber.filter.tags="@smoke"` |
-| sem filtro | Regressao completa | `mvn test` |
-
----
-
-## Como executar
-
-```bash
-mvn test                                        # todos os cenarios
-mvn test -Dcucumber.filter.tags="@api"          # so API
-mvn test -Dcucumber.filter.tags="@ui"           # so UI
-mvn test -Dcucumber.filter.tags="@smoke"        # smoke
-mvn test -Denvironment=HQA                      # outro ambiente
-```
-
-## Relatorios
-
-```bash
-mvn allure:serve                                # abre Allure no navegador
-mvn allure:report                               # gera em target/site/
-```
-
-| Tipo | Local |
-|---|---|
-| Cucumber HTML | `target/cucumber-reports/cucumber.html` |
-| Allure Report | `mvn allure:serve` (interativo) |
-| GitHub Pages | Automatico via CI |
+| Maven | 3.9 | Build |
+| Selenium | 3.141.59 | Automacao UI |
+| Cucumber | 7.18 | BDD |
+| JUnit | 4.13 | Runner |
+| REST Assured | 4.5.1 | Automacao API |
+| Allure | 2.24 | Relatorios |
+| PicoContainer | 7.18 | Injecao de dependencia |
+| SLF4J + Logback | 1.7/1.2 | Logging |
+| JavaFaker | 1.0.2 | Dados dinamicos |
+| GitHub Actions | - | CI/CD |
 
 ---
 
 ## Pipeline CI/CD
 
-O GitHub Actions executa automaticamente em cada push para `main` ou `develop`.
-
-1. Configura Java 8, Chrome e ChromeDriver
-2. Executa `mvn test` com `CI=true` (headless automatico)
-3. Gera e publica Allure Report no GitHub Pages
-4. Publica relatorio Cucumber como artefato
-5. Exibe resultado JUnit inline no GitHub
+O GitHub Actions executa automaticamente em cada push:
+1. Java 8 + Chrome + ChromeDriver configurados
+2. `mvn test` com `CI=true` (headless)
+3. Allure Report publicado no GitHub Pages
+4. Artefatos Cucumber disponiveis
 
 ---
 
-## Evidencias
+## Configuracao por ambiente
 
-- Screenshots capturadas em **todos** os cenarios `@ui` (sucesso e falha)
-- Embutidas no Allure Report e no `cucumber.html`
-- Cenarios com sucesso: screenshot do estado final da tela
-- Cenarios com falha: screenshot do momento do erro
-
----
-
-## Validacao de contrato (JSON Schema)
-
-O cenario "Validar contrato do post" garante que a API retorna a estrutura esperada:
-
-```json
-{
-  "type": "object",
-  "required": ["userId", "id", "title", "body"],
-  "properties": {
-    "userId": { "type": "integer", "minimum": 1 },
-    "id": { "type": "integer", "minimum": 1 },
-    "title": { "type": "string", "minLength": 1 },
-    "body": { "type": "string", "minLength": 1 }
-  },
-  "additionalProperties": false
-}
+```
+resources/environments/
+├── dev.properties    <- padrao
+└── hml.properties    <- mvn test -Denvironment=hml
 ```
 
-Se a API mudar a estrutura da resposta, o teste quebra imediatamente.
+Hierarquia de credenciais:
+1. `dev.properties` — credenciais de teste (commitavel)
+2. Variaveis de ambiente — CI/CD (GitHub Secrets)
+3. Secrets Manager — producao (nunca no codigo)
 
 ---
 
-## Gerado com Kiro AI
+## Documentacao completa
 
-Projeto criado com [Kiro](https://kiro.dev), ambiente de desenvolvimento com IA.
+Consulte o arquivo [DOCUMENTATION.md](DOCUMENTATION.md) para o guia tecnico completo com 42 capitulos cobrindo toda a arquitetura, implementacao e boas praticas.
