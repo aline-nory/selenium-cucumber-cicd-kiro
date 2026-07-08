@@ -1,6 +1,6 @@
-# selenium-cucumber-cicd-kiro
+# selenium-cucumber-kiro-github-actions
 
-![CI](https://github.com/aline-nory/selenium-cucumber-cicd-kiro/actions/workflows/testes.yml/badge.svg)
+![CI](https://github.com/aline-nory/selenium-cucumber-kiro-github-actions/actions/workflows/testes.yml/badge.svg)
 ![Java](https://img.shields.io/badge/Java-8-orange?logo=java)
 ![Maven](https://img.shields.io/badge/Maven-3.9-blue?logo=apachemaven)
 ![Selenium](https://img.shields.io/badge/Selenium-3.141-green?logo=selenium)
@@ -8,20 +8,20 @@
 ![REST Assured](https://img.shields.io/badge/REST_Assured-4.5-teal)
 ![Kiro AI](https://img.shields.io/badge/Generated%20with-Kiro%20AI-blueviolet)
 
-Projeto de automação de testes desenvolvido com **Kiro AI**, cobrindo testes **Web (UI)** e **API REST**, com pipeline **CI/CD** via GitHub Actions.
+Projeto de automacao de testes Web (UI) e API REST com pipeline CI/CD via GitHub Actions. Desenvolvido com Kiro AI.
 
 ---
 
 ## Stack
 
-| Tecnologia | Versão | Função |
+| Tecnologia | Versao | Funcao |
 |---|---|---|
 | Java | 8 | Linguagem |
-| Maven | 3.9 | Build e gerenciamento de dependências |
-| Selenium WebDriver | 3.141.59 | Automação de UI no Chrome |
-| Cucumber | 7.18 | BDD — cenários em português |
+| Maven | 3.9 | Build e dependencias |
+| Selenium WebDriver | 3.141.59 | Automacao de UI |
+| Cucumber | 7.18 | BDD em portugues |
 | JUnit | 4.13 | Runner e assertions |
-| REST Assured | 4.5.1 | Automação de API REST |
+| REST Assured | 4.5.1 | Automacao de API REST |
 | GitHub Actions | - | Pipeline CI/CD |
 
 ---
@@ -29,109 +29,85 @@ Projeto de automação de testes desenvolvido com **Kiro AI**, cobrindo testes *
 ## Estrutura do projeto
 
 ```
-selenium-cucumber-cicd-kiro/
-├── .github/
-│   └── workflows/
-│       └── testes.yml          # Pipeline CI/CD
-├── src/
-│   └── test/
-│       ├── java/
-│       │   ├── pages/
-│       │   │   └── LoginPage.java       # Page Object
-│       │   ├── steps/
-│       │   │   ├── Hooks.java           # Ciclo de vida WebDriver
-│       │   │   ├── LoginSteps.java      # Steps de UI
-│       │   │   └── ApiSteps.java        # Steps de API
-│       │   └── runner/
-│       │       └── RunnerTest.java      # JUnit Runner
-│       └── resources/
-│           ├── features/
-│           │   ├── login.feature        # Cenários de UI (OrangeHRM)
-│           │   └── api_posts.feature    # Cenários de API (JSONPlaceholder)
-│           └── cucumber.properties
-├── pom.xml
-└── executar-testes.bat         # Script para execução local (Windows)
+src/test/java/
+├── pages/                          # Page Objects
+│   ├── BasePage.java               # Classe base (acoes comuns)
+│   └── LoginPage.java             # PO da tela de login
+├── services/                       # Servicos de API
+│   └── PostService.java           # Chamadas do endpoint /posts
+├── steps/                          # Step Definitions
+│   ├── LoginSteps.java            # Steps de UI
+│   └── ApiPostsSteps.java        # Steps de API
+├── support/
+│   ├── communication/             # Comunicacao HTTP
+│   │   └── RestApi.java           # Wrapper REST Assured
+│   ├── environment/               # Configuracoes de ambiente
+│   │   └── Environment.java      # Leitura do config.properties
+│   ├── helpers/                   # Utilitarios
+│   │   └── LogUtils.java         # Log formatado
+│   ├── hooks/                     # Hooks do Cucumber
+│   │   ├── WebHooks.java         # Ciclo de vida WebDriver (@ui)
+│   │   └── ApiHooks.java         # Setup de API (@api)
+│   ├── testEvidence/              # Evidencias de teste
+│   │   └── ScreenshotUtils.java  # Captura de screenshots
+│   └── webDriver/                 # Fabrica de drivers
+│       └── DriverFactory.java    # Criacao Chrome/headless
+└── Runner.java                    # Runner principal
+
+src/test/resources/
+└── features/
+    ├── login.feature              # Cenarios de UI
+    └── api_posts.feature          # Cenarios de API
+
+config.properties                  # Configuracoes por ambiente (raiz)
 ```
 
 ---
 
-## Cenários de teste
+## Tags
 
-### UI — Login (OrangeHRM Demo)
-- Login com credenciais válidas
-- Login com senha incorreta
-- Login com múltiplas credenciais inválidas (Scenario Outline)
-
-### API — Posts (JSONPlaceholder)
-- `GET /posts` — listar todos os posts
-- `GET /posts/{id}` — buscar por ID
-- `GET /posts?userId=1` — filtrar por usuário
-- `POST /posts` — criar novo post
-- `PUT /posts/{id}` — atualizar post
-- `DELETE /posts/{id}` — deletar post
-- `GET /posts/9999` — recurso inexistente (404)
+| Tag | Tipo | Como rodar |
+|---|---|---|
+| `@ui` | Cenarios Web (Chrome) | `mvn test -Dcucumber.filter.tags="@ui"` |
+| `@api` | Cenarios de API | `mvn test -Dcucumber.filter.tags="@api"` |
+| `@smoke` | Validacao rapida | `mvn test -Dcucumber.filter.tags="@smoke"` |
+| sem filtro | Regressao completa | `mvn test` |
 
 ---
 
-## Como executar localmente (Windows)
+## Como executar
 
-### Pré-requisitos
-- Java 8 JDK instalado
-- Maven instalado (ou use o script abaixo)
-- Google Chrome instalado
-- ChromeDriver compatível com sua versão do Chrome
-
-### Executar todos os testes
 ```bat
-executar-testes.bat
-```
-
-### Executar por categoria
-```bat
-executar-testes.bat api    # apenas testes de API
-executar-testes.bat ui     # apenas testes de UI
-```
-
-### Executar via Maven diretamente
-```bat
-mvn test
-mvn test -Dcucumber.features=src/test/resources/features/api_posts.feature
-mvn test -Dcucumber.filter.tags="@smoke"
+mvn test                                        # tudo
+mvn test -Dcucumber.filter.tags="@api"          # so API
+mvn test -Dcucumber.filter.tags="@ui"           # so UI
+mvn test -Dcucumber.filter.tags="@smoke"        # smoke
+mvn test -Denvironment=HQA                      # outro ambiente
 ```
 
 ---
 
 ## Pipeline CI/CD
 
-O GitHub Actions executa os testes automaticamente em cada:
-- **Push** para `main` ou `develop`
-- **Pull Request** para `main`
-- **Execução manual** pela aba Actions
+O GitHub Actions executa automaticamente em cada push para `main` ou `develop`.
 
-### O que o pipeline faz
-1. Faz checkout do código
-2. Configura Java 8
-3. Instala Chrome e ChromeDriver (versão compatível)
-4. Executa `mvn test` com `CI=true` (ativa headless automático)
-5. Publica o relatório HTML como artefato
-6. Exibe resultado JUnit inline no GitHub
-
-> Os testes de UI rodam em modo **headless** automaticamente no CI.
-> Localmente o Chrome abre normalmente.
+O que o pipeline faz:
+1. Configura Java 8, Chrome e ChromeDriver
+2. Executa `mvn test` com `CI=true` (headless automatico)
+3. Publica relatorio Cucumber como artefato
+4. Exibe resultado JUnit inline no GitHub
 
 ---
 
-## Relatórios
+## Evidencias
 
-Após a execução os relatórios ficam disponíveis em:
-- `target/cucumber-reports/cucumber.html` — relatório visual
-- `target/cucumber-reports/cucumber.json` — para integrações
-- `target/cucumber-reports/cucumber.xml` — formato JUnit (Jenkins/GitHub)
-
-No CI os relatórios são publicados como artefatos na aba **Actions** do GitHub.
+- Screenshots capturadas automaticamente em todos os cenarios `@ui`
+- Embutidas no relatorio `target/cucumber-reports/cucumber.html`
+- Cenarios com sucesso: screenshot do estado final
+- Cenarios com falha: screenshot do momento do erro
 
 ---
 
 ## Gerado com Kiro AI
 
-Este projeto foi criado com o auxílio do **[Kiro](https://kiro.dev)**, um ambiente de desenvolvimento com IA que gera, refatora e executa código diretamente no editor.
+Projeto criado com [Kiro](https://kiro.dev), ambiente de desenvolvimento com IA.

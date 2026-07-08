@@ -1,4 +1,5 @@
 # language: pt
+@ui
 Funcionalidade: Login no sistema
   Como um usuário registrado
   Quero fazer login na aplicação
@@ -7,6 +8,7 @@ Funcionalidade: Login no sistema
   Contexto:
     Dado que estou na página de login
 
+  @smoke
   Cenário: Login com credenciais válidas
     Quando faço login como administrador
     Então devo ser redirecionado para a página inicial

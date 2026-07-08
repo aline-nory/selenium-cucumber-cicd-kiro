@@ -7,11 +7,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.automacao</groupId>
-    <artifactId>selenium-cucumber-cicd-kiro</artifactId>
+    <artifactId>selenium-cucumber-kiro-github-actions</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>selenium-cucumber-cicd-kiro</name>
+    <name>selenium-cucumber-kiro-github-actions</name>
     <description>Automação de testes Web (Selenium) e API (REST Assured) com Cucumber BDD, JUnit e pipeline CI/CD via GitHub Actions. Projeto gerado com Kiro AI.</description>
 
     <properties>
@@ -90,8 +90,7 @@
                 <version>3.2.5</version>
                 <configuration>
                     <includes>
-                        <include>**/Runner*.java</include>
-                        <include>**/*Runner.java</include>
+                        <include>**/Runner.java</include>
                     </includes>
                     <!-- Passa o truststore customizado para a JVM forked do Surefire.
                          Necessário em ambientes onde um proxy SSL (ex: antivírus)

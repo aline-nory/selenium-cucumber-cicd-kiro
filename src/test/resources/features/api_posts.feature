@@ -1,4 +1,5 @@
 # language: pt
+@api
 Funcionalidade: API de Posts
   Como consumidor da API REST
   Quero validar os endpoints de posts
@@ -7,12 +8,14 @@ Funcionalidade: API de Posts
   Contexto:
     Dado que estou consumindo a API de posts
 
+  @smoke
   Cenário: Listar todos os posts
     Quando busco todos os posts
     Então o status code da resposta deve ser 200
     E o Content-Type da resposta deve conter "application/json"
     E a resposta deve conter 100 posts
 
+  @smoke
   Cenário: Buscar um post por ID
     Quando busco o post de ID 1
     Então o status code da resposta deve ser 200

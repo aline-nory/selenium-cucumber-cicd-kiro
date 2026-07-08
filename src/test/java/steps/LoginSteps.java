@@ -1,72 +1,55 @@
 package steps;
 
 import io.cucumber.java.pt.Dado;
-import io.cucumber.java.pt.E;
 import io.cucumber.java.pt.Então;
 import io.cucumber.java.pt.Quando;
 import org.junit.Assert;
 import pages.LoginPage;
+import support.environment.Environment;
+import support.hooks.WebHooks;
 
 /**
- * Step Definitions para os cenários de Login.
- * Credenciais e URLs ficam aqui, fora dos arquivos .feature,
- * seguindo a boa prática de BDD de esconder detalhes técnicos.
+ * Steps de Login.
  */
 public class LoginSteps {
 
-    // Detalhes técnicos centralizados aqui, não expostos no .feature
-    private static final String URL_LOGIN    = "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login";
-    private static final String ADMIN_USER   = "admin";
-    private static final String ADMIN_PASS   = "admin123";
-    private static final String SENHA_ERRADA = "senhaErrada";
-
-    private final LoginPage loginPage;
-
-    public LoginSteps() {
-        this.loginPage = new LoginPage(Hooks.getDriver());
-    }
+    private LoginPage loginPage;
+    private Environment env = new Environment();
 
     @Dado("que estou na página de login")
-    public void queEstouNaPaginaDeLogin() {
-        loginPage.abrirPagina(URL_LOGIN);
+    public void abrirLogin() {
+        loginPage = new LoginPage(WebHooks.getDriver());
+        loginPage.abrirPagina(env.baseUrl);
     }
 
     @Quando("faço login como administrador")
-    public void facoLoginComoAdministrador() {
-        loginPage.preencherCampo("username", ADMIN_USER);
-        loginPage.preencherCampo("password", ADMIN_PASS);
-        loginPage.clicarBotaoLogin();
-    }
-
-    @Quando("faço login com usuário {string} e senha incorreta")
-    public void facoLoginComUsuarioESenhaIncorreta(String usuario) {
-        loginPage.preencherCampo("username", usuario);
-        loginPage.preencherCampo("password", SENHA_ERRADA);
-        loginPage.clicarBotaoLogin();
+    public void loginAdmin() {
+        loginPage.preencherUsuario(env.getProperty("usuario.admin"));
+        loginPage.preencherSenha(env.getProperty("senha.admin"));
+        loginPage.clicarLogin();
     }
 
     @Quando("faço login com usuário {string} e senha {string}")
-    public void facoLoginComUsuarioESenha(String usuario, String senha) {
-        loginPage.preencherCampo("username", usuario);
-        loginPage.preencherCampo("password", senha);
-        loginPage.clicarBotaoLogin();
+    public void loginComCredenciais(String usuario, String senha) {
+        loginPage.preencherUsuario(usuario);
+        loginPage.preencherSenha(senha);
+        loginPage.clicarLogin();
+    }
+
+    @Quando("faço login com usuário {string} e senha incorreta")
+    public void loginComSenhaIncorreta(String usuario) {
+        loginPage.preencherUsuario(usuario);
+        loginPage.preencherSenha(env.getProperty("senha.invalida"));
+        loginPage.clicarLogin();
     }
 
     @Então("devo ser redirecionado para a página inicial")
-    public void devoSerRedirecionadoParaPaginaInicial() {
-        Assert.assertTrue(
-            "Esperava ser redirecionado para o dashboard, mas a URL não contém '/dashboard'",
-            loginPage.estaNaPaginaInicial()
-        );
+    public void validarDashboard() {
+        Assert.assertTrue("Nao redirecionou para o dashboard", loginPage.estaNoDashboard());
     }
 
     @Então("devo ver a mensagem de erro {string}")
-    public void devoVerMensagemDeErro(String mensagemEsperada) {
-        String mensagemAtual = loginPage.obterMensagemErro();
-        Assert.assertEquals(
-            "Mensagem de erro não corresponde ao esperado",
-            mensagemEsperada,
-            mensagemAtual
-        );
+    public void validarMensagemErro(String esperada) {
+        Assert.assertEquals("Mensagem incorreta", esperada, loginPage.obterMensagemErro());
     }
 }
