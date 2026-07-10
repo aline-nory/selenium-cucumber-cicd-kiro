@@ -1,509 +1,83 @@
-# Framework Profissional de Automação de Testes
-## Construindo uma Arquitetura Enterprise do Zero
-
-> Este material acompanha o projeto de referência. Cada parte corresponde a uma etapa da construção do framework, desde a fundação até a integração contínua.
+# Framework de Automação com Selenium + Cucumber
+## Guia Completo para QA — Do Zero à Pipeline
 
 ---
 
 ## Sumário
 
-- [Parte 1 — Visão Geral e Arquitetura](#parte-1--visão-geral-e-arquitetura)
-  - [1.1 O que é automação de testes e por que automatizar](#11-o-que-é-automação-de-testes-e-por-que-automatizar)
-  - [1.2 O que é um framework](#12-o-que-é-um-framework)
-  - [1.3 Pirâmide de testes](#13-pirâmide-de-testes)
-  - [1.4 Arquitetura em camadas](#14-arquitetura-em-camadas)
-  - [1.5 Fluxo completo de execução](#15-fluxo-completo-de-execução)
-  - [1.6 Responsabilidade de cada camada](#16-responsabilidade-de-cada-camada)
-  - [1.7 Decisões tecnológicas e justificativas](#17-decisões-tecnológicas-e-justificativas)
-  - [1.8 Estrutura completa de diretórios](#18-estrutura-completa-de-diretórios)
-  - [1.9 Pré-requisitos](#19-pré-requisitos)
-- [Parte 2 — Construção do Framework UI](#parte-2--construção-do-framework-ui)
-  - [2.1 Criação do projeto Maven](#21-criação-do-projeto-maven)
-  - [2.2 DriverFactory](#22-driverfactory)
-  - [2.3 DriverManager](#23-drivermanager)
-  - [2.4 BasePage](#24-basepage)
-  - [2.5 LoginPage](#25-loginpage)
-  - [2.6 Cucumber — Features em português](#26-cucumber--features-em-português)
-  - [2.7 TestRunner](#27-testrunner)
-  - [2.8 LoginSteps](#28-loginsteps)
-  - [2.9 UiHooks](#29-uihooks)
-  - [2.10 Evidências — Screenshots automáticas](#210-evidências--screenshots-automáticas)
-- [Parte 3 — Construção do Framework API](#parte-3--construção-do-framework-api)
-  - [3.1 REST Assured — Introdução](#31-rest-assured--introdução)
-  - [3.2 RestClient](#32-restclient)
-  - [3.3 Padrão Client-Service](#33-padrão-client-service)
-  - [3.4 PostService](#34-postservice)
-  - [3.5 PostRequest — Modelo POJO](#35-postrequest--modelo-pojo)
-  - [3.6 PostBuilder — Builder Pattern com Faker](#36-postbuilder--builder-pattern-com-faker)
-  - [3.7 JsonUtils](#37-jsonutils)
-  - [3.8 Payloads externalizados](#38-payloads-externalizados)
-  - [3.9 JSON Schema Validation](#39-json-schema-validation)
-  - [3.10 Feature de API em português](#310-feature-de-api-em-português)
-  - [3.11 PostSteps](#311-poststeps)
-  - [3.12 TestData vs Payload](#312-testdata-vs-payload)
-- [Parte 4 — Engenharia do Framework](#parte-4--engenharia-do-framework)
-  - [4.1 PicoContainer — Injeção de dependência](#41-picocontainer--injeção-de-dependência)
-  - [4.2 ConfigReader](#42-configreader)
-  - [4.3 Environment](#43-environment)
-  - [4.4 Configuração por ambiente](#44-configuração-por-ambiente)
-  - [4.5 Logging corporativo](#45-logging-corporativo)
-  - [4.6 FrameworkException](#46-frameworkexception)
-  - [4.7 Screenshots configuráveis](#47-screenshots-configuráveis)
-  - [4.8 Allure Report](#48-allure-report)
-  - [4.9 Estratégia de Tags](#49-estratégia-de-tags)
-  - [4.10 Organização e nomenclatura](#410-organização-e-nomenclatura)
-- [Parte 5 — Integração e Manutenção](#parte-5--integração-e-manutenção)
-  - [5.1 GitHub Actions — Pipeline completo](#51-github-actions--pipeline-completo)
-  - [5.2 Como adicionar um novo teste UI](#52-como-adicionar-um-novo-teste-ui)
-  - [5.3 Como adicionar um novo teste API](#53-como-adicionar-um-novo-teste-api)
-  - [5.4 Padrões de Code Review](#54-padrões-de-code-review)
-  - [5.5 Checklist para iniciar novo projeto](#55-checklist-para-iniciar-novo-projeto)
-  - [5.6 Troubleshooting](#56-troubleshooting)
-  - [5.7 FAQ](#57-faq)
-  - [5.8 Glossário](#58-glossário)
-  - [5.9 Comandos rápidos](#59-comandos-rápidos)
-  - [5.10 Como evoluir a arquitetura](#510-como-evoluir-a-arquitetura)
+1. [Criar o projeto Maven vazio](#capítulo-1--criar-o-projeto-maven-vazio)
+2. [Configurar dependências no pom.xml](#capítulo-2--configurar-dependências-no-pomxml)
+3. [Criar estrutura de diretórios e pacotes](#capítulo-3--criar-estrutura-de-diretórios-e-pacotes)
+4. [FrameworkException](#capítulo-4--frameworkexception)
+5. [ConfigReader e Environment](#capítulo-5--configreader-e-environment)
+6. [DriverFactory e DriverManager](#capítulo-6--driverfactory-e-drivermanager)
+7. [LogUtils e logback.xml](#capítulo-7--logutils-e-logbackxml)
+8. [BasePage e LoginPage](#capítulo-8--basepage-e-loginpage)
+9. [Feature de login + LoginSteps + TestRunner](#capítulo-9--feature-de-login--loginsteps--testrunner)
+10. [UiHooks e ScreenshotUtils](#capítulo-10--uihooks-e-screenshotutils)
+11. [RestClient](#capítulo-11--restclient)
+12. [JsonUtils e payloads](#capítulo-12--jsonutils-e-payloads)
+13. [PostService](#capítulo-13--postservice)
+14. [PostRequest e PostBuilder](#capítulo-14--postrequest-e-postbuilder)
+15. [Feature de API + PostSteps + ApiHooks](#capítulo-15--feature-de-api--poststeps--apihooks)
+16. [JSON Schema Validation](#capítulo-16--json-schema-validation)
+17. [Ambiente HML](#capítulo-17--ambiente-hml)
+18. [Allure Report](#capítulo-18--allure-report)
+19. [GitHub Actions (progressivo)](#capítulo-19--github-actions-progressivo)
+20. [Manutenção e evolução](#capítulo-20--manutenção-e-evolução)
 
 ---
 
-## Parte 1 — Visão Geral e Arquitetura
+## Capítulo 1 — Criar o projeto Maven vazio
 
-### 1.1 O que é automação de testes e por que automatizar
+### Resultado que construiremos
 
-Automação de testes é a prática de usar software para executar testes que seriam feitos manualmente. Em vez de um QA clicar em cada campo, preencher formulários e verificar resultados toda vez que o sistema muda, um script faz isso de forma repetível, rápida e confiável.
+Um projeto Maven funcional com a estrutura mínima que compila sem erros. Ao final, você terá um diretório reconhecido por qualquer IDE Java e pronto para receber dependências.
 
-A justificativa econômica é clara: um teste manual que leva 10 minutos, executado 50 vezes por sprint, consome mais de 8 horas de trabalho humano. Automatizado, ele roda em segundos a cada commit. O investimento inicial se paga em poucas semanas.
-
-**O ciclo de vida de um bug:**
-
-Quanto mais tarde um bug é encontrado, mais caro ele é para corrigir. A automação atua na camada de prevenção — detecta regressões ANTES de chegarem à produção.
+### Onde estamos na arquitetura
 
 ```
-Custo de correção por fase:
-  Desenvolvimento:   1x  (barato)
-  Testes manuais:    5x
-  QA formal:        10x
-  Homologação:      20x
-  Produção:        100x  (caro + dano reputacional)
++-------------------------------------------------------+
+| PROJETO MAVEN (pom.xml)                               |  <-- AQUI
+|                                                       |
+|   src/test/java/    (código de teste)                 |
+|   src/test/resources/ (recursos de teste)             |
++-------------------------------------------------------+
 ```
 
-A automação de testes opera na fase de "Testes" — encontra o bug quando custa 5x, não quando custa 100x.
+Estamos na fundação. Sem o Maven configurado, nada mais funciona.
 
-**Quando NÃO automatizar:**
+### Conceito mínimo necessário
 
-Nem tudo deve ser automatizado. Automatize quando:
-- O teste será executado mais de 5 vezes
-- O fluxo é estável (não muda toda sprint)
-- O resultado é determinístico (mesma entrada = mesma saída)
-- Há ROI positivo (custo de automação < custo de execução manual)
+Maven é um gerenciador de build e dependências. Ele usa um arquivo `pom.xml` para saber:
+- Qual versão do Java usar
+- Quais bibliotecas baixar
+- Como compilar e executar testes
 
-Não automatize quando:
-- O fluxo muda constantemente (tela em desenvolvimento ativo)
-- É um teste exploratório (sem roteiro definido)
-- É um teste de usabilidade (requer percepção humana)
-- O sistema não tem interface estável (protótipos)
+O diretório `src/test/java` é onde ficam os testes. Diferente de projetos de aplicação, nosso framework de automação vive inteiramente em `src/test`.
 
-**Benefícios concretos:**
+### Arquivos envolvidos
 
-| Aspecto | Manual | Automatizado |
-|---------|--------|--------------|
-| Velocidade de execução | 10-30 min por fluxo | 5-30 seg por fluxo |
-| Consistência | Sujeito a erro humano | Execução idêntica sempre |
-| Feedback | Após horas/dias | Em minutos (CI/CD) |
-| Cobertura de regressão | Parcial (tempo limitado) | Completa (todas as suítes) |
-| Custo por execução | Alto (hora-homem) | Praticamente zero |
-| Execução noturna | Inviável | Trivial |
+| Arquivo | Função |
+|---------|--------|
+| `pom.xml` | Configuração do Maven |
 
-> **Dica:** Automatizar não significa eliminar testes manuais. Testes exploratórios, de usabilidade e cenários ad-hoc continuam sendo manuais. Automatize o que é repetitivo e regressivo.
+### Construção manual passo a passo
 
----
+1. Crie uma pasta chamada `selenium-cucumber-project`
+2. Dentro dela, crie o arquivo `pom.xml`
+3. Crie a estrutura de pastas: `src/test/java` e `src/test/resources`
 
-### 1.2 O que é um framework
-
-Há uma diferença crítica entre "ter scripts de teste" e "ter um framework de automação". Scripts soltos são arquivos Java que abrem o navegador, clicam em elementos e verificam resultados — sem padrão, sem reuso, sem estrutura.
-
-Um framework é uma arquitetura organizada que define:
-- **Onde** colocar cada tipo de código (separação de responsabilidades)
-- **Como** elementos são localizados e interagidos (Page Objects)
-- **Como** dados de teste são gerenciados (configurações por ambiente)
-- **Como** os testes são executados e reportados (Runner + Reports)
-- **Como** novos testes são adicionados (padrão replicável)
-
-| Característica | Scripts Soltos | Framework |
-|----------------|---------------|-----------|
-| Manutenção | Alterar em N arquivos | Alterar em 1 lugar |
-| Reuso de código | Copiar e colar | Herança + composição |
-| Onboarding de novos QAs | Dias | Horas |
-| Escala para +100 testes | Caos | Organizado |
-| Integração com CI/CD | Difícil | Nativa |
-| Reports profissionais | Inexistente | Allure/Cucumber |
-
-> **Dica:** Se você precisa de mais de 1 hora para explicar como adicionar um novo teste, seu framework precisa de refatoração.
-
----
-
-### 1.3 Pirâmide de testes
-
-A pirâmide de testes (Martin Fowler / Mike Cohn) define a proporção ideal de testes em um sistema:
-
-```
-         /\
-        /  \      E2E (UI)          - Poucos, lentos, frágeis
-       /----\     
-      /      \    Integração (API)   - Médios, rápidos, estáveis
-     /--------\   
-    /          \  Unitários          - Muitos, rápidos, isolados
-   /____________\
-```
-
-**Neste framework, cobrimos as duas camadas superiores:**
-- **Testes de UI (E2E):** Validam fluxos completos do usuário via navegador (Selenium)
-- **Testes de API (Integração):** Validam contratos, status codes e regras de negócio via HTTP (REST Assured)
-
-A estratégia é: manter poucos testes UI nos caminhos críticos (login, checkout) e muitos testes API para validações de dados e regras.
-
-**Características de cada camada:**
-
-| Camada | Quantidade | Velocidade | Estabilidade | Manutenção | Confiança |
-|--------|-----------|-----------|-------------|-----------|-----------|
-| Unitários | Centenas | Milissegundos | Muito alta | Baixa | Isolada |
-| API | Dezenas | 0.5-3 segundos | Alta | Média | Integração |
-| UI | Poucos | 5-30 segundos | Média-baixa | Alta | E2E |
-
-**Distribuição recomendada:**
-- 70% unitários (responsabilidade do time de desenvolvimento)
-- 20% API (responsabilidade compartilhada QA + DEV)
-- 10% UI (responsabilidade principal do QA)
-
-**Anti-padrão: Pirâmide invertida (Ice Cream Cone)**
-```
-   ______________
-  /              \    UI: Tudo testado via interface (LENTO)
-  \______________/
-      /    \          API: Quase nenhum
-      \____/
-       /  \           Unit: Inexistente
-       \__/
-```
-
-Se sua organização tem mais testes UI do que API e unit, você está no anti-padrão "cone de sorvete". Migre gradualmente: para cada novo teste UI, pergunte "isso poderia ser um teste de API?".
-
-> **Dica:** Cada teste de UI que pode ser substituído por um teste de API deve ser. Testes de API são 10x mais rápidos e 5x mais estáveis.
-
----
-
-### 1.4 Arquitetura em camadas
-
-O framework segue uma arquitetura em camadas, onde cada camada tem responsabilidade única e se comúnica apenas com a camada imediatamente abaixo.
-
-```mermaid
-graph TB
-    subgraph "Camada de Especificação"
-        A[Features Gherkin .feature]
-    end
-
-    subgraph "Camada de Orquestração"
-        B[TestRunner]
-        C[Hooks - UiHooks / ApiHooks]
-    end
-
-    subgraph "Camada de Steps"
-        D[LoginSteps]
-        E[PostSteps]
-    end
-
-    subgraph "Camada de Lógica"
-        F[Pages - LoginPage]
-        G[Services - PostService]
-    end
-
-    subgraph "Camada de Infraestrutura"
-        H[DriverFactory / DriverManager]
-        I[RestClient]
-        J[ConfigReader / Environment]
-    end
-
-    subgraph "Camada de Utilitários"
-        K[LogUtils / ScreenshotUtils / JsonUtils]
-        L[FrameworkException]
-    end
-
-    A --> B
-    B --> C
-    B --> D
-    B --> E
-    D --> F
-    E --> G
-    F --> H
-    G --> I
-    H --> J
-    I --> J
-    F --> K
-    G --> K
-    H --> K
-```
-
-Cada camada é isolada e testável independentemente. Se amanhã o Selenium for substituído por Playwright, apenas a camada de infraestrutura muda — os Steps e Features permanecem intactos.
-
-> **Dica:** A regra de ouro da arquitetura em camadas: uma camada NUNCA deve depender de uma camada acima dela. Steps conhecem Pages, mas Pages nunca importam Steps.
-
----
-
-### 1.5 Fluxo completo de execução
-
-Quando você executa `mvn test`, uma cadeia precisa de eventos acontece. Entender esse fluxo é fundamental para debugar problemas.
-
-```mermaid
-sequenceDiagram
-    participant DEV as Desenvolvedor
-    participant MVN as Maven
-    participant SF as Surefire Plugin
-    participant RUN as TestRunner
-    participant CUC as Cucumber Engine
-    participant HOOK as Hooks
-    participant STEP as Steps
-    participant PAGE as Pages/Services
-    participant DRV as Driver/RestClient
-    participant RPT as Reports
-
-    DEV->>MVN: mvn test
-    MVN->>SF: Fase test
-    SF->>RUN: Encontra TestRunner.java
-    RUN->>CUC: @CucumberOptions
-    CUC->>CUC: Parseia .feature files
-    loop Para cada cenário
-        CUC->>HOOK: @Before (ordem 0, 1...)
-        HOOK->>DRV: Cria navegador/configura API
-        loop Para cada step
-            CUC->>STEP: Executa step definition
-            STEP->>PAGE: Chama Page Object ou Service
-            PAGE->>DRV: Interage com sistema
-        end
-        CUC->>HOOK: @After
-        HOOK->>DRV: Screenshot + fecha navegador
-        HOOK->>RPT: Anexa evidências
-    end
-    CUC->>RPT: Gera cucumber.html + json + xml
-    SF->>RPT: Allure results
-    DEV->>RPT: mvn allure:serve
-```
-
-O ponto-chave é que o Cucumber controla o ciclo de vida. Ele lê os `.feature`, mapeia cada frase para um método Java (step definition) e gerencia os hooks de setup/teardown.
-
-> **Dica:** Se um teste falha no @Before, o cenário inteiro é marcado como falho. Sempre verifique os logs de hook primeiro ao investigar falhas.
-
----
-
-### 1.6 Responsabilidade de cada camada
-
-| Camada | Responsabilidade | Exemplos de Classes |
-|--------|-----------------|---------------------|
-| Especificação | Descrever comportamento em linguagem natural | `login.feature`, `posts.feature` |
-| Orquestração | Configurar execução e ciclo de vida | `TestRunner`, `UiHooks`, `ApiHooks` |
-| Steps | Traduzir Gherkin para ações Java | `LoginSteps`, `PostSteps` |
-| Lógica (UI) | Encapsular interações com páginas | `BasePage`, `LoginPage` |
-| Lógica (API) | Encapsular regras de negócio HTTP | `PostService`, `PostBuilder` |
-| Infraestrutura | Gerenciar conexões e configurações | `DriverFactory`, `RestClient`, `Environment` |
-| Utilitários | Funções transversais de suporte | `LogUtils`, `ScreenshotUtils`, `JsonUtils` |
-| Modelos | Representar dados estruturados | `PostRequest` |
-| Exceções | Erros semânticos do framework | `FrameworkException` |
-
-> **Dica:** Se uma classe não se encaixa claramente em nenhuma camada, provavelmente ela está fazendo coisas demais e deve ser dividida.
-
----
-
-### 1.7 Decisões tecnológicas e justificativas
-
-| Tecnologia | Versão | Justificativa |
-|------------|--------|---------------|
-| Java | 8 | Compatibilidade máxima com ambientes corporativos; LTS |
-| Maven | 3.x | Gerenciador de build padrão; integração nativa com CI |
-| Selenium WebDriver | 3.141.59 | Última versão compatível com Java 8; estável em produção |
-| Cucumber | 7.18.0 | BDD em português; integração madura com JUnit |
-| JUnit 4 | 4.13.2 | Runner padrão para Cucumber; compatível com Surefire |
-| REST Assured | 4.5.1 | Última versão Java 8; API fluente given/when/then |
-| PicoContainer | 7.18.0 | DI leve por cenário; zero configuração |
-| Allure Report | 2.24.0 | Relatórios visuais ricos; histórico de execuções |
-| SLF4J + Logback | 1.7.36 / 1.2.12 | Logging desacoplado; configurável por ambiente |
-| JavaFaker | 1.0.2 | Dados dinâmicos; evita dados fixos em testes |
-| AspectJ | 1.9.19 | Necessário para integração Allure (weaving) |
-| GitHub Actions | - | CI/CD gratuito; integração nativa com repositório |
-
-> **Dica:** A escolha do Java 8 é estratégica: a maioria dos ambientes corporativos brasileiros ainda roda Java 8 em produção. Seu framework de testes deve ser compatível com o ambiente onde será executado.
-
----
-
-### 1.8 Estrutura completa de diretórios
-
-```
-selenium-cucumber-project/
-├── .github/
-│   └── workflows/
-│       └── testes.yml                  # Pipeline CI/CD
-├── src/
-│   └── test/
-│       ├── java/
-│       │   ├── api/
-│       │   │   ├── builders/
-│       │   │   │   └── PostBuilder.java        # Builder Pattern + Faker
-│       │   │   ├── clients/
-│       │   │   │   └── RestClient.java         # Cliente HTTP corporativo
-│       │   │   ├── models/
-│       │   │   │   └── PostRequest.java        # POJO de request
-│       │   │   └── services/
-│       │   │       └── PostService.java        # Lógica de negócio API
-│       │   ├── config/
-│       │   │   ├── ConfigReader.java           # Leitura de .properties
-│       │   │   └── Environment.java            # Gerenciamento de ambientes
-│       │   ├── drivers/
-│       │   │   ├── DriverFactory.java          # Criação do navegador
-│       │   │   └── DriverManager.java          # ThreadLocal para paralelo
-│       │   ├── exceptions/
-│       │   │   └── FrameworkException.java     # Exceção customizada
-│       │   ├── hooks/
-│       │   │   ├── ApiHooks.java               # Hooks para @api
-│       │   │   └── UiHooks.java                # Hooks para @ui
-│       │   ├── pages/
-│       │   │   ├── base/
-│       │   │   │   └── BasePage.java           # Classe abstrata base
-│       │   │   └── login/
-│       │   │       └── LoginPage.java          # Page Object do login
-│       │   ├── runners/
-│       │   │   └── TestRunner.java             # Ponto de entrada
-│       │   ├── steps/
-│       │   │   ├── api/
-│       │   │   │   └── PostSteps.java          # Steps de API
-│       │   │   └── ui/
-│       │   │       └── LoginSteps.java         # Steps de UI
-│       │   └── utils/
-│       │       ├── JsonUtils.java              # Carregamento de JSON
-│       │       ├── LogUtils.java               # Logging corporativo
-│       │       └── ScreenshotUtils.java        # Captura de tela
-│       └── resources/
-│           ├── environments/
-│           │   ├── dev.properties              # Configuração DEV
-│           │   └── hml.properties              # Configuração HML
-│           ├── features/
-│           │   ├── api/
-│           │   │   └── posts.feature           # Cenários de API
-│           │   └── ui/
-│           │       └── login.feature           # Cenários de UI
-│           ├── payloads/
-│           │   └── posts/
-│           │       ├── create-post.json        # Payload de criação
-│           │       └── update-post.json        # Payload de atualização
-│           ├── schemas/
-│           │   └── post-schema.json            # Schema de validação
-│           └── logback.xml                     # Configuração de logging
-└── pom.xml                                     # Configuração Maven
-```
-
-A organização segue o princípio de **coesão**: arquivos que mudam juntos ficam juntos. Todas as classes de API ficam em `api/`, todos os resources de API ficam em subpastas correspondentes.
-
-> **Dica:** Ao criar um novo recurso (ex: Users), replique a mesma estrutura: `api/services/UserService.java`, `api/models/UserRequest.java`, `payloads/users/create-user.json`, `features/api/users.feature`.
-
----
-
-### 1.9 Pré-requisitos
-
-Para executar este framework localmente, você precisa de quatro componentes fundamentais. Cada um cumpre um papel específico na cadeia de execução.
-
-**Visão geral dos componentes:**
-
-```
-┌──────────┐     ┌──────────┐     ┌──────────────┐     ┌──────────┐
-│   JDK 8  │────>│  Maven   │────>│ ChromeDriver │────>│  Chrome  │
-│ (compila)│     │ (executa)│     │  (controla)  │     │(renderiza)│
-└──────────┘     └──────────┘     └──────────────┘     └──────────┘
-```
-
-- **JDK 8** compila o código Java do framework
-- **Maven** gerencia dependências e executa os testes
-- **ChromeDriver** é a ponte entre o Selenium e o Chrome
-- **Chrome** é o navegador que renderiza as páginas
-
-**1. JDK 8 (Java Development Kit)**
-
-O JDK inclui o compilador (`javac`) e a JVM (`java`). Certifique-se de instalar o JDK (não apenas o JRE).
-
-Verifique se já está instalado:
-```bash
-java -version
-# Esperado: java version "1.8.x"
-
-javac -version
-# Esperado: javac 1.8.x
-```
-
-Caso não tenha, instale o Temurin (AdoptOpenJDK):
-- Windows: Baixe em https://adoptium.net/ e escolha JDK 8 LTS
-- Configure `JAVA_HOME` apontando para a pasta de instalação
-- Adicione `%JAVA_HOME%\bin` ao PATH
-- Reinicie o terminal após configurar
-
-**Verificação pós-instalação:**
-```bash
-echo %JAVA_HOME%
-# Esperado: C:\Program Files\Eclipse Adoptium\jdk-8.x.x-hotspot (ou similar)
-```
-
-**2. Apache Maven 3.x**
-
-O Maven gerencia dependências e o ciclo de build. Ele baixa automaticamente todas as bibliotecas declaradas no pom.xml.
+No terminal:
 
 ```bash
-mvn -version
-# Esperado: Apache Maven 3.x.x
-# Esperado: Java version: 1.8.x (confirma que usa o JDK correto)
+mkdir selenium-cucumber-project
+cd selenium-cucumber-project
+mkdir -p src/test/java
+mkdir -p src/test/resources
 ```
 
-- Windows: Baixe em https://maven.apache.org/download.cgi
-- Extraia para `C:\maven`
-- Configure `MAVEN_HOME` e adicione `%MAVEN_HOME%\bin` ao PATH
-
-**Primeiro uso:** Na primeira execução, o Maven baixa todas as dependências (~100 MB). As execuções seguintes são rápidas porque usa cache local (`~/.m2/repository/`).
-
-**3. Google Chrome (última versão)**
-
-O framework usa Chrome como navegador padrão. Mantenha-o atualizado para evitar incompatibilidades com o ChromeDriver.
-
-Para verificar a versão: acesse `chrome://version` na barra de endereço.
-
-**4. ChromeDriver**
-
-O ChromeDriver deve ser compatível com a versão do Chrome instalada:
-- Verifique a versão do Chrome em `chrome://version`
-- Baixe o driver correspondente em https://chromedriver.chromium.org/downloads
-- Para Chrome 115+: https://googlechromelabs.github.io/chrome-for-testing/
-- Coloque em um diretório acessível (ex: `C:\chromedriver\`)
-- Configure a variável de ambiente `CHROME_DRIVER_PATH` ou use o path padrão
-
-**Compatibilidade Chrome/ChromeDriver:**
-
-| Chrome | ChromeDriver |
-|--------|-------------|
-| 120.x | chromedriver 120.x |
-| 121.x | chromedriver 121.x |
-| 125.x | chromedriver 125.x |
-
-A regra é simples: a versão MAJOR (primeiro número) deve ser idêntica.
-
-**Validação completa do ambiente:**
-```bash
-java -version && mvn -version && google-chrome --version && chromedriver --version
-```
-
-Se todos os quatro comandos retornam versões, seu ambiente está pronto.
-
-> **Dica:** Em ambientes CI (GitHub Actions), o Chrome e o ChromeDriver são instalados automaticamente pelo pipeline. A configuração local é necessária apenas para desenvolvimento.
-
----
-
-## Parte 2 — Construção do Framework UI
-
-### 2.1 Criação do projeto Maven
-
-O `pom.xml` é o coração de qualquer projeto Java gerenciado pelo Maven. Ele define as dependências, plugins de build e configurações de compilação. Cada dependência foi escolhida com critério de compatibilidade com Java 8 e maturidade em produção.
+### Codigo completo final
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -514,52 +88,198 @@ O `pom.xml` é o coração de qualquer projeto Java gerenciado pelo Maven. Ele d
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.automacao</groupId>
-    <artifactId>selenium-restassured-cucumber-github-actions</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.framework</groupId>
+    <artifactId>selenium-cucumber-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>selenium-restassured-cucumber-github-actions</name>
-    <description>Automação de testes Web (Selenium) e API (REST Assured) com Cucumber BDD</description>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+</project>
+```
+
+### Explicacao do codigo
+
+- `groupId`: identifica sua organização (como um domínio invertido)
+- `artifactId`: nome do projeto
+- `version`: versão atual (SNAPSHOT indica desenvolvimento)
+- `packaging`: jar é o padrão para projetos Java
+- `maven.compiler.source/target`: define Java 8 como versão de compilação
+
+### Fluxo de execucao
+
+```
+Terminal: mvn validate
+    |
+    v
+Maven lê pom.xml
+    |
+    v
+Valida estrutura XML
+    |
+    v
+BUILD SUCCESS (sem erros)
+```
+
+### Como executar
+
+```bash
+cd selenium-cucumber-project
+mvn validate
+```
+
+### Como confirmar que funcionou
+
+Você verá no terminal:
+
+```
+[INFO] BUILD SUCCESS
+[INFO] Total time: 0.5 s
+```
+
+### Falha guiada
+
+Remova a tag `</project>` do final do pom.xml e execute `mvn validate`. Você verá:
+
+```
+[FATAL] Non-parseable POM... Unexpected end of file
+```
+
+Isso ensina que o XML precisa estar bem-formado. Restaure a tag e tente novamente.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `mvn: command not found` | Maven não instalado | Instale Maven 3.x e adicione ao PATH |
+| `Non-parseable POM` | XML malformado | Verifique tags abertas/fechadas |
+| `Source option 5 is no longer supported` | Java antigo sem config | Adicione compiler.source/target |
+
+### O que nao deve ser feito
+
+- Não crie código em `src/main/java` — nosso framework é 100% teste
+- Não use Maven 2.x — ele não suporta plugins modernos
+- Não pule este passo achando que a IDE faz tudo — entender o pom.xml é essencial
+
+### Exercicio
+
+1. Altere o `groupId` para refletir sua empresa (ex: `com.suaempresa`)
+2. Execute `mvn validate` e confirme BUILD SUCCESS
+3. Tente mudar `maven.compiler.source` para `11` e valide novamente
+
+### Checklist
+
+- [ ] Pasta `selenium-cucumber-project` criada
+- [ ] `pom.xml` com groupId, artifactId, version
+- [ ] Propriedades de compilação Java 8 configuradas
+- [ ] `mvn validate` retorna BUILD SUCCESS
+- [ ] Estrutura `src/test/java` existe
+- [ ] Estrutura `src/test/resources` existe
+
+---
+
+## Capítulo 2 — Configurar dependências no pom.xml
+
+### Resultado que construiremos
+
+Um `pom.xml` completo com todas as 12 dependências que o framework usa. Ao final, `mvn compile` baixará todas as bibliotecas e compilará sem erros.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| PROJETO MAVEN (pom.xml)                               |  <-- AQUI
+|   +-- Selenium 3.141.59                               |
+|   +-- Cucumber 7.18 + JUnit 4                         |
+|   +-- REST Assured 4.5.1                              |
+|   +-- Allure 2.24                                     |
+|   +-- PicoContainer (injecao de dependencia)          |
+|   +-- SLF4J + Logback (logs)                          |
+|   +-- JavaFaker (dados fake)                          |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+Dependências Maven ficam dentro da tag `<dependencies>`. Cada dependência precisa de:
+- `groupId` — quem publicou
+- `artifactId` — nome da biblioteca
+- `version` — versão exata (usamos versões fixas para reprodutibilidade)
+- `scope` — `test` significa que só está disponível em `src/test`
+
+Plugins Maven ficam em `<build><plugins>`. Eles estendem o comportamento do build.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `pom.xml` | Todas as dependências e plugins |
+
+### Construção manual passo a passo
+
+1. Abra o `pom.xml` criado no capítulo anterior
+2. Adicione o bloco `<dependencies>` com cada biblioteca
+3. Adicione o bloco `<build><plugins>` para Surefire e Allure
+4. Execute `mvn compile` para baixar tudo
+
+### Codigo completo final
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.framework</groupId>
+    <artifactId>selenium-cucumber-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
-        <java.version>8</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Versões das dependências -->
-        <!-- Selenium 3.x — última versão compatível com Java 8 -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <selenium.version>3.141.59</selenium.version>
-        <!-- Cucumber 7.x requer Java 8+ -->
         <cucumber.version>7.18.0</cucumber.version>
         <junit.version>4.13.2</junit.version>
-        <!-- REST Assured 4.x — última versão com suporte a Java 8 -->
-        <rest.assured.version>4.5.1</rest.assured.version>
-        <!-- Allure Report -->
+        <rest-assured.version>4.5.1</rest-assured.version>
         <allure.version>2.24.0</allure.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <logback.version>1.2.12</logback.version>
     </properties>
 
     <dependencies>
-
-        <!-- Selenium WebDriver -->
+        <!-- Selenium -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
+            <scope>test</scope>
         </dependency>
 
-        <!-- Cucumber JVM -->
+        <!-- Cucumber -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>${cucumber.version}</version>
+            <scope>test</scope>
         </dependency>
-
-        <!-- Cucumber + JUnit integration -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-picocontainer</artifactId>
             <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
@@ -572,444 +292,1704 @@ O `pom.xml` é o coração de qualquer projeto Java gerenciado pelo Maven. Ele d
             <scope>test</scope>
         </dependency>
 
-        <!-- REST Assured - testes de API REST -->
+        <!-- REST Assured -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest.assured.version}</version>
+            <version>${rest-assured.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- JSON Schema Validator - valida estrutura da resposta -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <version>${rest.assured.version}</version>
+            <version>${rest-assured.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Allure Cucumber Integration -->
+        <!-- Allure -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-cucumber7-jvm</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.cucumber</groupId>
-                    <artifactId>gherkin</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.cucumber</groupId>
-                    <artifactId>messages</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
-        <!-- AspectJ Weaver (necessário para Allure) -->
         <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>1.9.19</version>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-rest-assured</artifactId>
+            <version>${allure.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- PicoContainer — Injeção de Dependência por cenário no Cucumber -->
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-picocontainer</artifactId>
-            <version>${cucumber.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- SLF4J API — fachada de logging -->
+        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
         </dependency>
-
-        <!-- Logback — implementação SLF4J -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.12</version>
+            <version>${logback.version}</version>
+            <scope>test</scope>
         </dependency>
 
-        <!-- JavaFaker — geração de dados de teste dinâmicos -->
+        <!-- JavaFaker -->
         <dependency>
             <groupId>com.github.javafaker</groupId>
             <artifactId>javafaker</artifactId>
             <version>1.0.2</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-
-            <!-- Maven Surefire Plugin - executa os testes JUnit -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>3.1.2</version>
                 <configuration>
-                    <includes>
-                        <include>**/TestRunner.java</include>
-                    </includes>
                     <argLine>
-                        -Djavax.net.ssl.trustStore=${user.home}/.maven-cacerts
-                        -Djavax.net.ssl.trustStorePassword=changeit
-                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.19/aspectjweaver-1.9.19.jar"
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.20.1/aspectjweaver-1.9.20.1.jar"
                     </argLine>
                     <systemPropertyVariables>
-                        <allure.results.directory>target/allure-results</allure.results.directory>
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>1.9.20.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
-
-            <!-- Maven Compiler Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <!-- Allure Maven Plugin - gera relatório -->
-            <plugin>
-                <groupId>io.qameta.allure</groupId>
-                <artifactId>allure-maven</artifactId>
-                <version>2.12.0</version>
-                <configuration>
-                    <reportVersion>${allure.version}</reportVersion>
-                    <resultsDirectory>allure-results</resultsDirectory>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 
 </project>
 ```
 
-**Decisões de design do pom.xml:**
+### Explicacao do codigo
 
-- Todas as versões estão centralizadas em `<properties>` para fácilitar atualizações futuras — basta alterar um número em um lugar.
-- O Surefire está configurado para encontrar apenas `TestRunner.java`, garantindo que o Cucumber controla a execução (e não o JUnit direto).
-- O `argLine` do Surefire injeta o AspectJ como agente JVM, necessário para que o Allure intercepte os steps automaticamente.
-- As exclusões no `allure-cucumber7-jvm` evitam conflitos de versão com as bibliotecas Gherkin que já vêm com o Cucumber.
+| Dependência | Para que serve |
+|-------------|---------------|
+| `selenium-java` | Controlar o navegador |
+| `cucumber-java` | Escrever steps em Java |
+| `cucumber-junit` | Integrar Cucumber com JUnit |
+| `cucumber-picocontainer` | Injetar dependências nos steps |
+| `junit` | Runner de testes |
+| `rest-assured` | Testes de API REST |
+| `json-schema-validator` | Validar JSON contra schema |
+| `allure-cucumber7-jvm` | Relatórios Allure para UI |
+| `allure-rest-assured` | Relatórios Allure para API |
+| `slf4j-api` | Fachada de logging |
+| `logback-classic` | Implementação de logging |
+| `javafaker` | Gerar dados de teste |
 
-> **Dica:** Sempre defina versões como properties. Quando precisar atualizar o Cucumber de 7.18 para 7.19, você muda em UM lugar e todas as dependências se ajustam.
+O plugin `maven-surefire-plugin` executa os testes e integra o AspectJ para o Allure interceptar os steps.
+
+### Fluxo de execucao
+
+```
+Terminal: mvn compile -DskipTests
+    |
+    v
+Maven resolve dependencias (baixa .jar do Maven Central)
+    |
+    v
+Compila src/test/java (ainda vazio)
+    |
+    v
+BUILD SUCCESS
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+```
+[INFO] BUILD SUCCESS
+```
+
+Verifique também que a pasta `~/.m2/repository` agora contém as bibliotecas baixadas.
+
+### Falha guiada
+
+Mude a versão do Selenium para `99.99.99` (inexistente):
+
+```xml
+<selenium.version>99.99.99</selenium.version>
+```
+
+Execute `mvn compile`. Você verá:
+
+```
+Could not find artifact org.seleniumhq.selenium:selenium-java:jar:99.99.99
+```
+
+Isso mostra que o Maven valida se a versão existe. Restaure para `3.141.59`.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Could not find artifact` | Versão inexistente | Confirme versão no Maven Central |
+| `Failed to read artifact descriptor` | Sem internet | Verifique conexão |
+| `Package does not exist` | Scope errado | Use `test` para src/test |
+| `Plugin not found` | Repositório bloqueado | Verifique proxy/firewall |
+
+### O que nao deve ser feito
+
+- Não use `LATEST` ou `RELEASE` como versão — não é reproduzível
+- Não omita o `<scope>test</scope>` — poluirá o classpath de produção
+- Não misture versões de Cucumber (java, junit, picocontainer devem ter mesma versão)
+- Não esqueça do AspectJ no Surefire — sem ele o Allure não funciona
+
+### Exercicio
+
+1. Adicione a dependência do `webdrivermanager` versão 5.5.3 (groupId: `io.github.bonigarcia`)
+2. Execute `mvn dependency:tree` e identifique dependências transitivas do Selenium
+3. Remova uma dependência, compile e observe o erro
+
+### Checklist
+
+- [ ] Todas as 12 dependências adicionadas
+- [ ] Versões centralizadas em `<properties>`
+- [ ] Scope `test` em todas as dependências
+- [ ] Plugin Surefire configurado com AspectJ
+- [ ] `mvn compile -DskipTests` retorna BUILD SUCCESS
+- [ ] Nenhum warning de versão no output
 
 ---
 
-### 2.2 DriverFactory
+## Capítulo 3 — Criar estrutura de diretórios e pacotes
 
-A DriverFactory é responsável por criar instâncias do WebDriver. Ela encapsula toda a lógica de configuração do navegador, incluindo a detecção automática de ambiente CI para modo headless.
+### Resultado que construiremos
+
+A árvore completa de pacotes Java e diretórios de recursos. Ao final, cada classe terá seu lugar definido e o projeto estará organizado para crescer.
+
+### Onde estamos na arquitetura
+
+```
+src/test/java/
++-- runners/            <-- Ponto de entrada do Cucumber
++-- steps/
+|   +-- ui/             <-- Steps de interface
+|   +-- api/            <-- Steps de API
++-- pages/
+|   +-- base/           <-- Page Objects base
+|   +-- login/          <-- Page Objects por funcionalidade
++-- api/
+|   +-- clients/        <-- Clientes HTTP
+|   +-- services/       <-- Servicos de dominio
+|   +-- models/         <-- POJOs de request/response
+|   +-- builders/       <-- Builders para payloads
++-- hooks/              <-- Before/After do Cucumber
++-- config/             <-- Leitura de configuracao
++-- drivers/            <-- Gerenciamento do WebDriver
++-- utils/              <-- Utilitarios
++-- exceptions/         <-- Excecoes customizadas
+
+src/test/resources/
++-- features/
+|   +-- ui/             <-- Features de interface
+|   +-- api/            <-- Features de API
++-- environments/       <-- Propriedades por ambiente
++-- payloads/
+|   +-- posts/          <-- JSONs de request
++-- schemas/            <-- JSON Schemas
++-- testdata/           <-- Dados de teste
+```
+
+### Conceito mínimo necessário
+
+Em Java, a estrutura de pacotes reflete a organização lógica do código. Cada pacote é um diretório. A convenção é:
+- Agrupar por responsabilidade (não por tipo de arquivo)
+- Manter pacotes coesos — classes no mesmo pacote colaboram
+- Separar UI de API desde o início
+
+O Cucumber encontra features pelo caminho configurado no Runner. Steps são descobertos pelo pacote declarado no `@CucumberOptions`.
+
+### Arquivos envolvidos
+
+Nenhum arquivo de código neste capítulo — apenas diretórios.
+
+### Construção manual passo a passo
+
+Execute no terminal (a partir da raiz do projeto):
+
+```bash
+# Pacotes Java
+mkdir -p src/test/java/runners
+mkdir -p src/test/java/steps/ui
+mkdir -p src/test/java/steps/api
+mkdir -p src/test/java/pages/base
+mkdir -p src/test/java/pages/login
+mkdir -p src/test/java/api/clients
+mkdir -p src/test/java/api/services
+mkdir -p src/test/java/api/models
+mkdir -p src/test/java/api/builders
+mkdir -p src/test/java/hooks
+mkdir -p src/test/java/config
+mkdir -p src/test/java/drivers
+mkdir -p src/test/java/utils
+mkdir -p src/test/java/exceptions
+
+# Recursos
+mkdir -p src/test/resources/features/ui
+mkdir -p src/test/resources/features/api
+mkdir -p src/test/resources/environments
+mkdir -p src/test/resources/payloads/posts
+mkdir -p src/test/resources/schemas
+mkdir -p src/test/resources/testdata
+```
+
+### Codigo completo final
+
+Não há código neste capítulo. A saída é a estrutura de diretórios mostrada acima.
+
+Para validar, execute:
+
+```bash
+find src -type d | sort
+```
+
+Saída esperada:
+
+```
+src
+src/test
+src/test/java
+src/test/java/api
+src/test/java/api/builders
+src/test/java/api/clients
+src/test/java/api/models
+src/test/java/api/services
+src/test/java/config
+src/test/java/drivers
+src/test/java/exceptions
+src/test/java/hooks
+src/test/java/pages
+src/test/java/pages/base
+src/test/java/pages/login
+src/test/java/runners
+src/test/java/steps
+src/test/java/steps/api
+src/test/java/steps/ui
+src/test/java/utils
+src/test/resources
+src/test/resources/environments
+src/test/resources/features
+src/test/resources/features/api
+src/test/resources/features/ui
+src/test/resources/payloads
+src/test/resources/payloads/posts
+src/test/resources/schemas
+src/test/resources/testdata
+```
+
+### Explicacao do codigo
+
+| Pacote | Responsabilidade |
+|--------|-----------------|
+| `runners` | Classes JUnit que disparam o Cucumber |
+| `steps/ui` | Implementação dos steps de interface |
+| `steps/api` | Implementação dos steps de API |
+| `pages/base` | BasePage com métodos comuns (click, type, wait) |
+| `pages/login` | LoginPage com elementos e ações da tela de login |
+| `api/clients` | RestClient genérico para chamadas HTTP |
+| `api/services` | PostService que conhece os endpoints |
+| `api/models` | POJOs: PostRequest, PostResponse |
+| `api/builders` | PostBuilder para criar payloads com fluent API |
+| `hooks` | @Before/@After: abrir browser, tirar screenshot |
+| `config` | Leitura de .properties por ambiente |
+| `drivers` | Criação e gerenciamento do WebDriver |
+| `utils` | LogUtils, JsonUtils, ScreenshotUtils |
+| `exceptions` | FrameworkException customizada |
+
+### Fluxo de execucao
+
+Não há execução neste capítulo. A estrutura será populada a partir do Capítulo 4.
+
+### Como executar
+
+```bash
+# Valide que compila (mesmo vazio)
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. O comando `find src -type d | sort` mostra todos os diretórios
+2. `mvn compile -DskipTests` continua com BUILD SUCCESS
+3. Sua IDE mostra a árvore de pacotes no painel lateral
+
+### Falha guiada
+
+Crie um arquivo `src/test/java/steps/Teste.java` com conteúdo:
+
+```java
+package steps.ui;
+
+public class Teste {}
+```
+
+Compile. O erro será:
+
+```
+Teste.java: package steps.ui does not match directory steps
+```
+
+Isso ensina que o `package` declarado DEVE corresponder ao diretório. Mova o arquivo para `src/test/java/steps/ui/` ou mude o package.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| Package does not match directory | Arquivo no diretório errado | Mover arquivo para o pacote correto |
+| Class not found | Pacote não existe | Criar o diretório correspondente |
+| IDE não reconhece src/test/java | Não marcou como Test Source | Marque na IDE (Mark as Test Sources Root) |
+
+### O que nao deve ser feito
+
+- Não crie `src/main/java` — não temos código de produção
+- Não coloque tudo em um pacote só — dificulta manutenção
+- Não misture features de UI e API no mesmo diretório
+- Não use nomes de pacotes com hífen ou maiúsculas
+
+### Exercicio
+
+1. Adicione um pacote `pages/dashboard` para uma futura página de dashboard
+2. Adicione `src/test/resources/payloads/users` para um futuro endpoint de usuários
+3. Verifique que a estrutura compila sem erros
+
+### Checklist
+
+- [ ] Todos os 14 pacotes Java criados
+- [ ] Todos os 7 diretórios de resources criados
+- [ ] `mvn compile -DskipTests` BUILD SUCCESS
+- [ ] IDE reconhece src/test/java como source root
+- [ ] IDE reconhece src/test/resources como resource root
+- [ ] Nenhum arquivo de código criado ainda (apenas diretórios)
+
+---
+
+## Capítulo 4 — FrameworkException
+
+### Resultado que construiremos
+
+Uma exceção customizada que padroniza o tratamento de erros no framework. Toda falha interna (timeout, configuração ausente, driver não encontrado) será encapsulada nesta exceção.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| exceptions/                                           |
+|   +-- FrameworkException.java   <-- AQUI              |
+|                                                       |
+| Quem usa:                                             |
+|   ConfigReader, DriverFactory, BasePage, RestClient   |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+Exceções customizadas em Java estendem `RuntimeException` (unchecked) ou `Exception` (checked). Usamos `RuntimeException` porque:
+- Não obriga o chamador a fazer try/catch
+- Interrompe o teste imediatamente quando algo está errado
+- Mantém o código dos steps limpo
+
+Uma boa exceção customizada:
+1. Aceita mensagem descritiva
+2. Aceita causa original (para não perder stack trace)
+3. Tem nome que expressa o domínio
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/exceptions/FrameworkException.java` | Exceção do framework |
+
+### Construção manual passo a passo
+
+1. Crie o arquivo `src/test/java/exceptions/FrameworkException.java`
+2. Declare o pacote `exceptions`
+3. Estenda `RuntimeException`
+4. Crie dois construtores: um com mensagem e outro com mensagem + causa
+
+### Codigo completo final
+
+```java
+package exceptions;
+
+public class FrameworkException extends RuntimeException {
+
+    public FrameworkException(String message) {
+        super(message);
+    }
+
+    public FrameworkException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+```
+
+### Explicacao do codigo
+
+- `extends RuntimeException`: torna a exceção unchecked (não exige throws na assinatura)
+- Construtor com `String message`: para erros simples como "Propriedade X não encontrada"
+- Construtor com `Throwable cause`: preserva a exceção original no stack trace
+- Sem lógica adicional — é apenas um wrapper semântico
+
+Exemplos de uso futuro:
+
+```java
+// Em ConfigReader
+throw new FrameworkException("Propriedade 'base.url' nao encontrada no arquivo de configuracao");
+
+// Em DriverFactory
+throw new FrameworkException("Browser '" + browser + "' nao suportado");
+
+// Em BasePage (com causa)
+try {
+    wait.until(ExpectedConditions.visibilityOf(element));
+} catch (TimeoutException e) {
+    throw new FrameworkException("Elemento nao visivel apos 10s: " + element, e);
+}
+```
+
+### Fluxo de execucao
+
+```
+Alguma classe detecta erro
+    |
+    v
+throw new FrameworkException("mensagem clara")
+    |
+    v
+JUnit captura a excecao
+    |
+    v
+Teste marca como FAILED
+    |
+    v
+Stack trace mostra origem + mensagem
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Nenhum erro de compilação
+3. O arquivo aparece em `target/test-classes/exceptions/FrameworkException.class`
+
+### Falha guiada
+
+Remova `extends RuntimeException` e tente usar sem try/catch:
+
+```java
+public class FrameworkException { ... }
+```
+
+Em outra classe:
+
+```java
+throw new FrameworkException("teste");
+```
+
+Erro: `Incompatible types: FrameworkException cannot be converted to Throwable`
+
+Isso mostra que para usar `throw`, a classe DEVE estender alguma classe de Throwable.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `cannot be converted to Throwable` | Não estende Exception/RuntimeException | Adicione extends RuntimeException |
+| `unreported exception` | Estendeu Exception (checked) | Mude para RuntimeException ou adicione throws |
+| `package does not exist` | Diretório errado | Verifique que está em src/test/java/exceptions/ |
+
+### O que nao deve ser feito
+
+- Não use `Exception` genérica — perde semântica nos logs
+- Não adicione lógica de negócio na exceção — ela só carrega informação
+- Não crie dezenas de exceções diferentes — uma é suficiente para um framework de teste
+- Não engula a causa (`catch (Exception e) { throw new FrameworkException("erro") }`) — sempre passe `e`
+
+### Exercicio
+
+1. Crie um método `main` temporário que faz `throw new FrameworkException("teste")`
+2. Execute e observe o stack trace
+3. Agora use o construtor com causa: `throw new FrameworkException("wrap", new NullPointerException())`
+4. Compare os dois stack traces
+
+### Checklist
+
+- [ ] Arquivo em `src/test/java/exceptions/FrameworkException.java`
+- [ ] Package declaration: `package exceptions;`
+- [ ] Estende RuntimeException
+- [ ] Construtor com String message
+- [ ] Construtor com String message + Throwable cause
+- [ ] Compila sem erros
+
+---
+
+## Capítulo 5 — ConfigReader e Environment
+
+### Resultado que construiremos
+
+Um sistema de configuração que lê propriedades de arquivos `.properties` baseado no ambiente ativo (dev, hml). Ao final, qualquer classe poderá obter a URL base ou credenciais chamando `Environment.get("base.url")`.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| config/                                               |
+|   +-- ConfigReader.java         <-- AQUI              |
+|   +-- Environment.java          <-- AQUI              |
+|                                                       |
+| environments/                                         |
+|   +-- dev.properties            <-- AQUI              |
+|   +-- hml.properties            (capitulo 17)         |
+|                                                       |
+| Quem usa:                                             |
+|   DriverFactory, RestClient, Pages, Steps             |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**ConfigReader**: classe que carrega um arquivo `.properties` do classpath e expõe os valores. Usa `java.util.Properties` internamente.
+
+**Environment**: fachada estática que decide QUAL arquivo carregar baseado na system property `env`. Se nenhuma for passada, usa `dev` como padrão.
+
+Fluxo: `mvn test -Denv=hml` → Environment lê `environments/hml.properties`.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/config/ConfigReader.java` | Carrega .properties |
+| `src/test/java/config/Environment.java` | Fachada estática |
+| `src/test/resources/environments/dev.properties` | Config de DEV |
+
+### Construção manual passo a passo
+
+1. Crie `dev.properties` com as propriedades mínimas
+2. Crie `ConfigReader` que recebe o nome do arquivo e carrega
+3. Crie `Environment` que instancia ConfigReader com o ambiente correto
+4. Teste compilando
+
+### Codigo completo final
+
+**src/test/resources/environments/dev.properties**
+
+```properties
+base.url=https://the-internet.herokuapp.com
+api.base.url=https://jsonplaceholder.typicode.com
+browser=chrome
+timeout=10
+headless=false
+username=tomsmith
+password=SuperSecretPassword!
+```
+
+**src/test/java/config/ConfigReader.java**
+
+```java
+package config;
+
+import exceptions.FrameworkException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class ConfigReader {
+
+    private final Properties properties;
+
+    public ConfigReader(String fileName) {
+        properties = new Properties();
+        loadProperties(fileName);
+    }
+
+    private void loadProperties(String fileName) {
+        String path = "environments/" + fileName + ".properties";
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(path)) {
+            if (input == null) {
+                throw new FrameworkException("Arquivo de configuracao nao encontrado: " + path);
+            }
+            properties.load(input);
+        } catch (IOException e) {
+            throw new FrameworkException("Erro ao ler arquivo de configuracao: " + path, e);
+        }
+    }
+
+    public String getProperty(String key) {
+        String value = properties.getProperty(key);
+        if (value == null) {
+            throw new FrameworkException("Propriedade '" + key + "' nao encontrada no arquivo de configuracao");
+        }
+        return value.trim();
+    }
+
+    public String getProperty(String key, String defaultValue) {
+        String value = properties.getProperty(key);
+        return value != null ? value.trim() : defaultValue;
+    }
+
+    public int getIntProperty(String key) {
+        String value = getProperty(key);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new FrameworkException("Propriedade '" + key + "' nao e um numero valido: " + value, e);
+        }
+    }
+
+    public boolean getBooleanProperty(String key) {
+        return Boolean.parseBoolean(getProperty(key));
+    }
+}
+```
+
+**src/test/java/config/Environment.java**
+
+```java
+package config;
+
+public class Environment {
+
+    private static ConfigReader configReader;
+
+    private Environment() {
+        // Classe utilitaria - nao instanciar
+    }
+
+    private static ConfigReader getConfigReader() {
+        if (configReader == null) {
+            String env = System.getProperty("env", "dev");
+            configReader = new ConfigReader(env);
+        }
+        return configReader;
+    }
+
+    public static String get(String key) {
+        return getConfigReader().getProperty(key);
+    }
+
+    public static String get(String key, String defaultValue) {
+        return getConfigReader().getProperty(key, defaultValue);
+    }
+
+    public static int getInt(String key) {
+        return getConfigReader().getIntProperty(key);
+    }
+
+    public static boolean getBoolean(String key) {
+        return getConfigReader().getBooleanProperty(key);
+    }
+}
+```
+
+### Explicacao do codigo
+
+**ConfigReader:**
+- `getResourceAsStream`: lê do classpath (dentro de src/test/resources)
+- `Properties.load()`: parse chave=valor automaticamente
+- `getProperty(key)` com exceção: falha rápido se configuração ausente
+- `getProperty(key, default)`: para configs opcionais
+- `getIntProperty/getBooleanProperty`: conversão tipada
+
+**Environment:**
+- Padrão Singleton lazy — inicializa na primeira chamada
+- `System.getProperty("env", "dev")`: lê `-Denv=xxx` da linha de comando
+- Construtor privado: impede instanciação
+- Métodos estáticos: acesso direto sem instanciar (`Environment.get("base.url")`)
+
+### Fluxo de execucao
+
+```
+Test Runner inicia
+    |
+    v
+Alguma classe chama Environment.get("base.url")
+    |
+    v
+Environment verifica se configReader existe
+    |  (primeira vez: nao existe)
+    v
+Le System.getProperty("env") --> "dev"
+    |
+    v
+Cria ConfigReader("dev")
+    |
+    v
+ConfigReader abre "environments/dev.properties"
+    |
+    v
+Retorna "https://the-internet.herokuapp.com"
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Para testar em tempo de execução (futuro): `Environment.get("base.url")` retorna a URL do dev.properties
+
+### Falha guiada
+
+1. Passe um ambiente inexistente: `mvn test -Denv=producao`
+   - Erro: `FrameworkException: Arquivo de configuracao nao encontrado: environments/producao.properties`
+
+2. Remova `base.url` do dev.properties e tente acessar:
+   - Erro: `FrameworkException: Propriedade 'base.url' nao encontrada`
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Arquivo nao encontrado` | Nome do .properties errado | Verifique que combina com `-Denv` |
+| `NullPointerException` em getResourceAsStream | Arquivo fora do classpath | Deve estar em src/test/resources |
+| `Propriedade nao encontrada` | Chave escrita diferente | Compare exatamente com o .properties |
+| Valor com espaços extras | Properties não trim | Nosso código já faz trim() |
+
+### O que nao deve ser feito
+
+- Não hardcode URLs nos steps — sempre use Environment.get()
+- Não crie um Environment por classe — é singleton compartilhado
+- Não coloque credenciais sensíveis de produção no .properties commitado
+- Não use encoding diferente de UTF-8 no .properties
+
+### Exercicio
+
+1. Adicione a propriedade `api.timeout=30` no dev.properties
+2. Acesse com `Environment.getInt("api.timeout")`
+3. Crie uma propriedade `screenshot.on.failure=true` e acesse com `Environment.getBoolean()`
+
+### Checklist
+
+- [ ] `dev.properties` em `src/test/resources/environments/`
+- [ ] ConfigReader lê do classpath com getResourceAsStream
+- [ ] ConfigReader lança FrameworkException para arquivo/propriedade ausente
+- [ ] Environment usa System.getProperty("env", "dev")
+- [ ] Environment é singleton lazy (inicializa na primeira chamada)
+- [ ] Métodos get, getInt, getBoolean disponíveis
+- [ ] Compila sem erros
+
+---
+
+## Capítulo 6 — DriverFactory e DriverManager
+
+### Resultado que construiremos
+
+Um sistema que cria e gerencia instâncias do WebDriver. `DriverFactory` sabe COMO criar cada browser. `DriverManager` controla o ciclo de vida (criar, obter, fechar) usando ThreadLocal para segurança em execução paralela.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| drivers/                                              |
+|   +-- DriverFactory.java        <-- AQUI              |
+|   +-- DriverManager.java        <-- AQUI              |
+|                                                       |
+| Depende de:                                           |
+|   config/Environment (para ler browser e headless)    |
+|   exceptions/FrameworkException                       |
+|                                                       |
+| Quem usa:                                             |
+|   hooks/UiHooks, pages/base/BasePage                  |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**DriverFactory**: Factory Pattern — encapsula a lógica de criação de objetos. Dado um nome de browser ("chrome", "firefox"), retorna o WebDriver correspondente configurado.
+
+**DriverManager**: gerencia o ciclo de vida do driver usando `ThreadLocal<WebDriver>`. ThreadLocal garante que cada thread tem sua própria instância, permitindo execução paralela futura.
+
+**WebDriver**: é a interface do Selenium que controla o navegador. Cada instância é um browser aberto.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/drivers/DriverFactory.java` | Cria WebDriver por browser |
+| `src/test/java/drivers/DriverManager.java` | Gerencia ciclo de vida |
+
+### Construção manual passo a passo
+
+1. Crie `DriverFactory` com método `createDriver(String browser)`
+2. Configure ChromeDriver e FirefoxDriver com opções
+3. Crie `DriverManager` com ThreadLocal
+4. Exponha métodos `getDriver()`, `setDriver()`, `quitDriver()`
+
+### Codigo completo final
+
+**src/test/java/drivers/DriverFactory.java**
 
 ```java
 package drivers;
 
+import config.Environment;
+import exceptions.FrameworkException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import utils.LogUtils;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
-/**
- * Cria instâncias de WebDriver.
- */
+import java.util.concurrent.TimeUnit;
+
 public class DriverFactory {
 
-    private static final boolean IN_CI =
-            System.getenv("CI") != null || System.getenv("JENKINS_URL") != null;
+    private DriverFactory() {
+        // Classe utilitaria - nao instanciar
+    }
 
-    public WebDriver create(String browser) {
-        LogUtils.info("Criando driver: " + browser + (IN_CI ? " [headless]" : " [visual]"));
+    public static WebDriver createDriver() {
+        String browser = Environment.get("browser", "chrome");
+        boolean headless = Environment.getBoolean("headless");
+        int timeout = Environment.getInt("timeout");
+
+        WebDriver driver = initDriver(browser, headless);
+        configureDriver(driver, timeout);
+        return driver;
+    }
+
+    private static WebDriver initDriver(String browser, boolean headless) {
         switch (browser.toLowerCase()) {
-            case "chrome": return createChrome();
-            default: throw new IllegalArgumentException("Browser não suportado: " + browser);
+            case "chrome":
+                return createChromeDriver(headless);
+            case "firefox":
+                return createFirefoxDriver(headless);
+            default:
+                throw new FrameworkException("Browser nao suportado: " + browser);
         }
     }
 
-    private WebDriver createChrome() {
-        if (!IN_CI) {
-            String path = System.getenv("CHROME_DRIVER_PATH") != null
-                    ? System.getenv("CHROME_DRIVER_PATH")
-                    : "C:\\chromedriver\\chromedriver-win64\\chromedriver.exe";
-            System.setProperty("webdriver.chrome.driver", path);
-        }
-
+    private static WebDriver createChromeDriver(boolean headless) {
         ChromeOptions options = new ChromeOptions();
-        if (IN_CI) {
-            options.addArguments("--headless=new", "--no-sandbox",
-                    "--disable-dev-shm-usage", "--window-size=1920,1080");
-        } else {
-            options.addArguments("--start-maximized");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--window-size=1920,1080");
+        if (headless) {
+            options.addArguments("--headless");
         }
-        options.addArguments("--disable-notifications", "--remote-allow-origins=*");
         return new ChromeDriver(options);
+    }
+
+    private static WebDriver createFirefoxDriver(boolean headless) {
+        FirefoxOptions options = new FirefoxOptions();
+        if (headless) {
+            options.addArguments("--headless");
+        }
+        return new FirefoxDriver(options);
+    }
+
+    private static void configureDriver(WebDriver driver, int timeout) {
+        driver.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
+        driver.manage().window().maximize();
     }
 }
 ```
 
-**Decisões de design:**
-
-- A detecção de CI usa variáveis de ambiente padrão (`CI` para GitHub Actions, `JENKINS_URL` para Jenkins). Isso permite que o mesmo código rode local e no pipeline sem nenhuma alteração.
-- Em CI, o Chrome roda headless com `--no-sandbox` e `--disable-dev-shm-usage` — flags obrigatórias para containers Linux.
-- O `--window-size=1920,1080` garante que screenshots em CI tenham resolução consistente.
-- Localmente, o path do ChromeDriver aceita variável de ambiente ou usa um padrão sensato.
-
-> **Dica:** Nunca faça commit de caminhos absolutos locais (ex: `C:\Users\joao\...`). Use variáveis de ambiente para paths que variam entre máquinas.
-
----
-
-### 2.3 DriverManager
-
-O DriverManager resolve um problema crítico: como compartilhar a mesma instância de WebDriver entre Hooks, Steps e Pages sem acoplá-los via campo estático comum. A resposta é ThreadLocal.
+**src/test/java/drivers/DriverManager.java**
 
 ```java
 package drivers;
 
 import org.openqa.selenium.WebDriver;
 
-/**
- * Gerencia o WebDriver via ThreadLocal (seguro para paralelo).
- */
 public class DriverManager {
 
-    private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    private static final ThreadLocal<WebDriver> driverThread = new ThreadLocal<>();
 
-    private DriverManager() {}
+    private DriverManager() {
+        // Classe utilitaria - nao instanciar
+    }
 
     public static WebDriver getDriver() {
-        return driver.get();
+        return driverThread.get();
     }
 
-    public static void setDriver(WebDriver webDriver) {
-        driver.set(webDriver);
+    public static void setDriver(WebDriver driver) {
+        driverThread.set(driver);
     }
 
-    public static void quit() {
-        WebDriver d = driver.get();
-        if (d != null) {
-            d.quit();
-            driver.remove();
+    public static void quitDriver() {
+        WebDriver driver = driverThread.get();
+        if (driver != null) {
+            driver.quit();
+            driverThread.remove();
         }
     }
 }
 ```
 
-**Decisões de design:**
+### Explicacao do codigo
 
-- `ThreadLocal<WebDriver>` garante que cada thread tem sua própria instância do navegador. Quando o Cucumber executar cenários em paralelo (futuro), cada cenário terá seu Chrome isolado sem interferência.
-- O construtor é privado (padrão útility class) porque todos os métodos são estáticos.
-- O `quit()` faz `driver.remove()` após fechar — isso previne memory leaks em execuções longas com muitos cenários.
+**DriverFactory:**
+- `createDriver()`: método público que orquestra a criação
+- `initDriver()`: switch que seleciona browser — extensível para Edge, Safari
+- `createChromeDriver()`: configura ChromeOptions (no-sandbox é obrigatório em CI)
+- `configureDriver()`: timeout implícito e maximize — aplicados a qualquer browser
+- `--disable-dev-shm-usage`: previne crash em containers com memória limitada
+- `--window-size=1920,1080`: garante layout consistente em headless
 
-> **Dica:** ThreadLocal é essencial para paralelismo, mas também é útil em execução serial: ele garante um ponto único de acesso ao driver sem precisar passar o objeto por parâmetro em toda a cadeia.
+**DriverManager:**
+- `ThreadLocal<WebDriver>`: cada thread tem seu próprio driver
+- `getDriver()`: retorna o driver da thread atual
+- `setDriver()`: armazena o driver na thread atual
+- `quitDriver()`: fecha o browser E limpa o ThreadLocal (evita memory leak)
+- `remove()`: essencial — sem isso o ThreadLocal vaza em thread pools
+
+### Fluxo de execucao
+
+```
+UiHooks @Before:
+    |
+    v
+DriverFactory.createDriver()
+    |
+    v
+Le "browser" do Environment --> "chrome"
+    |
+    v
+Cria ChromeDriver com options
+    |
+    v
+DriverManager.setDriver(driver)
+    |
+    v
+[Teste executa usando DriverManager.getDriver()]
+    |
+    v
+UiHooks @After:
+    |
+    v
+DriverManager.quitDriver()
+    |
+    v
+Browser fecha + ThreadLocal limpo
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS — classes compilam sem erro
+2. Verificação real acontecerá no Capítulo 9 quando o primeiro teste rodar
+
+### Falha guiada
+
+No `dev.properties`, mude `browser=safari` e tente criar o driver (futuro):
+- Erro: `FrameworkException: Browser nao suportado: safari`
+
+Remova `--no-sandbox` e rode em CI (Docker):
+- Erro: `DevToolsActivePort file doesn't exist` — Chrome precisa do no-sandbox em containers
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `WebDriverException: cannot find chromedriver` | ChromeDriver não instalado | Use WebDriverManager ou baixe manualmente |
+| `session not created: version mismatch` | ChromeDriver incompatível com Chrome | Atualize para versão correspondente |
+| `DevToolsActivePort` | Falta no-sandbox em CI | Adicione --no-sandbox |
+| `NullPointerException em getDriver()` | setDriver nunca chamado | Verifique que Hook inicializa |
+| `ThreadLocal leak` | Não chamou remove() | quitDriver() sempre faz remove() |
+
+### O que nao deve ser feito
+
+- Não crie WebDriver diretamente nos steps — use DriverManager
+- Não use `driver.close()` — use `driver.quit()` (close fecha só a aba, quit mata o processo)
+- Não esqueça de chamar `quitDriver()` no @After — browser fica aberto
+- Não use ImplicitWait + ExplicitWait juntos — causa comportamento imprevisível
+- Não compartilhe WebDriver entre threads sem ThreadLocal
+
+### Exercicio
+
+1. Adicione suporte ao Microsoft Edge (EdgeDriver + EdgeOptions)
+2. Adicione um log (`System.out.println`) mostrando qual browser foi criado
+3. Experimente mudar `headless=true` no dev.properties
+
+### Checklist
+
+- [ ] DriverFactory com factory method createDriver()
+- [ ] Suporte a Chrome e Firefox com options
+- [ ] Headless configurável via properties
+- [ ] Timeout implícito configurável
+- [ ] DriverManager com ThreadLocal
+- [ ] Métodos getDriver, setDriver, quitDriver
+- [ ] quitDriver faz quit() + remove()
+- [ ] Compila sem erros
 
 ---
 
-### 2.4 BasePage
+## Capítulo 7 — LogUtils e logback.xml
 
-A BasePage é a classe abstrata que serve de fundação para todos os Page Objects. Ela encapsula as interações comuns com o Selenium (clicar, digitar, navegar) e configura o WebDriverWait com timeout do ambiente.
+### Resultado que construiremos
+
+Um sistema de logging estruturado usando SLF4J + Logback. `LogUtils` é a fachada que toda classe do framework usa para registrar informações. `logback.xml` configura formato, nível e destino dos logs.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| utils/                                                |
+|   +-- LogUtils.java             <-- AQUI              |
+|                                                       |
+| resources/                                            |
+|   +-- logback.xml               <-- AQUI              |
+|                                                       |
+| Quem usa:                                             |
+|   TODAS as classes do framework                       |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**SLF4J**: fachada (interface) de logging. Seu código depende apenas dela.
+**Logback**: implementação que faz o log aparecer no console/arquivo.
+
+Níveis de log (do mais detalhado ao mais grave):
+- `TRACE` → detalhe fino (raramente usado)
+- `DEBUG` → informação de debug
+- `INFO` → fluxo normal de execução
+- `WARN` → algo inesperado mas não fatal
+- `ERROR` → falha que requer atenção
+
+`LogUtils` simplifica o uso: em vez de criar Logger em cada classe, você chama `LogUtils.info("mensagem")`.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/utils/LogUtils.java` | Fachada de logging |
+| `src/test/resources/logback.xml` | Configuração do Logback |
+
+### Construção manual passo a passo
+
+1. Crie `logback.xml` em src/test/resources
+2. Configure appender de console com padrão timestamp + nível + mensagem
+3. Crie `LogUtils` com métodos estáticos para cada nível
+
+### Codigo completo final
+
+**src/test/resources/logback.xml**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>target/logs/framework.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>target/logs/framework-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io.restassured" level="WARN"/>
+    <logger name="org.apache.http" level="WARN"/>
+    <logger name="org.openqa.selenium" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
+```
+
+**src/test/java/utils/LogUtils.java**
+
+```java
+package utils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LogUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger("Framework");
+
+    private LogUtils() {
+        // Classe utilitaria - nao instanciar
+    }
+
+    public static void info(String message) {
+        logger.info(message);
+    }
+
+    public static void info(String message, Object... args) {
+        logger.info(message, args);
+    }
+
+    public static void debug(String message) {
+        logger.debug(message);
+    }
+
+    public static void debug(String message, Object... args) {
+        logger.debug(message, args);
+    }
+
+    public static void warn(String message) {
+        logger.warn(message);
+    }
+
+    public static void warn(String message, Object... args) {
+        logger.warn(message, args);
+    }
+
+    public static void error(String message) {
+        logger.error(message);
+    }
+
+    public static void error(String message, Throwable throwable) {
+        logger.error(message, throwable);
+    }
+}
+```
+
+### Explicacao do codigo
+
+**logback.xml:**
+- `CONSOLE` appender: mostra logs no terminal durante execução
+- `FILE` appender: salva em `target/logs/framework.log` com rotação
+- `SizeAndTimeBasedRollingPolicy`: novo arquivo por dia ou quando atingir 10MB
+- `maxHistory=7`: mantém 7 dias de log
+- Loggers silenciados (`WARN`): REST Assured, Apache HTTP e Selenium são verbosos — só queremos ver warnings deles
+- Root level `INFO`: mostra INFO, WARN e ERROR no console
+
+**LogUtils:**
+- Logger com nome "Framework" — aparece nos logs para identificar a origem
+- Varargs `Object... args`: permite placeholders como `LogUtils.info("Abrindo pagina: {}", url)`
+- SLF4J usa `{}` como placeholder (mais eficiente que concatenação)
+- Método `error(String, Throwable)`: loga a exceção com stack trace completo
+
+### Fluxo de execucao
+
+```
+LogUtils.info("Navegando para: {}", url)
+    |
+    v
+SLF4J repassa para Logback
+    |
+    v
+Logback aplica pattern
+    |
+    v
+Console: 14:30:05.123 [main] INFO  Framework - Navegando para: https://...
+    |
+    v
+Arquivo: target/logs/framework.log (mesma mensagem)
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Verificação real no Capítulo 9 — logs aparecerão no console durante teste
+
+### Falha guiada
+
+Remova `logback.xml` do classpath e execute um teste (futuro):
+
+```
+SLF4J: Failed to load class "ch.qos.logback.classic.LoggerContext"
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+```
+
+Isso mostra que sem o logback.xml, SLF4J funciona mas não imprime nada.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Failed to load class LoggerContext` | logback-classic não no classpath | Verifique dependência no pom.xml |
+| `No appenders found` | logback.xml fora de resources | Mova para src/test/resources/ |
+| Logs não aparecem | Level muito restritivo | Mude root level para DEBUG |
+| Logs excessivos de Selenium | Selenium loga em INFO | Silencie com logger level WARN |
+
+### O que nao deve ser feito
+
+- Não use `System.out.println` — não tem timestamp, nível ou arquivo
+- Não logue dados sensíveis (senhas, tokens) em INFO — use DEBUG
+- Não silencie o root em WARN — você perderá informações de fluxo
+- Não crie um Logger por método — um por classe (ou um centralizado como fizemos)
+
+### Exercicio
+
+1. Adicione `LogUtils.info("Iniciando teste")` em um método main temporário
+2. Execute e observe o formato no console
+3. Mude o root level para `DEBUG` e observe mais detalhes
+4. Verifique que `target/logs/framework.log` foi criado
+
+### Checklist
+
+- [ ] `logback.xml` em `src/test/resources/`
+- [ ] Appender CONSOLE configurado
+- [ ] Appender FILE com rolling policy
+- [ ] Selenium/REST Assured silenciados em WARN
+- [ ] LogUtils com métodos info, debug, warn, error
+- [ ] Suporte a placeholders com varargs
+- [ ] Compila sem erros
+
+---
+
+## Capítulo 8 — BasePage e LoginPage
+
+### Resultado que construiremos
+
+O padrão Page Object implementado em duas camadas: `BasePage` com métodos genéricos reutilizáveis (click, type, waitForElement) e `LoginPage` que herda de BasePage e mapeia a tela de login.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| pages/                                                |
+|   +-- base/                                           |
+|   |   +-- BasePage.java         <-- AQUI              |
+|   +-- login/                                          |
+|       +-- LoginPage.java        <-- AQUI              |
+|                                                       |
+| Depende de:                                           |
+|   drivers/DriverManager                               |
+|   config/Environment                                  |
+|   utils/LogUtils                                      |
+|   exceptions/FrameworkException                       |
+|                                                       |
+| Quem usa:                                             |
+|   steps/ui/LoginSteps                                 |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**Page Object Pattern**: cada tela da aplicação é representada por uma classe Java. A classe:
+- Mapeia os elementos da tela (locators)
+- Expõe ações de negócio (login, preencherUsuario)
+- Encapsula detalhes de implementação (XPath, CSS)
+
+**BasePage**: classe abstrata com métodos que QUALQUER page object precisa:
+- `click(element)` — clicar com wait
+- `type(element, text)` — limpar e digitar
+- `waitForElement(element)` — espera explícita
+- `getText(element)` — obter texto visível
+
+Os steps nunca interagem diretamente com WebDriver ou locators.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/pages/base/BasePage.java` | Métodos genéricos |
+| `src/test/java/pages/login/LoginPage.java` | Page Object do login |
+
+### Construção manual passo a passo
+
+1. Crie `BasePage` com WebDriver obtido do DriverManager
+2. Configure WebDriverWait no construtor
+3. Implemente métodos genéricos com explicit wait
+4. Crie `LoginPage` estendendo BasePage
+5. Mapeie elementos com By (username, password, botão, mensagem)
+6. Crie métodos de ação: fillUsername, fillPassword, clickLogin, getSuccessMessage
+
+### Codigo completo final
+
+**src/test/java/pages/base/BasePage.java**
 
 ```java
 package pages.base;
 
 import config.Environment;
+import drivers.DriverManager;
+import exceptions.FrameworkException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.LogUtils;
 
-/**
- * Classe base para todos os Page Objects.
- */
 public abstract class BasePage {
 
-    protected final WebDriver driver;
-    protected final WebDriverWait wait;
+    protected WebDriver driver;
+    protected WebDriverWait wait;
 
-    protected BasePage(WebDriver driver) {
-        this.driver = driver;
-        int timeout = new Environment().getInt("timeout.explicit", 10);
+    protected BasePage() {
+        this.driver = DriverManager.getDriver();
+        int timeout = Environment.getInt("timeout");
         this.wait = new WebDriverWait(driver, timeout);
     }
 
-    protected void navigate(String url) {
-        LogUtils.info("Navegando: " + url);
-        driver.get(url);
+    protected void click(By locator) {
+        LogUtils.debug("Clicando no elemento: {}", locator);
+        waitForClickable(locator).click();
     }
 
     protected void type(By locator, String text) {
-        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        LogUtils.debug("Digitando '{}' no elemento: {}", text, locator);
+        WebElement element = waitForVisible(locator);
         element.clear();
         element.sendKeys(text);
     }
 
-    protected void click(By locator) {
-        wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
-    }
-
     protected String getText(By locator) {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator)).getText();
+        String text = waitForVisible(locator).getText();
+        LogUtils.debug("Texto obtido: '{}'", text);
+        return text;
     }
 
-    protected boolean urlContains(String fragment) {
+    protected boolean isDisplayed(By locator) {
         try {
-            return wait.until(ExpectedConditions.urlContains(fragment));
-        } catch (TimeoutException e) {
-            LogUtils.warn("Timeout aguardando URL conter: " + fragment);
+            return waitForVisible(locator).isDisplayed();
+        } catch (Exception e) {
             return false;
         }
+    }
+
+    protected void navigateTo(String url) {
+        LogUtils.info("Navegando para: {}", url);
+        driver.get(url);
+    }
+
+    protected WebElement waitForVisible(By locator) {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        } catch (Exception e) {
+            throw new FrameworkException("Elemento nao visivel apos timeout: " + locator, e);
+        }
+    }
+
+    protected WebElement waitForClickable(By locator) {
+        try {
+            return wait.until(ExpectedConditions.elementToBeClickable(locator));
+        } catch (Exception e) {
+            throw new FrameworkException("Elemento nao clicavel apos timeout: " + locator, e);
+        }
+    }
+
+    public String getTitle() {
+        return driver.getTitle();
+    }
+
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
     }
 }
 ```
 
-**Decisões de design:**
-
-- A classe é `abstract` porque nunca deve ser instânciada diretamente — ela só existe para ser herdada por Pages concretas.
-- Os métodos são `protected` (não public) porque são destinados apenas às subclasses, não ao mundo externo. Steps nunca devem chamar `type()` diretamente.
-- O timeout vem do `Environment`, então cada ambiente pode ter timeouts diferentes (DEV = 10s, HML = 15s).
-- Todo `type()` faz `clear()` antes de `sendKeys()` para evitar concatenação de texto em campos pré-preenchidos.
-- O `urlContains()` captura `TimeoutException` e retorna `false` em vez de propagar a exceção — isso torna as asserções mais limpas nos Steps.
-
-> **Dica:** Se você precisa de uma interação específica que não existe na BasePage (ex: drag-and-drop), adicione-a aqui. Todas as Pages herdam automaticamente.
-
----
-
-### 2.5 LoginPage
-
-O LoginPage implementa o Page Object Pattern: cada página da aplicação tem uma classe Java correspondente que encapsula seus elementos e ações. O código externo (Steps) nunca lida com localizadores — apenas com métodos semânticos.
+**src/test/java/pages/login/LoginPage.java**
 
 ```java
 package pages.login;
 
+import config.Environment;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import pages.base.BasePage;
+import utils.LogUtils;
 
-/**
- * Page Object da página de Login.
- */
 public class LoginPage extends BasePage {
 
-    private final By usernameField = By.name("username");
-    private final By passwordField = By.name("password");
-    private final By loginButton   = By.cssSelector("button[type='submit']");
-    private final By errorMessage  = By.cssSelector(".oxd-alert-content-text");
+    // Locators
+    private final By inputUsername = By.id("username");
+    private final By inputPassword = By.id("password");
+    private final By buttonLogin = By.cssSelector("button[type='submit']");
+    private final By labelSuccess = By.cssSelector(".flash.success");
+    private final By labelError = By.cssSelector(".flash.error");
 
-    public LoginPage(WebDriver driver) {
-        super(driver);
-    }
-
-    public void open(String url) {
-        navigate(url);
+    // Actions
+    public void openLoginPage() {
+        String url = Environment.get("base.url") + "/login";
+        navigateTo(url);
+        LogUtils.info("Pagina de login aberta");
     }
 
     public void fillUsername(String username) {
-        type(usernameField, username);
+        type(inputUsername, username);
     }
 
     public void fillPassword(String password) {
-        type(passwordField, password);
+        type(inputPassword, password);
     }
 
     public void clickLogin() {
-        click(loginButton);
+        click(buttonLogin);
+        LogUtils.info("Botao de login clicado");
+    }
+
+    public void login(String username, String password) {
+        fillUsername(username);
+        fillPassword(password);
+        clickLogin();
+    }
+
+    public String getSuccessMessage() {
+        return getText(labelSuccess);
     }
 
     public String getErrorMessage() {
-        return getText(errorMessage);
+        return getText(labelError);
     }
 
-    public boolean isOnDashboard() {
-        return urlContains("/dashboard");
+    public boolean isSuccessMessageDisplayed() {
+        return isDisplayed(labelSuccess);
     }
 }
 ```
 
-**Decisões de design:**
+### Explicacao do codigo
 
-- Localizadores são `private final` — eles pertencem exclusivamente a esta Page e nunca mudam após construção.
-- Métodos têm nomes semânticos (`fillUsername`, `clickLogin`) em vez de técnicos (`typeInField1`, `clickButton`). Isso torna os Steps legíveis como documentação.
-- A Page recebe o driver no construtor (injeção de dependência) em vez de buscar de um singleton. Isso fácilita testes unitários da própria Page.
-- Não há lógica de negócio na Page: ela não decide se o login foi bem-sucedido — apenas expõe `isOnDashboard()` para o Step decidir.
+**BasePage:**
+- `abstract class`: não pode ser instanciada diretamente — só via herança
+- `DriverManager.getDriver()`: obtém o driver da thread atual (configurado pelo Hook)
+- `WebDriverWait`: espera explícita que aguarda condições (visível, clicável)
+- `waitForVisible/waitForClickable`: envolvem o wait com tratamento de exceção amigável
+- `type()` faz `clear()` antes — garante que o campo está vazio
+- Todos os métodos logam a ação — facilita debug
 
-> **Dica:** Um Page Object nunca deve conter asserções (Assert). A responsabilidade de verificar é do Step. A Page apenas informa o estado atual.
+**LoginPage:**
+- Locators como `By` constants: centralizados no topo, fáceis de atualizar
+- `openLoginPage()`: monta URL completa usando Environment
+- `login()`: ação composta — preenche e clica (atalho para os steps)
+- `getSuccessMessage()/getErrorMessage()`: retornam texto para assertação nos steps
+- Steps NUNCA veem `By.id("username")` — só veem `loginPage.fillUsername("tom")`
 
----
+### Fluxo de execucao
 
-### 2.6 Cucumber — Features em português
-
-O Cucumber permite escrever especificações executáveis em linguagem natural. Com a diretiva `# language: pt`, todas as keywords ficam em português, tornando os cenários acessíveis para analistas de negócio e POs.
-
-```gherkin
-# language: pt
-@ui
-Funcionalidade: Login no sistema
-  Como um usuário registrado
-  Quero fazer login na aplicação
-  Para acessar as funcionalidades do sistema
-
-  Contexto:
-    Dado que estou na página de login
-
-  @smoke
-  Cenário: Login com credenciais válidas
-    Quando faço login como administrador
-    Então devo ser redirecionado para a página inicial
-
-  Cenário: Login com senha incorreta
-    Quando faço login com usuário "admin" e senha incorreta
-    Então devo ver a mensagem de erro "Invalid credentials"
-
-  Esquema do Cenário: Login com credenciais inválidas
-    Quando faço login com usuário "<usuario>" e senha "<senha>"
-    Então devo ver a mensagem de erro "<mensagem>"
-
-    Exemplos:
-      | usuario       | senha      | mensagem            |
-      | usuarioErrado | admin123   | Invalid credentials |
-      | wronguser     | wrongpass  | Invalid credentials |
+```
+LoginSteps chama loginPage.openLoginPage()
+    |
+    v
+BasePage.navigateTo() --> driver.get(url)
+    |
+    v
+LoginSteps chama loginPage.login("tomsmith", "SuperSecret!")
+    |
+    v
+LoginPage.fillUsername() --> BasePage.type(inputUsername, "tomsmith")
+    |
+    v
+BasePage.waitForVisible() --> WebDriverWait ate elemento aparecer
+    |
+    v
+element.clear() + element.sendKeys("tomsmith")
+    |
+    v
+LoginPage.clickLogin() --> BasePage.click(buttonLogin)
+    |
+    v
+LoginSteps chama loginPage.getSuccessMessage()
+    |
+    v
+BasePage.getText(labelSuccess) --> retorna texto da flash message
 ```
 
-**Tabela de keywords Gherkin em português:**
+### Como executar
 
-| Português | Inglês | Função |
-|-----------|--------|--------|
-| Funcionalidade | Feature | Agrupa cenários relacionados |
-| Contexto | Background | Steps executados antes de cada cenário |
-| Cenário | Scenario | Caso de teste individual |
-| Esquema do Cenário | Scenario Outline | Template com múltiplas combinações |
-| Exemplos | Examples | Tabela de dados para Outline |
-| Dado | Given | Pré-condição (setup) |
-| Quando | When | Ação do usuário |
-| Então | Then | Resultado esperado |
-| E | And | Continuação do step anterior |
+```bash
+mvn compile -DskipTests
+```
 
-**Decisões de design:**
+### Como confirmar que funcionou
 
-- A tag `@ui` permite filtrar apenas testes de interface. A tag `@smoke` marca cenários críticos para execução rápida.
-- O `Contexto` (Background) evita repetir "Dado que estou na página de login" em todo cenário.
-- O `Esquema do Cenário` com `Exemplos` é um teste parametrizado — executa o mesmo fluxo com dados diferentes.
+1. BUILD SUCCESS
+2. Teste real no Capítulo 9
 
-> **Dica:** Features devem ser escritas na perspectiva do usuário, não do sistema. Use "Quando faço login" (usuário) em vez de "Quando o sistema valida credenciais" (técnico).
+### Falha guiada
+
+Mude o locator para um ID inexistente:
+
+```java
+private final By inputUsername = By.id("usuario_inexistente");
+```
+
+Ao executar o teste (futuro), o erro será:
+```
+FrameworkException: Elemento nao visivel apos timeout: By.id: usuario_inexistente
+```
+
+Isso demonstra o valor do wrap com mensagem descritiva vs. o stacktrace críptico do Selenium.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `NullPointerException` no driver | getDriver() antes de setDriver() | Hook deve inicializar primeiro |
+| `StaleElementReference` | Elemento mudou no DOM | Use locator dinâmico (not cached element) |
+| `ElementNotInteractable` | Elemento coberto por outro | Use waitForClickable |
+| Timeout muito curto | Aplicação lenta | Aumente timeout no .properties |
+| `NoSuchElementException` | Locator errado | Inspecione elemento no DevTools |
+
+### O que nao deve ser feito
+
+- Não exponha WebElement nos métodos públicos — encapsule na Page
+- Não use Thread.sleep() — use explicit wait
+- Não coloque asserts na Page Object — asserts ficam nos steps
+- Não use PageFactory (@FindBy) com Selenium 3 — tem problemas com StaleElement
+- Não repita locators em várias pages — se compartilham, crie um ComponentObject
+
+### Exercicio
+
+1. Adicione um método `isErrorMessageDisplayed()` na LoginPage
+2. Crie uma `SecureAreaPage` com locator para o botão de logout
+3. Na BasePage, adicione um método `selectDropdown(By locator, String visibleText)`
+
+### Checklist
+
+- [ ] BasePage abstrata com driver do DriverManager
+- [ ] WebDriverWait configurável via Environment
+- [ ] Métodos: click, type, getText, isDisplayed, navigateTo
+- [ ] waitForVisible e waitForClickable com FrameworkException
+- [ ] LoginPage com locators privados e ações públicas
+- [ ] Métodos fillUsername, fillPassword, clickLogin, login
+- [ ] getSuccessMessage e getErrorMessage
+- [ ] Logging em ações principais
+- [ ] Compila sem erros
 
 ---
 
-### 2.7 TestRunner
+## Capítulo 9 — Feature de login + LoginSteps + TestRunner
 
-O TestRunner é o ponto de entrada que conecta Maven, JUnit e Cucumber. Ele define onde estão as features, onde estão os steps e quais plugins de report serão usados.
+### Resultado que construiremos
+
+O primeiro teste executável do framework. Uma feature Cucumber em Gherkin, a classe de steps que implementa cada passo, e o Runner que integra Cucumber com JUnit. Ao final, `mvn test` abrirá o browser e executará o cenário de login.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| features/ui/                                          |
+|   +-- login.feature            <-- AQUI               |
+|                                                       |
+| steps/ui/                                             |
+|   +-- LoginSteps.java          <-- AQUI               |
+|                                                       |
+| runners/                                              |
+|   +-- TestRunner.java           <-- AQUI              |
+|                                                       |
+| testdata/                                             |
+|   +-- login.json                <-- AQUI              |
+|                                                       |
+| Depende de:                                           |
+|   pages/login/LoginPage                               |
+|   drivers/DriverFactory, DriverManager                |
+|   config/Environment                                  |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**Feature file**: descreve o comportamento em linguagem natural (Gherkin). Usa Given/When/Then.
+
+**Steps**: classe Java que implementa cada linha do Gherkin com `@Given`, `@When`, `@Then`.
+
+**TestRunner**: classe JUnit com `@RunWith(Cucumber.class)` que configura onde buscar features e steps.
+
+**PicoContainer**: injeta dependências nos steps. Se dois steps compartilham um objeto, PicoContainer resolve automaticamente.
+
+> **IMPORTANTE**: Neste capítulo, como os Hooks ainda não existem, incluiremos código TEMPORÁRIO para abrir e fechar o browser dentro dos steps. No Capítulo 10, esse código será removido.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/resources/features/ui/login.feature` | Cenários Gherkin |
+| `src/test/java/steps/ui/LoginSteps.java` | Implementação dos steps |
+| `src/test/java/runners/TestRunner.java` | Configuração do Cucumber |
+| `src/test/resources/testdata/login.json` | Dados de teste |
+
+### Construção manual passo a passo
+
+1. Crie a feature com cenários de login com sucesso e falha
+2. Crie `login.json` com credenciais de teste
+3. Crie `TestRunner` com @CucumberOptions
+4. Crie `LoginSteps` com código temporário de setup/teardown do driver
+5. Execute `mvn test`
+
+### Codigo completo final
+
+**src/test/resources/features/ui/login.feature**
+
+```gherkin
+@ui @login
+Feature: Login no The Internet
+
+  Como usuario do sistema
+  Quero fazer login com credenciais validas
+  Para acessar a area segura
+
+  @smoke
+  Scenario: Login com credenciais validas
+    Given que estou na pagina de login
+    When preencho o usuario "tomsmith"
+    And preencho a senha "SuperSecretPassword!"
+    And clico no botao de login
+    Then devo ver a mensagem de sucesso
+
+  @negative
+  Scenario: Login com senha invalida
+    Given que estou na pagina de login
+    When preencho o usuario "tomsmith"
+    And preencho a senha "senhaerrada"
+    And clico no botao de login
+    Then devo ver a mensagem de erro
+```
+
+**src/test/resources/testdata/login.json**
+
+```json
+{
+  "validUser": {
+    "username": "tomsmith",
+    "password": "SuperSecretPassword!"
+  },
+  "invalidUser": {
+    "username": "tomsmith",
+    "password": "senhaerrada"
+  }
+}
+```
+
+**src/test/java/runners/TestRunner.java**
 
 ```java
 package runners;
@@ -1018,16 +1998,6 @@ import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 
-/**
- * Runner principal.
- *
- * mvn test                                    -> todos
- * mvn test -Dcucumber.filter.tags="@smoke"    -> smoke
- * mvn test -Dcucumber.filter.tags="@api"      -> API
- * mvn test -Dcucumber.filter.tags="@ui"       -> UI
- * mvn test -Denvironment=hml                  -> ambiente HML
- * mvn allure:serve                            -> relatório
- */
 @RunWith(Cucumber.class)
 @CucumberOptions(
     features = "src/test/resources/features",
@@ -1036,564 +2006,1305 @@ import org.junit.runner.RunWith;
         "pretty",
         "html:target/cucumber-reports/cucumber.html",
         "json:target/cucumber-reports/cucumber.json",
-        "junit:target/cucumber-reports/cucumber.xml",
         "io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"
     },
-    monochrome = true
+    monochrome = true,
+    tags = ""
 )
 public class TestRunner {
 }
 ```
 
-**Decisões de design:**
-
-- `features` aponta para a pasta raiz — o Cucumber escaneia recursivamente todas as subpastas (`ui/`, `api/`).
-- `glue` inclui tanto `steps` quanto `hooks`. Se você esquecer de incluir `hooks`, os @Before/@After não serão executados.
-- Os quatro plugins geram: saída colorida no console (`pretty`), relatório HTML nativo, JSON para integração com ferramentas, XML para JUnit report e dados para o Allure.
-- `monochrome = true` remove caracteres de escape ANSI do output — útil em logs de CI.
-- A filtragem por tags é feita via linha de comando (`-Dcucumber.filter.tags`), não no Runner. Isso permite flexibilidade sem recompilar.
-
-> **Dica:** Nunca coloque `tags` fixas no @CucumberOptions em produção. Isso impediria a execução de todos os testes. Use `-Dcucumber.filter.tags` no comando Maven.
-
----
-
-### 2.8 LoginSteps
-
-Os Step Definitions conectam a linguagem natural do Gherkin com código Java executável. Cada frase "Dado/Quando/Então" mapeia para um método anotado. O PicoContainer injeta dependências automaticamente via construtor.
+**src/test/java/steps/ui/LoginSteps.java** — VERSAO TEMPORARIA
 
 ```java
 package steps.ui;
 
-import config.Environment;
-import drivers.DriverManager;
-import io.cucumber.java.pt.Dado;
-import io.cucumber.java.pt.Então;
-import io.cucumber.java.pt.Quando;
-import org.junit.Assert;
-import pages.login.LoginPage;
+// =====================================================================
+// VERSAO TEMPORARIA - O codigo de setup/teardown do driver sera movido
+// para hooks/UiHooks.java no Capitulo 10.
+// =====================================================================
 
-/**
- * Steps de Login (UI).
- * Environment injetado via PicoContainer.
- */
-public class LoginSteps {
-
-    private final Environment env;
-    private LoginPage loginPage;
-
-    public LoginSteps(Environment env) {
-        this.env = env;
-    }
-
-    @Dado("que estou na página de login")
-    public void openLogin() {
-        loginPage = new LoginPage(DriverManager.getDriver());
-        loginPage.open(env.baseUrl);
-    }
-
-    @Quando("faço login como administrador")
-    public void loginAsAdmin() {
-        loginPage.fillUsername(env.get("usuario.admin"));
-        loginPage.fillPassword(env.get("senha.admin"));
-        loginPage.clickLogin();
-    }
-
-    @Quando("faço login com usuário {string} e senha {string}")
-    public void loginWith(String user, String pass) {
-        loginPage.fillUsername(user);
-        loginPage.fillPassword(pass);
-        loginPage.clickLogin();
-    }
-
-    @Quando("faço login com usuário {string} e senha incorreta")
-    public void loginWithWrongPassword(String user) {
-        loginPage.fillUsername(user);
-        loginPage.fillPassword(env.get("senha.invalida"));
-        loginPage.clickLogin();
-    }
-
-    @Então("devo ser redirecionado para a página inicial")
-    public void shouldBeOnDashboard() {
-        Assert.assertTrue("Não redirecionou para o dashboard", loginPage.isOnDashboard());
-    }
-
-    @Então("devo ver a mensagem de erro {string}")
-    public void shouldSeeError(String expected) {
-        Assert.assertEquals("Mensagem incorreta", expected, loginPage.getErrorMessage());
-    }
-}
-```
-
-**Decisões de design:**
-
-- O `Environment` é injetado via construtor pelo PicoContainer. Nenhuma configuração XML ou anotação adicional é necessária — basta declarar no construtor.
-- Credenciais vêm do arquivo de propriedades (`env.get("usuario.admin")`), nunca hardcoded no Step. Isso permite trocar credenciais por ambiente sem alterar código.
-- O `LoginPage` é instânciado no step `@Dado` (não no construtor) porque o driver só existe após o Hook abrir o navegador.
-- Steps usam `{string}` como expression do Cucumber para capturar parâmetros dinâmicos do Gherkin.
-
-> **Dica:** Cada classe de Steps deve ser coesa — trate apenas de um assunto. LoginSteps cuida de login, não de cadastro. Se a feature crescer, crie novas classes de Steps.
-
----
-
-### 2.9 UiHooks
-
-Os Hooks controlam o ciclo de vida do navegador: abrir antes de cada cenário UI e fechar depois. Eles também gerenciam a captura de evidências (screenshots).
-
-```java
-package hooks;
-
-import config.Environment;
 import drivers.DriverFactory;
 import drivers.DriverManager;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import io.cucumber.java.Scenario;
-import org.openqa.selenium.WebDriver;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import io.cucumber.java.en.Then;
+import org.junit.Assert;
+import pages.login.LoginPage;
 import utils.LogUtils;
-import utils.ScreenshotUtils;
 
-import java.util.concurrent.TimeUnit;
+public class LoginSteps {
 
-/**
- * Hooks para cenários @ui.
- */
-public class UiHooks {
+    private LoginPage loginPage;
 
-    private final Environment env;
-
-    public UiHooks() {
-        this.env = new Environment();
+    // =====================================================================
+    // TEMPORARIO: Estes metodos Before/After serao removidos no Capitulo 10
+    // quando criarmos UiHooks.java
+    // =====================================================================
+    @Before("@ui")
+    public void setup() {
+        LogUtils.info("=== SETUP TEMPORARIO: Iniciando browser ===");
+        DriverManager.setDriver(DriverFactory.createDriver());
+        loginPage = new LoginPage();
     }
 
-    @Before(value = "@ui", order = 0)
-    public void logScenario(Scenario scenario) {
-        LogUtils.info("=== [UI] " + scenario.getName() + " ===");
+    @After("@ui")
+    public void teardown() {
+        LogUtils.info("=== TEARDOWN TEMPORARIO: Fechando browser ===");
+        DriverManager.quitDriver();
+    }
+    // =====================================================================
+    // FIM DO CODIGO TEMPORARIO
+    // =====================================================================
+
+    @Given("que estou na pagina de login")
+    public void queEstouNaPaginaDeLogin() {
+        loginPage.openLoginPage();
     }
 
-    @Before(value = "@ui", order = 1)
-    public void openBrowser() {
-        if (DriverManager.getDriver() == null) {
-            String browser = env.get("browser", "chrome");
-            int implicitWait = env.getInt("timeout.implicit", 10);
-            int pageLoad = env.getInt("timeout.pageLoad", 30);
-
-            DriverFactory factory = new DriverFactory();
-            WebDriver driver = factory.create(browser);
-            driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.SECONDS);
-            driver.manage().timeouts().pageLoadTimeout(pageLoad, TimeUnit.SECONDS);
-            DriverManager.setDriver(driver);
-        }
+    @When("preencho o usuario {string}")
+    public void preenchoOUsuario(String username) {
+        loginPage.fillUsername(username);
     }
 
-    @After(value = "@ui")
-    public void closeBrowser(Scenario scenario) {
-        WebDriver driver = DriverManager.getDriver();
-        if (driver == null) return;
+    @When("preencho a senha {string}")
+    public void preenchoASenha(String password) {
+        loginPage.fillPassword(password);
+    }
 
-        String mode = env.get("screenshot.mode", "failure_only");
-        boolean shouldCapture = "always".equals(mode) || scenario.isFailed();
+    @When("clico no botao de login")
+    public void clicoNoBotaoDeLogin() {
+        loginPage.clickLogin();
+    }
 
-        if (shouldCapture) {
-            byte[] screenshot = ScreenshotUtils.capture(driver);
-            if (screenshot.length > 0) {
-                String status = scenario.isFailed() ? "FALHA" : "SUCESSO";
-                scenario.attach(screenshot, "image/png", status + " - " + scenario.getName());
-                LogUtils.info("Screenshot [" + status + "]");
-            }
-        }
+    @Then("devo ver a mensagem de sucesso")
+    public void devoVerAMensagemDeSucesso() {
+        Assert.assertTrue(
+            "Mensagem de sucesso nao exibida",
+            loginPage.isSuccessMessageDisplayed()
+        );
+        LogUtils.info("Login realizado com sucesso - mensagem de sucesso visivel");
+    }
 
-        DriverManager.quit();
-        LogUtils.info("=== Navegador encerrado ===");
+    @Then("devo ver a mensagem de erro")
+    public void devoVerAMensagemDeErro() {
+        String errorMessage = loginPage.getErrorMessage();
+        Assert.assertTrue(
+            "Mensagem de erro nao contem texto esperado",
+            errorMessage.contains("Your username is invalid!")
+                || errorMessage.contains("Your password is invalid!")
+        );
+        LogUtils.info("Mensagem de erro exibida: {}", errorMessage);
     }
 }
 ```
 
-**Ciclo de vida do cenário UI:**
+### Explicacao do codigo
 
-```mermaid
-graph LR
-    A["@Before order=0<br/>Log do cenário"] --> B["@Before order=1<br/>Abre navegador"]
-    B --> C["Steps executam<br/>Dado/Quando/Então"]
-    C --> D["@After<br/>Screenshot + Fecha"]
+**login.feature:**
+- `@ui @login`: tags para filtrar execução
+- `@smoke`: cenário prioritário para pipeline rápida
+- `Feature/Scenario`: estrutura padrão Gherkin
+- Given/When/Then: setup, ação, verificação
+- `{string}` no When: captura parâmetro entre aspas
 
-    style A fill:#e1f5fe
-    style B fill:#e1f5fe
-    style C fill:#fff9c4
-    style D fill:#fce4ec
+**TestRunner:**
+- `@RunWith(Cucumber.class)`: JUnit delega execução ao Cucumber
+- `features`: caminho das features (relativo à raiz do projeto)
+- `glue`: pacotes onde buscar steps E hooks
+- `plugin`: formatadores de relatório
+- `monochrome`: output sem cores (melhor para CI)
+- `tags = ""`: executa tudo (filtrar com `-Dcucumber.filter.tags="@smoke"`)
+
+**LoginSteps (temporário):**
+- `@Before("@ui")`: executa antes de cenários com tag @ui
+- `@After("@ui")`: executa depois — garante que browser fecha
+- `loginPage = new LoginPage()`: cria após driver existir
+- Steps são métodos simples que delegam para LoginPage
+- Asserts no `@Then` — único lugar com verificações
+
+### Fluxo de execucao
+
+```
+mvn test
+    |
+    v
+JUnit encontra TestRunner.java
+    |
+    v
+Cucumber le features em src/test/resources/features
+    |
+    v
+Para cada Scenario:
+    |
+    v
+@Before("@ui") --> cria driver
+    |
+    v
+Given --> loginPage.openLoginPage()
+    |
+    v
+When --> fillUsername, fillPassword, clickLogin
+    |
+    v
+Then --> Assert.assertTrue(...)
+    |
+    v
+@After("@ui") --> fecha driver
+    |
+    v
+Proximo Scenario...
+    |
+    v
+Relatorio gerado em target/cucumber-reports/
 ```
 
-**Decisões de design:**
+### Como executar
 
-- `value = "@ui"` faz o hook rodar APENAS em cenários com a tag @ui. Cenários de API não abrem navegador.
-- `order = 0` e `order = 1` garantem sequência: primeiro loga, depois abre o browser. Ordens menores executam primeiro.
-- O `if (DriverManager.getDriver() == null)` previne reabrir o navegador se ele já estiver aberto (defensivo).
-- O screenshot mode é configurável por ambiente: em DEV capture apenas falhas (economiza tempo), em HML capture sempre (mais evidências).
-- `scenario.attach()` anexa a screenshot diretamente ao relatório Cucumber/Allure.
+```bash
+# Todos os testes
+mvn test
 
-> **Dica:** O `@After` sempre executa, mesmo se o cenário falhou. Por isso ele é o local perfeito para cleanup (fechar browser, limpar dados). Nunca faça cleanup no último step.
+# Apenas cenarios com tag @smoke
+mvn test -Dcucumber.filter.tags="@smoke"
+
+# Apenas login
+mvn test -Dcucumber.filter.tags="@login"
+```
+
+### Como confirmar que funcionou
+
+```
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+O Chrome abrirá (visível se headless=false), navegará para a página de login, preencherá os campos e verificará as mensagens.
+
+### Falha guiada
+
+1. Remova o `glue` do Runner:
+   ```
+   io.cucumber.junit.CucumberOptions: No backends were found. Please make sure you have a backend module on your CLASSPATH.
+   ```
+
+2. Use uma tag inexistente: `-Dcucumber.filter.tags="@naoexiste"` — 0 cenários executados
+
+3. Mude a senha para valor errado no step e observe o Assert falhar
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `No backends were found` | glue não aponta para pacote de steps | Corrija o glue |
+| `Step undefined` | Step no Gherkin não tem match em Java | Crie o método com a annotation correta |
+| `Duplicate step` | Dois métodos com mesmo padrão | Remova a duplicata |
+| `0 Scenarios` | Tag filtra tudo | Verifique tags ou remova filtro |
+| `Cannot instantiate class` | Construtor com parâmetros sem PicoContainer | Use construtor padrão |
+
+### O que nao deve ser feito
+
+- Não coloque lógica de negócio nos steps — delegue para Pages
+- Não use `Thread.sleep()` nos steps — Pages já fazem explicit wait
+- Não hardcode dados nos steps — use parâmetros do Gherkin ou testdata
+- Não esqueça de fechar o browser no @After — deixa processos zombie
+- Não misture steps de UI e API no mesmo arquivo
+
+### Exercicio
+
+1. Adicione um cenário `Scenario: Login com usuario invalido` 
+2. Filtre execução com `-Dcucumber.filter.tags="@smoke"` e confirme que só roda 1 cenário
+3. Mude `headless=true` no dev.properties e observe que o Chrome não aparece
+
+### Checklist
+
+- [ ] Feature com cenários Given/When/Then
+- [ ] Tags @ui, @login, @smoke, @negative
+- [ ] TestRunner com features, glue, plugins configurados
+- [ ] LoginSteps implementa todos os steps da feature
+- [ ] Setup/teardown TEMPORÁRIO funciona (driver abre e fecha)
+- [ ] `mvn test` executa 2 cenários com sucesso
+- [ ] Relatório HTML gerado em target/cucumber-reports/
+- [ ] Código temporário claramente marcado para remoção
 
 ---
 
-### 2.10 Evidências — Screenshots automáticas
+## Capítulo 10 — UiHooks e ScreenshotUtils
 
-A captura de evidências é essencial para rastreabilidade. O ScreenshotUtils encapsula a lógica de captura, enquanto o UiHooks decide QUANDO capturar com base na configuração.
+### Resultado que construiremos
+
+Hooks centralizados que gerenciam o ciclo de vida do browser para TODOS os testes de UI e capturam screenshots em caso de falha. Ao final, o código temporário do Capítulo 9 será removido e os steps ficarão limpos.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| hooks/                                                |
+|   +-- UiHooks.java             <-- AQUI               |
+|                                                       |
+| utils/                                                |
+|   +-- ScreenshotUtils.java     <-- AQUI               |
+|                                                       |
+| Depende de:                                           |
+|   drivers/DriverFactory, DriverManager                |
+|   utils/LogUtils                                      |
+|                                                       |
+| Quem usa:                                             |
+|   Cucumber (automaticamente via @Before/@After)       |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**Hooks** no Cucumber são métodos `@Before` e `@After` que executam antes/depois de cada cenário. Eles ficam em classes separadas dos steps para manter responsabilidades isoladas.
+
+**Cenário com tags**: `@Before("@ui")` só executa para cenários com tag `@ui`. Isso permite ter hooks diferentes para UI e API.
+
+**Screenshot on failure**: o `@After` recebe o objeto `Scenario`. Se `scenario.isFailed()`, capturamos screenshot e anexamos ao relatório.
+
+**Allure attachment**: `@Attachment` do Allure salva bytes (screenshot) no relatório.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/hooks/UiHooks.java` | @Before/@After para UI |
+| `src/test/java/utils/ScreenshotUtils.java` | Captura de screenshot |
+| `src/test/java/steps/ui/LoginSteps.java` | Versão FINAL (sem temporário) |
+
+### Construção manual passo a passo
+
+1. Crie `ScreenshotUtils` com método que retorna bytes do screenshot
+2. Crie `UiHooks` com @Before e @After para tag @ui
+3. No @After, verifique se cenário falhou e capture screenshot
+4. REMOVA o código temporário de LoginSteps
+5. Execute `mvn test` e confirme que funciona igual
+
+### Codigo completo final
+
+**src/test/java/utils/ScreenshotUtils.java**
 
 ```java
 package utils;
 
+import drivers.DriverManager;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
-/**
- * Captura de screenshots.
- */
 public class ScreenshotUtils {
 
-    private ScreenshotUtils() {}
+    private ScreenshotUtils() {
+        // Classe utilitaria - nao instanciar
+    }
 
-    public static byte[] capture(WebDriver driver) {
-        if (driver instanceof TakesScreenshot) {
-            return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+    public static byte[] takeScreenshot() {
+        WebDriver driver = DriverManager.getDriver();
+        if (driver == null) {
+            LogUtils.warn("Driver nulo - nao foi possivel capturar screenshot");
+            return new byte[0];
+        }
+        LogUtils.debug("Capturando screenshot");
+        return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+    }
+
+    public static byte[] takeScreenshotIfFailed(boolean isFailed) {
+        if (isFailed) {
+            LogUtils.info("Cenario falhou - capturando screenshot");
+            return takeScreenshot();
         }
         return new byte[0];
     }
 }
 ```
 
-**Modos de captura:**
-
-| Modo | Configuração | Quando captura | Uso recomendado |
-|------|-------------|----------------|-----------------|
-| `failure_only` | `screenshot.mode=failure_only` | Apenas quando cenário falha | DEV (economiza tempo) |
-| `always` | `screenshot.mode=always` | Sempre (sucesso e falha) | HML (mais evidências) |
-
-A decisão de modo fica no arquivo de propriedades do ambiente. O código em UiHooks avalia:
+**src/test/java/hooks/UiHooks.java**
 
 ```java
-String mode = env.get("screenshot.mode", "failure_only");
-boolean shouldCapture = "always".equals(mode) || scenario.isFailed();
+package hooks;
+
+import drivers.DriverFactory;
+import drivers.DriverManager;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+import io.qameta.allure.Allure;
+import utils.LogUtils;
+import utils.ScreenshotUtils;
+
+import java.io.ByteArrayInputStream;
+
+public class UiHooks {
+
+    @Before("@ui")
+    public void setUp(Scenario scenario) {
+        LogUtils.info("========================================");
+        LogUtils.info("Iniciando cenario: {}", scenario.getName());
+        LogUtils.info("========================================");
+        DriverManager.setDriver(DriverFactory.createDriver());
+    }
+
+    @After("@ui")
+    public void tearDown(Scenario scenario) {
+        try {
+            if (scenario.isFailed()) {
+                byte[] screenshot = ScreenshotUtils.takeScreenshot();
+                if (screenshot.length > 0) {
+                    scenario.attach(screenshot, "image/png", "screenshot-falha");
+                    Allure.addAttachment("Screenshot - " + scenario.getName(),
+                        new ByteArrayInputStream(screenshot));
+                }
+                LogUtils.error("Cenario FALHOU: {}", scenario.getName());
+            } else {
+                LogUtils.info("Cenario PASSOU: {}", scenario.getName());
+            }
+        } finally {
+            DriverManager.quitDriver();
+            LogUtils.info("Browser fechado");
+            LogUtils.info("========================================");
+        }
+    }
+}
 ```
 
-A screenshot é retornada como `byte[]` e anexada ao cenário Cucumber via `scenario.attach()`. Isso garante que a imagem aparece tanto no relatório Cucumber HTML quanto no Allure Report.
+**src/test/java/steps/ui/LoginSteps.java** — VERSAO FINAL (limpa)
 
-> **Dica:** Em ambientes de homologação, use `always` — isso gera evidências visuais para auditoria mesmo quando os testes passam.
+```java
+package steps.ui;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import io.cucumber.java.en.Then;
+import org.junit.Assert;
+import pages.login.LoginPage;
+import utils.LogUtils;
+
+public class LoginSteps {
+
+    private final LoginPage loginPage;
+
+    public LoginSteps() {
+        this.loginPage = new LoginPage();
+    }
+
+    @Given("que estou na pagina de login")
+    public void queEstouNaPaginaDeLogin() {
+        loginPage.openLoginPage();
+    }
+
+    @When("preencho o usuario {string}")
+    public void preenchoOUsuario(String username) {
+        loginPage.fillUsername(username);
+    }
+
+    @When("preencho a senha {string}")
+    public void preenchoASenha(String password) {
+        loginPage.fillPassword(password);
+    }
+
+    @When("clico no botao de login")
+    public void clicoNoBotaoDeLogin() {
+        loginPage.clickLogin();
+    }
+
+    @Then("devo ver a mensagem de sucesso")
+    public void devoVerAMensagemDeSucesso() {
+        Assert.assertTrue(
+            "Mensagem de sucesso nao exibida",
+            loginPage.isSuccessMessageDisplayed()
+        );
+        LogUtils.info("Login realizado com sucesso - mensagem de sucesso visivel");
+    }
+
+    @Then("devo ver a mensagem de erro")
+    public void devoVerAMensagemDeErro() {
+        String errorMessage = loginPage.getErrorMessage();
+        Assert.assertTrue(
+            "Mensagem de erro nao contem texto esperado",
+            errorMessage.contains("Your username is invalid!")
+                || errorMessage.contains("Your password is invalid!")
+        );
+        LogUtils.info("Mensagem de erro exibida corretamente");
+    }
+}
+```
+
+### Explicacao do codigo
+
+**O que mudou nos LoginSteps:**
+- REMOVIDO: `@Before("@ui")` e `@After("@ui")` — agora estão em UiHooks
+- REMOVIDO: imports de DriverFactory, DriverManager, After, Before
+- ADICIONADO: construtor com `new LoginPage()` (funciona porque Hook executa antes)
+- Steps agora são PUROS — só lógica de teste
+
+**ScreenshotUtils:**
+- `takeScreenshot()`: cast para TakesScreenshot e captura em bytes
+- Verifica driver null — previne NPE se algo deu errado antes
+- Retorna `byte[]` para flexibilidade (pode salvar em arquivo ou anexar)
+
+**UiHooks:**
+- `@Before("@ui")`: cria driver antes de cada cenário com tag @ui
+- `@After("@ui")`: captura screenshot se falhou, depois SEMPRE fecha driver
+- `try/finally`: garante que `quitDriver()` executa mesmo com exceção
+- `scenario.attach()`: anexa screenshot ao relatório Cucumber
+- `Allure.addAttachment()`: anexa ao relatório Allure
+- Logs marcam início/fim claramente (facilita debug em execução paralela)
+
+### Fluxo de execucao
+
+```
+Cucumber inicia Scenario (tag @ui)
+    |
+    v
+UiHooks.setUp() --> cria driver
+    |
+    v
+LoginSteps constructor --> new LoginPage() (driver ja existe)
+    |
+    v
+Given/When/Then executam
+    |
+    v
+UiHooks.tearDown()
+    |
+    +-- scenario.isFailed()?
+    |       |
+    |       +-- SIM: takeScreenshot() + attach
+    |       +-- NAO: log "PASSOU"
+    |
+    v
+DriverManager.quitDriver() (SEMPRE executa)
+```
+
+### Como executar
+
+```bash
+mvn test
+```
+
+### Como confirmar que funcionou
+
+1. Testes passam como antes (`Tests run: 2, Failures: 0`)
+2. Logs mostram "Iniciando cenario:" e "Cenario PASSOU:"
+3. Remova o código temporário dos LoginSteps e confirme que ainda funciona
+4. Force uma falha (mude assert) e verifique que screenshot aparece no relatório
+
+### Falha guiada
+
+Para verificar screenshot on failure:
+
+1. Mude temporariamente o assert para `Assert.fail("Forçando falha")`
+2. Execute `mvn test`
+3. Abra `target/cucumber-reports/cucumber.html`
+4. O cenário falhado terá a imagem "screenshot-falha" anexada
+5. Restaure o assert original
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `NullPointerException em LoginPage()` | Hook não executou antes | Verifique tag @ui no cenário |
+| Screenshot vazio | Driver já fechou | Capture ANTES de quit |
+| `ClassCastException: TakesScreenshot` | Driver custom sem interface | Use driver padrão |
+| Hooks duplicados | @Before em steps E em hooks | Remova do steps |
+| `Cannot attach` | Scenario sem falha | Só attach quando isFailed |
+
+### O que nao deve ser feito
+
+- Não deixe @Before/@After nos steps — viole separação de responsabilidades
+- Não capture screenshot DEPOIS de quit — driver já morreu
+- Não esqueça o try/finally — se screenshot falha, quit não executaria
+- Não use @Before sem tag — executaria para steps de API também
+- Não faça lógica de teste no Hook — ele só gerencia infraestrutura
+
+### Exercicio
+
+1. Adicione log do URL atual no @After (antes de quit) para debug
+2. Force uma falha e verifique o screenshot no relatório HTML
+3. Adicione um `@Before("@ui")` que verifica se o driver é null antes de criar
+
+### Checklist
+
+- [ ] UiHooks com @Before/@After para tag @ui
+- [ ] ScreenshotUtils com takeScreenshot retornando bytes
+- [ ] Screenshot capturado ANTES do quit
+- [ ] Screenshot anexado a Scenario e Allure
+- [ ] try/finally garante quit
+- [ ] LoginSteps LIMPO — sem código de infraestrutura
+- [ ] Código temporário do Cap. 9 COMPLETAMENTE removido
+- [ ] `mvn test` continua passando 2 cenários
+- [ ] Logs mostram início/fim de cenário
 
 ---
 
-## Parte 3 — Construção do Framework API
+## Capítulo 11 — RestClient
 
-### 3.1 REST Assured — Introdução
+### Resultado que construiremos
 
-REST Assured é uma biblioteca Java para testar APIs RESTful de forma fluente. Ela usa a mesma estrutura Given/When/Then do BDD para construir requisições HTTP e validar respostas.
+Um cliente HTTP genérico usando REST Assured que encapsula GET, POST, PUT e DELETE. Qualquer service class (PostService, UserService, etc.) usará o RestClient para fazer chamadas HTTP sem conhecer detalhes do REST Assured.
 
-**Conceitos fundamentais:**
-
-```
-given()                    // Configuração (headers, body, auth)
-    .baseUri("https://api.example.com")
-    .contentType(ContentType.JSON)
-    .body(payload)
-.when()                    // Ação (verbo HTTP)
-    .post("/users")
-.then()                    // Verificação (asserções)
-    .statusCode(201)
-    .body("id", notNullValue());
-```
-
-**Anatomia de uma chamada REST:**
-
-Uma chamada de API é composta por:
+### Onde estamos na arquitetura
 
 ```
-REQUEST:
-┌─────────────────────────────────────────────┐
-│ POST /posts HTTP/1.1                        │  ← Método + Endpoint
-│ Host: jsonplaceholder.typicode.com          │  ← Base URI
-│ Content-Type: application/json              │  ← Headers
-│ Accept: application/json                    │
-│                                             │
-│ {"title": "Novo Post", "userId": 1}        │  ← Body (payload)
-└─────────────────────────────────────────────┘
-
-RESPONSE:
-┌─────────────────────────────────────────────┐
-│ HTTP/1.1 201 Created                        │  ← Status Code
-│ Content-Type: application/json; utf-8       │  ← Headers
-│                                             │
-│ {"id": 101, "title": "Novo Post", ...}     │  ← Body (resposta)
-└─────────────────────────────────────────────┘
++-------------------------------------------------------+
+| api/                                                  |
+|   +-- clients/                                        |
+|       +-- RestClient.java       <-- AQUI              |
+|                                                       |
+| Depende de:                                           |
+|   config/Environment (api.base.url)                   |
+|   utils/LogUtils                                      |
+|                                                       |
+| Quem usa:                                             |
+|   api/services/PostService                            |
++-------------------------------------------------------+
 ```
 
-Nos testes, validamos:
-1. **Status Code** — a API retornou o código esperado?
-2. **Headers** — o Content-Type está correto?
-3. **Body** — os campos têm os valores esperados?
-4. **Schema** — a estrutura da resposta está correta?
+### Conceito mínimo necessário
 
-**Por que REST Assured em vez de HttpClient puro:**
+**REST Assured**: biblioteca Java para testes de API REST. Usa uma DSL fluente: `given().when().then()`.
 
-| Aspecto | HttpClient | REST Assured |
-|---------|-----------|--------------|
-| Sintaxe | Verbosa (20+ linhas) | Fluente (5 linhas) |
-| Validações | Manuais (parse JSON + assert) | Built-in (jsonPath, schema) |
-| Logging | Manual | Automático (log().all()) |
-| Integração BDD | Nenhuma | Nativa (given/when/then) |
-| Curva de aprendizado | Alta | Baixa |
-| Serialização JSON | Manual | Automática |
-| Cookie handling | Manual | Automático |
+**RestClient**: wrapper que:
+- Configura a base URL uma vez
+- Adiciona headers padrão (Content-Type, Accept)
+- Expõe métodos simples: `get(path)`, `post(path, body)`, etc.
+- Retorna `Response` do REST Assured para que o service valide
 
-**Exemplo comparativo:**
+**RequestSpecification**: configuração reutilizável de request (base URL, headers, auth).
 
-HttpClient (verboso):
-```java
-HttpClient client = HttpClient.newHttpClient();
-HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("https://api.example.com/posts/1"))
-    .header("Accept", "application/json")
-    .GET()
-    .build();
-HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-JSONObject json = new JSONObject(response.body());
-assertEquals(200, response.statusCode());
-assertEquals(1, json.getInt("id"));
-```
+### Arquivos envolvidos
 
-REST Assured (fluente):
-```java
-given()
-    .baseUri("https://api.example.com")
-.when()
-    .get("/posts/1")
-.then()
-    .statusCode(200)
-    .body("id", equalTo(1));
-```
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/api/clients/RestClient.java` | Cliente HTTP genérico |
 
-O REST Assured reduz o código de teste em ~70% mantendo a mesma cobertura.
+### Construção manual passo a passo
 
-Neste framework, o REST Assured é encapsulado dentro do `RestClient` para adicionar features corporativas (logging, Allure attachments, reuso de configuração).
+1. Crie `RestClient` com construtor que lê `api.base.url` do Environment
+2. Crie método privado `defaultSpec()` que monta RequestSpecification
+3. Implemente GET, POST, PUT, DELETE usando REST Assured
+4. Cada método retorna `Response`
+5. Adicione logging de request/response
 
-> **Dica:** REST Assured foi projetado para TESTES, não para produção. Nunca use em código de aplicação — use HttpClient ou OkHttp para isso.
+### Codigo completo final
 
----
-
-### 3.2 RestClient
-
-O RestClient é o cliente HTTP corporativo do framework. Ele encapsula o REST Assured adicionando logging automático, attachments para o Allure e uma interface simplificada para os Services.
+**src/test/java/api/clients/RestClient.java**
 
 ```java
 package api.clients;
 
-import io.qameta.allure.Allure;
+import config.Environment;
+import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import utils.LogUtils;
 
-import static io.restassured.RestAssured.given;
-
-/**
- * Cliente HTTP corporativo.
- * Instância por cenário (thread-safe via PicoContainer).
- * Anexa request/response ao Allure automaticamente.
- */
 public class RestClient {
 
-    private Response response;
-    private RequestSpecification request;
-    private String baseUri;
-    private String lastBody;
+    private final String baseUrl;
 
-    public RestClient() {}
-
-    public void setBaseUri(String baseUri) {
-        this.baseUri = baseUri;
-        this.request = given()
-                .baseUri(baseUri)
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON);
+    public RestClient() {
+        this.baseUrl = Environment.get("api.base.url");
+        LogUtils.info("RestClient inicializado com base URL: {}", baseUrl);
     }
 
-    public void addHeader(String key, String value) {
-        request = request.header(key, value);
+    private RequestSpecification defaultSpec() {
+        return RestAssured
+            .given()
+            .baseUri(baseUrl)
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .filter(new RequestLoggingFilter())
+            .filter(new ResponseLoggingFilter());
     }
 
-    public void setBody(String body) {
-        this.lastBody = body;
-        request = request.body(body);
+    public Response get(String path) {
+        LogUtils.info("GET {}{}", baseUrl, path);
+        return defaultSpec()
+            .when()
+            .get(path)
+            .then()
+            .extract()
+            .response();
     }
 
-    public void get(String endpoint) { execute("GET", endpoint); }
-    public void post(String endpoint) { execute("POST", endpoint); }
-    public void put(String endpoint) { execute("PUT", endpoint); }
-    public void delete(String endpoint) { execute("DELETE", endpoint); }
-
-    public int getStatusCode() { return response.getStatusCode(); }
-    public String getContentType() { return response.getContentType(); }
-    public Response getResponse() { return response; }
-    public String getResponseBody() { return response.getBody().asString(); }
-
-    private void execute(String method, String endpoint) {
-        LogUtils.info(method + " " + baseUri + endpoint);
-        switch (method) {
-            case "GET": response = request.when().get(endpoint).then().extract().response(); break;
-            case "POST": response = request.when().post(endpoint).then().extract().response(); break;
-            case "PUT": response = request.when().put(endpoint).then().extract().response(); break;
-            case "DELETE": response = request.when().delete(endpoint).then().extract().response(); break;
-        }
-        attachToAllure(method, endpoint);
+    public Response get(String path, String paramName, Object paramValue) {
+        LogUtils.info("GET {}{} ?{}={}", baseUrl, path, paramName, paramValue);
+        return defaultSpec()
+            .queryParam(paramName, paramValue)
+            .when()
+            .get(path)
+            .then()
+            .extract()
+            .response();
     }
 
-    private void attachToAllure(String method, String endpoint) {
-        try {
-            String req = method + " " + baseUri + endpoint;
-            if (lastBody != null) req += "\n\nBody:\n" + lastBody;
-            Allure.addAttachment("Request", "text/plain", req);
-            Allure.addAttachment("Response [" + response.getStatusCode() + "]",
-                    "application/json", response.getBody().asPrettyString());
-        } catch (Exception e) {
-            LogUtils.debug("Allure attach falhou: " + e.getMessage());
-        }
+    public Response post(String path, Object body) {
+        LogUtils.info("POST {}{}", baseUrl, path);
+        return defaultSpec()
+            .body(body)
+            .when()
+            .post(path)
+            .then()
+            .extract()
+            .response();
+    }
+
+    public Response put(String path, Object body) {
+        LogUtils.info("PUT {}{}", baseUrl, path);
+        return defaultSpec()
+            .body(body)
+            .when()
+            .put(path)
+            .then()
+            .extract()
+            .response();
+    }
+
+    public Response delete(String path) {
+        LogUtils.info("DELETE {}{}", baseUrl, path);
+        return defaultSpec()
+            .when()
+            .delete(path)
+            .then()
+            .extract()
+            .response();
     }
 }
 ```
 
-**Decisões de design:**
+### Explicacao do codigo
 
-- O `baseUri` é setado por instância (não estático), permitindo que diferentes Services apontem para APIs diferentes no mesmo cenário.
-- O método `execute()` centraliza toda execução HTTP — logging e Allure acontecem em um único ponto. Isso evita duplicação.
-- O `attachToAllure()` envolve tudo em try-catch porque o Allure não deve quebrar o teste se falhar ao anexar.
-- A classe é instânciada por cenário via PicoContainer, garantindo isolamento total entre testes.
-- O `lastBody` armazena o payload para exibir no attachment — útil para debug de falhas.
+- `baseUrl`: lido do Environment uma única vez no construtor
+- `defaultSpec()`: cria uma spec limpa a cada chamada (não compartilha estado entre requests)
+- `ContentType.JSON`: header `Content-Type: application/json`
+- `RequestLoggingFilter/ResponseLoggingFilter`: imprime request e response no console (útil para debug)
+- `extract().response()`: retorna o Response completo (status, body, headers)
+- Métodos retornam `Response` — quem chama decide o que validar
+- `post(path, body)`: body pode ser String JSON ou POJO (REST Assured serializa automaticamente)
 
-> **Dica:** Nunca instancie `RestClient` manualmente. Declare-o no construtor do Step e o PicoContainer faz o resto.
+**Por que wrapper em vez de REST Assured direto?**
+- Centraliza headers/baseUrl (DRY)
+- Se mudar de REST Assured para OkHttp, muda só aqui
+- Controla logging em um lugar
+- Permite interceptar (auth token, retry) sem mudar services
 
----
+### Fluxo de execucao
 
-### 3.3 Padrão Client-Service
-
-O framework separa responsabilidades HTTP (Client) de lógica de negócio (Service). Essa separação permite que o mesmo Client seja reusado por diferentes Services, e que os Services sejam testados independentemente.
-
-```mermaid
-graph LR
-    subgraph "Steps (Orquestração)"
-        A[PostSteps]
-    end
-
-    subgraph "Service (Lógica de Negócio)"
-        B[PostService]
-    end
-
-    subgraph "Client (Infraestrutura HTTP)"
-        C[RestClient]
-    end
-
-    subgraph "Externo"
-        D[API REST]
-    end
-
-    A -->|"postService.create()"| B
-    B -->|"client.setBody(json)"| C
-    B -->|"client.post('/posts')"| C
-    C -->|"HTTP POST"| D
-    D -->|"Response"| C
-    C -->|"getResponse()"| A
+```
+PostService.createPost(payload)
+    |
+    v
+restClient.post("/posts", payload)
+    |
+    v
+defaultSpec() --> baseUri + headers + filters
+    |
+    v
+REST Assured envia POST https://jsonplaceholder.typicode.com/posts
+    |
+    v
+Response retornada (status 201, body com id)
+    |
+    v
+PostService valida status e retorna dados
 ```
 
-| Camada | Responsabilidade | Sabe sobre HTTP? | Sabe sobre negócio? |
-|--------|-----------------|------------------|---------------------|
-| Steps | Orquestrar ações do cenário | Não | Indiretamente |
-| Service | Montar requests e definir fluxos | Parcialmente | Sim |
-| Client | Executar HTTP e capturar resposta | Sim | Não |
+### Como executar
 
-A vantagem é clara: se amanhã a API trocar de REST para GraphQL, apenas o Client muda. Se a regra de negócio mudar (ex: campo obrigatório novo), apenas o Service muda. Os Steps permanecem intactos.
+```bash
+mvn compile -DskipTests
+```
 
-> **Dica:** Um Service nunca deve fazer asserções. Ele executa a ação e retorna. Quem verifica o resultado é o Step (via `restClient.getStatusCode()`).
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Verificação real no Capítulo 15 quando o primeiro teste de API rodar
+
+### Falha guiada
+
+Mude `api.base.url` para um host inexistente:
+
+```properties
+api.base.url=https://host-inexistente-xyz.com
+```
+
+Ao executar um teste (futuro):
+```
+java.net.UnknownHostException: host-inexistente-xyz.com
+```
+
+Isso mostra que o RestClient usa o valor do Environment fielmente.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `UnknownHostException` | URL errada | Corrija api.base.url |
+| `Connection refused` | Servidor down | Verifique se API está no ar |
+| `415 Unsupported Media Type` | Falta Content-Type | defaultSpec() já define JSON |
+| `Serialization error` | POJO sem getters | Adicione getters ao model |
+| `SSLHandshakeException` | Certificado inválido | Adicione `relaxedHTTPSValidation()` |
+
+### O que nao deve ser feito
+
+- Não faça validações no RestClient — ele só transporta dados
+- Não compartilhe RequestSpecification entre chamadas — crie nova a cada vez
+- Não hardcode URLs — sempre use Environment
+- Não remova os filters de log — sem eles é impossível debugar API
+- Não capture exceções de rede — deixe falhar para aparecer no relatório
+
+### Exercicio
+
+1. Adicione um método `patch(String path, Object body)` para operações parciais
+2. Adicione um header customizado `X-Request-Id` com UUID aleatório
+3. Crie um método `getWithAuth(path, token)` que adiciona header Authorization
+
+### Checklist
+
+- [ ] RestClient com base URL do Environment
+- [ ] Métodos GET, POST, PUT, DELETE implementados
+- [ ] GET com query params
+- [ ] ContentType JSON em todas as requests
+- [ ] Request/Response logging com filters
+- [ ] Retorna Response (não faz validação)
+- [ ] Compila sem erros
 
 ---
 
-### 3.4 PostService
+## Capítulo 12 — JsonUtils e payloads
 
-O PostService encapsula toda a lógica de negócio relacionada ao recurso `/posts`. Ele sabe QUAIS endpoints chamar, COM QUAIS dados, mas delega a execução HTTP para o RestClient.
+### Resultado que construiremos
+
+Uma classe utilitária para ler arquivos JSON do classpath e converter entre String e objetos Java. Também criaremos os arquivos de payload que representam o corpo das requisições de API.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| utils/                                                |
+|   +-- JsonUtils.java           <-- AQUI               |
+|                                                       |
+| resources/payloads/posts/                             |
+|   +-- create-post.json         <-- AQUI               |
+|   +-- update-post.json         <-- AQUI               |
+|                                                       |
+| Depende de:                                           |
+|   exceptions/FrameworkException                       |
+|                                                       |
+| Quem usa:                                             |
+|   api/services/PostService                            |
+|   steps/api/PostSteps                                 |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**Payloads**: arquivos JSON que representam o corpo de uma requisição. Mantê-los em arquivos separados (não inline no código) permite:
+- Reusar em cenários diferentes
+- Alterar sem recompilar
+- Versionar como dado de teste
+
+**JsonUtils**: lê o arquivo JSON do classpath e retorna como String. REST Assured aceita String JSON diretamente no `body()`.
+
+**Por que não usar ObjectMapper aqui?** REST Assured já tem serialização embutida. Para payloads simples, ler como String é mais direto. Para modelos complexos, usamos POJOs (Capítulo 14).
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/utils/JsonUtils.java` | Leitura de JSON |
+| `src/test/resources/payloads/posts/create-post.json` | Payload de criação |
+| `src/test/resources/payloads/posts/update-post.json` | Payload de atualização |
+
+### Construção manual passo a passo
+
+1. Crie os arquivos JSON de payload
+2. Crie `JsonUtils` com método para ler arquivo do classpath
+3. Adicione método para substituir placeholders no JSON
+4. Compile e valide
+
+### Codigo completo final
+
+**src/test/resources/payloads/posts/create-post.json**
+
+```json
+{
+  "title": "{{title}}",
+  "body": "{{body}}",
+  "userId": {{userId}}
+}
+```
+
+**src/test/resources/payloads/posts/update-post.json**
+
+```json
+{
+  "id": {{id}},
+  "title": "{{title}}",
+  "body": "{{body}}",
+  "userId": {{userId}}
+}
+```
+
+**src/test/java/utils/JsonUtils.java**
+
+```java
+package utils;
+
+import exceptions.FrameworkException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Scanner;
+
+public class JsonUtils {
+
+    private JsonUtils() {
+        // Classe utilitaria - nao instanciar
+    }
+
+    public static String readJsonFile(String path) {
+        LogUtils.debug("Lendo arquivo JSON: {}", path);
+        try (InputStream is = JsonUtils.class.getClassLoader().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new FrameworkException("Arquivo JSON nao encontrado no classpath: " + path);
+            }
+            Scanner scanner = new Scanner(is, StandardCharsets.UTF_8.name());
+            scanner.useDelimiter("\\A");
+            String content = scanner.hasNext() ? scanner.next() : "";
+            scanner.close();
+            return content;
+        } catch (IOException e) {
+            throw new FrameworkException("Erro ao ler arquivo JSON: " + path, e);
+        }
+    }
+
+    public static String readPayload(String relativePath) {
+        return readJsonFile("payloads/" + relativePath);
+    }
+
+    public static String replacePlaceholders(String json, Map<String, String> values) {
+        String result = json;
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            String placeholder = "{{" + entry.getKey() + "}}";
+            result = result.replace(placeholder, entry.getValue());
+        }
+        LogUtils.debug("Payload com placeholders substituidos: {}", result);
+        return result;
+    }
+
+    public static String buildPayload(String relativePath, Map<String, String> values) {
+        String template = readPayload(relativePath);
+        return replacePlaceholders(template, values);
+    }
+}
+```
+
+### Explicacao do codigo
+
+**Payloads JSON:**
+- `{{title}}`, `{{body}}`, `{{userId}}`: placeholders que serão substituídos em runtime
+- Placeholders com `{{}}` e não `${}` para evitar conflito com outros template engines
+- `userId` sem aspas no template — é numérico
+
+**JsonUtils:**
+- `readJsonFile(path)`: lê qualquer arquivo do classpath como String
+- `getResourceAsStream`: busca em `src/test/resources` (compilado para target/test-classes)
+- `Scanner("\\A")`: truque para ler o InputStream inteiro como uma única String
+- `readPayload(relativePath)`: atalho que prefixa `payloads/`
+- `replacePlaceholders`: substituição simples de placeholders por valores
+- `buildPayload`: combina leitura + substituição (usado nos steps)
+
+**Por que Scanner e não Files.readString?** `Files.readString` é Java 11+. Estamos em Java 8.
+
+### Fluxo de execucao
+
+```
+PostSteps precisa criar um post
+    |
+    v
+JsonUtils.buildPayload("posts/create-post.json", Map.of(
+    "title", "Meu Post",
+    "body", "Conteudo...",
+    "userId", "1"
+))
+    |
+    v
+readPayload() --> le template do classpath
+    |
+    v
+replacePlaceholders() --> substitui {{title}}, {{body}}, {{userId}}
+    |
+    v
+Retorna: {"title": "Meu Post", "body": "Conteudo...", "userId": 1}
+    |
+    v
+restClient.post("/posts", payload)
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Verificação real no Capítulo 15
+
+### Falha guiada
+
+Tente ler um arquivo inexistente:
+
+```java
+JsonUtils.readJsonFile("payloads/naoexiste.json");
+```
+
+Erro: `FrameworkException: Arquivo JSON nao encontrado no classpath: payloads/naoexiste.json`
+
+Tente esquecer um placeholder no Map:
+
+```java
+Map<String, String> values = new HashMap<>();
+values.put("title", "teste");
+// esqueceu body e userId
+String json = JsonUtils.buildPayload("posts/create-post.json", values);
+```
+
+O JSON resultante terá `{{body}}` e `{{userId}}` literais — a API retornará erro de validação.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Arquivo nao encontrado` | Caminho errado | Verifique que está em src/test/resources |
+| JSON inválido após substituição | Aspas faltando/sobrando | Verifique template (String vs número) |
+| `{{placeholder}}` literal no payload | Chave não encontrada no Map | Adicione todas as chaves necessárias |
+| `NullPointerException` no Map | Valor null | Valide valores antes de passar |
+| Encoding errado | Caracteres especiais | Use UTF-8 (já configurado) |
+
+### O que nao deve ser feito
+
+- Não hardcode JSONs como String no código Java — use arquivos
+- Não use `new File()` — não funciona em classpath (funciona só no filesystem)
+- Não esqueça placeholders — causa erros silenciosos de parsing
+- Não coloque lógica de negócio em JsonUtils — é só leitura e substituição
+- Não use este approach para payloads complexos com listas dinâmicas — use Builders (Cap 14)
+
+### Exercicio
+
+1. Crie um payload `payloads/posts/partial-update.json` com apenas `{"title": "{{title}}"}`
+2. Adicione um método `readSchema(String name)` que lê de `schemas/`
+3. Crie um teste unitário que valida que `buildPayload` substitui todos os placeholders
+
+### Checklist
+
+- [ ] `create-post.json` com placeholders {{title}}, {{body}}, {{userId}}
+- [ ] `update-post.json` com id adicional
+- [ ] JsonUtils.readJsonFile lê do classpath
+- [ ] JsonUtils.readPayload prefixa caminho com payloads/
+- [ ] replacePlaceholders substitui todas as chaves do Map
+- [ ] buildPayload combina leitura + substituição
+- [ ] FrameworkException para arquivo não encontrado
+- [ ] Compila sem erros
+
+---
+
+## Capítulo 13 — PostService
+
+### Resultado que construiremos
+
+Uma classe de serviço que conhece os endpoints de posts e usa o RestClient para realizar operações CRUD. Ela é a interface entre os steps de API e o RestClient genérico.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| api/services/                                         |
+|   +-- PostService.java         <-- AQUI               |
+|                                                       |
+| Depende de:                                           |
+|   api/clients/RestClient                              |
+|   utils/LogUtils                                      |
+|                                                       |
+| Quem usa:                                             |
+|   steps/api/PostSteps                                 |
++-------------------------------------------------------+
+
+Camada de abstracoes:
+
+  Steps (o que testar)
+    |
+    v
+  Service (qual endpoint chamar)
+    |
+    v
+  RestClient (como fazer HTTP)
+    |
+    v
+  REST Assured (detalhes de protocolo)
+```
+
+### Conceito mínimo necessário
+
+**Service Pattern**: cada recurso da API (posts, users, comments) tem uma classe service que:
+- Conhece o path do endpoint (`/posts`, `/posts/{id}`)
+- Chama o RestClient com o verbo correto
+- Retorna o Response para o step validar
+
+O service NÃO valida (não faz assert). Ele apenas orquestra a chamada.
+
+**Por que Service em vez de chamada direta?**
+- Se o endpoint mudar de `/posts` para `/v2/posts`, muda só aqui
+- Reuso entre cenários (criar post é usado em vários testes)
+- Mantém os steps focados em validação, não em construção de request
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/api/services/PostService.java` | Operações CRUD de posts |
+
+### Construção manual passo a passo
+
+1. Crie `PostService` com instância de RestClient
+2. Defina constante com path do endpoint
+3. Implemente métodos: getAllPosts, getPost, createPost, updatePost, deletePost
+4. Cada método delega para o RestClient e retorna Response
+
+### Codigo completo final
+
+**src/test/java/api/services/PostService.java**
 
 ```java
 package api.services;
 
 import api.clients.RestClient;
-import utils.JsonUtils;
+import io.restassured.response.Response;
+import utils.LogUtils;
 
-/**
- * Service para o recurso /posts.
- * Encapsula lógica de negócio das chamadas API.
- */
 public class PostService {
 
-    private final RestClient client;
+    private static final String POSTS_ENDPOINT = "/posts";
+    private static final String POST_BY_ID_ENDPOINT = "/posts/{id}";
 
-    public PostService(RestClient client) {
-        this.client = client;
+    private final RestClient restClient;
+
+    public PostService() {
+        this.restClient = new RestClient();
     }
 
-    public void listAll() {
-        client.get("/posts");
+    public Response getAllPosts() {
+        LogUtils.info("Buscando todos os posts");
+        return restClient.get(POSTS_ENDPOINT);
     }
 
-    public void getById(int id) {
-        client.get("/posts/" + id);
+    public Response getPostById(int id) {
+        LogUtils.info("Buscando post com id: {}", id);
+        String path = POST_BY_ID_ENDPOINT.replace("{id}", String.valueOf(id));
+        return restClient.get(path);
     }
 
-    public void getByUser(int userId) {
-        client.get("/posts?userId=" + userId);
+    public Response getPostsByUserId(int userId) {
+        LogUtils.info("Buscando posts do usuario: {}", userId);
+        return restClient.get(POSTS_ENDPOINT, "userId", userId);
     }
 
-    public void create() {
-        String body = JsonUtils.load("payloads/posts/create-post.json");
-        client.setBody(body);
-        client.post("/posts");
+    public Response createPost(Object body) {
+        LogUtils.info("Criando novo post");
+        return restClient.post(POSTS_ENDPOINT, body);
     }
 
-    public void update(int id) {
-        String body = JsonUtils.load("payloads/posts/update-post.json")
-                .replace("\"id\":1", "\"id\":" + id);
-        client.setBody(body);
-        client.put("/posts/" + id);
+    public Response updatePost(int id, Object body) {
+        LogUtils.info("Atualizando post com id: {}", id);
+        String path = POST_BY_ID_ENDPOINT.replace("{id}", String.valueOf(id));
+        return restClient.put(path, body);
     }
 
-    public void delete(int id) {
-        client.delete("/posts/" + id);
+    public Response deletePost(int id) {
+        LogUtils.info("Deletando post com id: {}", id);
+        String path = POST_BY_ID_ENDPOINT.replace("{id}", String.valueOf(id));
+        return restClient.delete(path);
     }
 }
 ```
 
-**Decisões de design:**
+### Explicacao do codigo
 
-- O Service recebe o `RestClient` via construtor (injeção de dependência). Isso permite que o PicoContainer gerencie o ciclo de vida e garanta que Steps e Service compartilhem a MESMA instância do client.
-- Payloads são carregados de arquivos JSON externos via `JsonUtils.load()`. Isso separa dados de lógica e fácilita manutenção.
-- O `update()` faz replace do ID no JSON — uma estratégia simples para parametrizar payloads sem montar objetos complexos.
-- Cada método tem nome semântico: `create()`, `listAll()`, `getByUser()`. Os Steps ficam legíveis: `postService.create()`.
+- `POSTS_ENDPOINT`: path centralizado — muda uma vez, afeta todos os métodos
+- `POST_BY_ID_ENDPOINT`: template com `{id}` substituído em runtime
+- `RestClient` criado no construtor — um por instância de PostService
+- `createPost(Object body)`: aceita String JSON (do JsonUtils) ou POJO (do PostBuilder)
+- Retorna `Response` sem processar — steps decidem o que validar
+- Logging em cada operação — rastreável no console
 
-> **Dica:** Para APIs com muitos endpoints (10+), considere dividir em sub-services: `PostQueryService` (GETs) e `PostCommandService` (POST/PUT/DELETE).
+**Separação de responsabilidades:**
+
+| Camada | Responsabilidade | Exemplo |
+|--------|-----------------|---------|
+| Steps | O QUE validar | `assertEquals(201, response.statusCode())` |
+| Service | QUAL endpoint | `POST /posts` |
+| RestClient | COMO fazer HTTP | headers, baseUrl, filters |
+| REST Assured | Protocolo | HTTP/HTTPS transport |
+
+### Fluxo de execucao
+
+```
+PostSteps: "Quando crio um novo post"
+    |
+    v
+postService.createPost(payload)
+    |
+    v
+restClient.post("/posts", payload)
+    |
+    v
+REST Assured: POST https://jsonplaceholder.typicode.com/posts
+    |
+    v
+Response: { "id": 101, "title": "...", "body": "...", "userId": 1 }
+    |
+    v
+PostSteps: assertEquals(201, response.statusCode())
+```
+
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Teste real no Capítulo 15
+
+### Falha guiada
+
+Mude o endpoint para path inexistente:
+
+```java
+private static final String POSTS_ENDPOINT = "/postsXYZ";
+```
+
+Ao executar o teste (futuro), a API retornará 404 e o assert de status falhará. Isso mostra a importância de centralizar o path.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| 404 Not Found | Path errado | Verifique endpoint na documentação da API |
+| `NullPointerException` no body | Body null passado | Valide body antes de chamar |
+| `SerializationException` | POJO sem getters | Adicione getters ao model |
+| Path com `{id}` literal | Esqueceu replace | Use String.valueOf(id) |
+| Timeout | API lenta | Configure timeout no REST Assured |
+
+### O que nao deve ser feito
+
+- Não faça asserts no Service — ele retorna, step valida
+- Não crie um RestClient por método — reutilize a instância
+- Não hardcode IDs — receba como parâmetro
+- Não misture lógica de UI no Service — são camadas separadas
+- Não retorne tipos específicos (PostResponse) aqui — faça isso no step se necessário
+
+### Exercicio
+
+1. Adicione um método `getPostComments(int postId)` que chama `/posts/{id}/comments`
+2. Crie uma `UserService` seguindo o mesmo padrão para `/users`
+3. Adicione um overload `createPost(String title, String body, int userId)` que monta JSON inline
+
+### Checklist
+
+- [ ] PostService com RestClient no construtor
+- [ ] Constantes para endpoints
+- [ ] Métodos: getAllPosts, getPostById, getPostsByUserId
+- [ ] Métodos: createPost, updatePost, deletePost
+- [ ] Retorna Response (sem validação)
+- [ ] Logging em cada operação
+- [ ] body aceita String ou Object
+- [ ] Compila sem erros
 
 ---
 
-### 3.5 PostRequest — Modelo POJO
+## Capítulo 14 — PostRequest e PostBuilder
 
-O PostRequest é um Plain Old Java Object (POJO) que representa a estrutura de dados de um post. Ele serve como modelo tipado quando você precisa construir payloads programaticamente em vez de carregá-los de arquivo.
+### Resultado que construiremos
+
+Um POJO (PostRequest) que representa o corpo de um post e um Builder com fluent API para construí-lo de forma legível. O Builder também integra JavaFaker para gerar dados aleatórios automaticamente.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| api/models/                                           |
+|   +-- PostRequest.java         <-- AQUI               |
+|                                                       |
+| api/builders/                                         |
+|   +-- PostBuilder.java         <-- AQUI               |
+|                                                       |
+| Depende de:                                           |
+|   JavaFaker (dados aleatorios)                        |
+|                                                       |
+| Quem usa:                                             |
+|   steps/api/PostSteps                                 |
+|   api/services/PostService (como body)                |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**POJO (Plain Old Java Object)**: classe simples com atributos, getters e setters. REST Assured serializa automaticamente para JSON.
+
+**Builder Pattern**: permite construir objetos complexos passo a passo com uma API fluente:
+```java
+PostRequest post = new PostBuilder().withTitle("Hello").withUserId(1).build();
+```
+
+**JavaFaker**: gera dados aleatórios realistas (nomes, endereços, textos). Cada execução usa dados diferentes, o que:
+- Evita colisões em APIs reais
+- Descobre bugs que dados fixos não encontram
+- Torna testes mais realistas
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/api/models/PostRequest.java` | POJO do request |
+| `src/test/java/api/builders/PostBuilder.java` | Builder com Faker |
+
+### Construção manual passo a passo
+
+1. Crie `PostRequest` com title, body, userId + getters/setters
+2. Crie `PostBuilder` com métodos `with*` para cada campo
+3. Adicione JavaFaker no builder para valores default
+4. Implemente `build()` que retorna PostRequest preenchido
+
+### Codigo completo final
+
+**src/test/java/api/models/PostRequest.java**
 
 ```java
 package api.models;
 
-/**
- * Modelo de request para Post.
- */
 public class PostRequest {
 
     private String title;
     private String body;
     private int userId;
 
-    public PostRequest() {}
+    public PostRequest() {
+        // Construtor padrao necessario para serializacao
+    }
 
     public PostRequest(String title, String body, int userId) {
         this.title = title;
@@ -1601,62 +3312,63 @@ public class PostRequest {
         this.userId = userId;
     }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getBody() { return body; }
-    public void setBody(String body) { this.body = body; }
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String toJson() {
-        return "{\"title\":\"" + title + "\",\"body\":\"" + body + "\",\"userId\":" + userId + "}";
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public String toString() {
+        return "PostRequest{" +
+            "title='" + title + '\'' +
+            ", body='" + body + '\'' +
+            ", userId=" + userId +
+            '}';
     }
 }
 ```
 
-**Decisões de design:**
-
-- O construtor vazio permite deserialização por bibliotecas como Jackson/Gson. O construtor com argumentos permite criação direta.
-- O método `toJson()` gera JSON manualmente — simples e sem dependência de biblioteca de serialização. Para POJOs pequenos isso é suficiente.
-- Getters e setters seguem a convenção JavaBeans, garantindo compatibilidade com qualquer framework de serialização.
-- O campo `body` no POJO tem o mesmo nome do campo no JSON da API. Essa correspondência é intencional para fácilitar mapeamento.
-
-> **Dica:** Para APIs com payloads grandes (10+ campos), considere usar Jackson com `ObjectMapper` em vez de `toJson()` manual. A chance de erro com concatenação de strings aumenta com a complexidade.
-
----
-
-### 3.6 PostBuilder — Builder Pattern com Faker
-
-O PostBuilder implementa o Builder Pattern combinado com JavaFaker para gerar dados de teste dinâmicos. Ele permite criar posts com dados aleatórios (padrão) ou customizados (quando o cenário exige valores específicos).
+**src/test/java/api/builders/PostBuilder.java**
 
 ```java
 package api.builders;
 
 import api.models.PostRequest;
 import com.github.javafaker.Faker;
+import utils.LogUtils;
 
-import java.util.Locale;
-
-/**
- * Builder para dados de Post.
- * Gera dados dinâmicos via Faker ou permite customização.
- */
 public class PostBuilder {
 
-    private static final Faker faker = new Faker(new Locale("pt-BR"));
+    private static final Faker faker = new Faker();
 
     private String title;
     private String body;
     private int userId;
 
-    private PostBuilder() {
-        this.title = faker.lorem().sentence(5);
-        this.body = faker.lorem().paragraph(2);
-        this.userId = 1;
-    }
-
-    public static PostBuilder valid() {
-        return new PostBuilder();
+    public PostBuilder() {
+        // Valores default com Faker
+        this.title = faker.book().title();
+        this.body = faker.lorem().paragraph();
+        this.userId = faker.number().numberBetween(1, 10);
     }
 
     public PostBuilder withTitle(String title) {
@@ -1675,1623 +3387,2331 @@ public class PostBuilder {
     }
 
     public PostRequest build() {
-        return new PostRequest(title, body, userId);
+        PostRequest request = new PostRequest(title, body, userId);
+        LogUtils.debug("PostRequest construido: {}", request);
+        return request;
+    }
+
+    // Factory methods para cenarios comuns
+    public static PostRequest defaultPost() {
+        return new PostBuilder().build();
+    }
+
+    public static PostRequest postForUser(int userId) {
+        return new PostBuilder().withUserId(userId).build();
     }
 }
 ```
 
-**Exemplo de uso:**
+### Explicacao do codigo
+
+**PostRequest:**
+- Construtor vazio: necessário para deserialização (Jackson/REST Assured)
+- Construtor com parâmetros: conveniência para criação direta
+- Getters/Setters: REST Assured usa reflexão para serializar para JSON
+- `toString()`: facilita logging e debug
+
+**PostBuilder:**
+- `Faker` estático: uma instância compartilhada (thread-safe para geração simples)
+- Construtor preenche TODOS os campos com valores aleatórios
+- Métodos `with*` retornam `this` (fluent API — permite encadeamento)
+- `build()`: cria e retorna o PostRequest final
+- `defaultPost()`: factory method estático — post aleatório com uma linha
+- `postForUser(userId)`: factory com override parcial
+
+**Exemplos de uso nos steps:**
 
 ```java
-// Post com dados totalmente aleatórios
-PostRequest random = PostBuilder.valid().build();
+// Post totalmente aleatorio
+PostRequest post = PostBuilder.defaultPost();
 
-// Post com título específico, resto aleatório
-PostRequest custom = PostBuilder.valid()
-    .withTitle("Meu Título Fixo")
+// Post com titulo especifico, resto aleatorio
+PostRequest post = new PostBuilder()
+    .withTitle("Titulo do Teste")
+    .build();
+
+// Post com tudo especificado
+PostRequest post = new PostBuilder()
+    .withTitle("Meu Post")
+    .withBody("Conteudo do post")
     .withUserId(5)
     .build();
 ```
 
-**Decisões de design:**
+### Fluxo de execucao
 
-- O construtor é privado — a única forma de criar um Builder é via `PostBuilder.valid()`. Isso garante que todo post começa com dados válidos.
-- O Faker usa `Locale("pt-BR")` para gerar dados em português (nomes, textos).
-- O padrão Builder (`withX().withY().build()`) é mais legível que construtores com muitos parâmetros.
-- A separação Builder/Model permite ter múltiplos builders para o mesmo modelo: `PostBuilder.valid()`, `PostBuilder.invalid()`, `PostBuilder.minimal()`.
+```
+PostSteps: "Quando crio um post com titulo 'Teste'"
+    |
+    v
+PostRequest post = new PostBuilder()
+    .withTitle("Teste")
+    .build();
+    |
+    v
+Builder preenche body com faker.lorem()
+Builder preenche userId com faker.number()
+Builder usa "Teste" como title (override)
+    |
+    v
+PostRequest { title="Teste", body="Lorem ipsum...", userId=7 }
+    |
+    v
+postService.createPost(post)
+    |
+    v
+REST Assured serializa para JSON:
+{ "title": "Teste", "body": "Lorem ipsum...", "userId": 7 }
+```
 
-> **Dica:** Dados dinâmicos (Faker) evitam o problema de "dados viciados" — quando testes passam apenas com dados específicos e falham com dados reais.
+### Como executar
+
+```bash
+mvn compile -DskipTests
+```
+
+### Como confirmar que funcionou
+
+1. BUILD SUCCESS
+2. Verificação real no Capítulo 15
+
+### Falha guiada
+
+Remova o getter `getTitle()` e tente serializar com REST Assured:
+
+```
+Response body: {"body": "...", "userId": 1}
+```
+
+O campo `title` desaparece do JSON — REST Assured só serializa propriedades com getter. Isso mostra por que os getters são obrigatórios.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| Campo ausente no JSON | Getter faltando | Adicione getter para o campo |
+| `null` no JSON | Setter chamado com null | Valide no builder |
+| Faker gera texto enorme | Parágrafo longo demais | Use `faker.lorem().sentence()` |
+| `StackOverflowError` | toString com referência circular | Não inclua relações bidirecionais |
+| Builder sem reset | Valores da chamada anterior | Sempre use `new PostBuilder()` |
+
+### O que nao deve ser feito
+
+- Não reutilize instância de Builder — crie nova a cada post
+- Não omita getters — serialização depende deles
+- Não use campos públicos — quebra encapsulamento
+- Não coloque lógica de validação no POJO — ele é só transporte
+- Não faça Builder retornar campos opcionais como null — use valores default
+
+### Exercicio
+
+1. Crie um `PostResponse` com id, title, body, userId para deserialização
+2. Adicione ao PostBuilder um método `withRandomTitle(int maxWords)` usando Faker
+3. Crie um `UserBuilder` para um futuro endpoint de usuarios
+
+### Checklist
+
+- [ ] PostRequest com title, body, userId
+- [ ] Construtor vazio + construtor com parâmetros
+- [ ] Getters e setters para todos os campos
+- [ ] toString() implementado
+- [ ] PostBuilder com valores default do Faker
+- [ ] Métodos with* retornando this (fluent)
+- [ ] build() retorna PostRequest
+- [ ] Factory methods defaultPost() e postForUser()
+- [ ] Compila sem erros
 
 ---
 
-### 3.7 JsonUtils
+## Capítulo 15 — Feature de API + PostSteps + ApiHooks
 
-O JsonUtils é um útilitário para carregar arquivos JSON do classpath. Ele abstrai a leitura de arquivos e lança exceção semântica quando o arquivo não existe.
+### Resultado que construiremos
+
+O teste de API completo: feature Gherkin para posts, steps que chamam o PostService, e hooks específicos para API. Este capítulo já inclui o step de schema validation que será detalhado no Capítulo 16.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| features/api/                                         |
+|   +-- posts.feature            <-- AQUI               |
+|                                                       |
+| steps/api/                                            |
+|   +-- PostSteps.java           <-- AQUI               |
+|                                                       |
+| hooks/                                                |
+|   +-- ApiHooks.java            <-- AQUI               |
+|                                                       |
+| Depende de:                                           |
+|   api/services/PostService                            |
+|   api/builders/PostBuilder                            |
+|   api/models/PostRequest                              |
+|   utils/JsonUtils                                     |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**Testes de API** não precisam de browser. São mais rápidos, mais estáveis e devem ser a maioria dos seus testes automatizados.
+
+**ApiHooks**: mais leves que UiHooks — apenas configuram logging e podem resetar estado entre cenários.
+
+**Schema Validation**: valida que o JSON de resposta segue um contrato (schema). Isso garante que novos campos não foram removidos e tipos não mudaram.
+
+A feature exercita:
+- GET (listar e buscar por ID)
+- POST (criar)
+- PUT (atualizar)
+- DELETE (remover)
+- Schema validation
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/resources/features/api/posts.feature` | Cenários de API |
+| `src/test/java/steps/api/PostSteps.java` | Steps de API |
+| `src/test/java/hooks/ApiHooks.java` | Hooks de API |
+
+### Construção manual passo a passo
+
+1. Crie a feature com cenários CRUD
+2. Crie `ApiHooks` com @Before/@After para tag @api
+3. Crie `PostSteps` implementando cada step
+4. Execute `mvn test -Dcucumber.filter.tags="@api"`
+
+### Codigo completo final
+
+**src/test/resources/features/api/posts.feature**
+
+```gherkin
+@api @posts
+Feature: CRUD de Posts via API
+
+  Como consumidor da API
+  Quero gerenciar posts
+  Para validar que a API funciona corretamente
+
+  @smoke
+  Scenario: Listar todos os posts
+    When envio GET para listar posts
+    Then o status code deve ser 200
+    And a resposta deve conter uma lista de posts
+
+  Scenario: Buscar post por ID
+    When envio GET para buscar o post com id 1
+    Then o status code deve ser 200
+    And a resposta deve conter o post com id 1
+
+  @smoke
+  Scenario: Criar um novo post
+    Given que tenho um payload de post valido
+    When envio POST para criar o post
+    Then o status code deve ser 201
+    And a resposta deve conter o titulo do post criado
+
+  Scenario: Atualizar um post existente
+    Given que tenho um payload de post atualizado
+    When envio PUT para atualizar o post com id 1
+    Then o status code deve ser 200
+    And a resposta deve conter o titulo atualizado
+
+  Scenario: Deletar um post
+    When envio DELETE para remover o post com id 1
+    Then o status code deve ser 200
+
+  @schema
+  Scenario: Validar schema do post
+    When envio GET para buscar o post com id 1
+    Then o status code deve ser 200
+    And a resposta deve estar de acordo com o schema "post-schema.json"
+```
+
+**src/test/java/hooks/ApiHooks.java**
 
 ```java
-package utils;
+package hooks;
 
-import exceptions.FrameworkException;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+import utils.LogUtils;
 
-import java.io.InputStream;
-import java.util.Scanner;
+public class ApiHooks {
 
-/**
- * Utilitário para leitura de arquivos JSON do classpath.
- */
-public class JsonUtils {
+    @Before("@api")
+    public void setUp(Scenario scenario) {
+        LogUtils.info("========================================");
+        LogUtils.info("[API] Iniciando cenario: {}", scenario.getName());
+        LogUtils.info("========================================");
+    }
 
-    private JsonUtils() {}
-
-    /**
-     * Carrega um arquivo JSON do classpath.
-     * @param path caminho relativo (ex: "payloads/posts/create-post.json")
-     */
-    public static String load(String path) {
-        InputStream input = JsonUtils.class.getClassLoader().getResourceAsStream(path);
-        if (input == null) {
-            throw new FrameworkException("Arquivo JSON não encontrado: " + path);
+    @After("@api")
+    public void tearDown(Scenario scenario) {
+        if (scenario.isFailed()) {
+            LogUtils.error("[API] Cenario FALHOU: {}", scenario.getName());
+        } else {
+            LogUtils.info("[API] Cenario PASSOU: {}", scenario.getName());
         }
-        try (Scanner scanner = new Scanner(input, "UTF-8")) {
-            return scanner.useDelimiter("\\A").next();
-        }
+        LogUtils.info("========================================");
     }
 }
 ```
 
-**Decisões de design:**
-
-- Usa `getClassLoader().getResourceAsStream()` que busca no classpath (dentro de `src/test/resources/`). Isso funciona tanto local quanto em JARs.
-- O `Scanner` com delimiter `\\A` (início do input) lê o arquivo inteiro de uma vez — técnica concisa para Java 8.
-- Lança `FrameworkException` com mensagem clara em vez de retornar null. Falhar rápido com mensagem explicativa é melhor que NullPointerException 5 linhas depois.
-- Construtor privado porque a classe é útilitária (apenas métodos estáticos).
-
-> **Dica:** Sempre use caminhos relativos ao classpath (ex: `payloads/posts/create-post.json`), nunca caminhos absolutos do sistema de arquivos. Isso garante portabilidade entre máquinas.
-
----
-
-### 3.8 Payloads externalizados
-
-Payloads JSON ficam em arquivos separados dentro de `src/test/resources/payloads/`. Isso permite que analistas editem dados sem mexer em código Java, e fácilita versionamento.
-
-**create-post.json:**
-
-```json
-{
-  "title": "Post de Teste Automatizado",
-  "body": "Conteúdo via REST Assured",
-  "userId": 1
-}
-```
-
-**update-post.json:**
-
-```json
-{
-  "id": 1,
-  "title": "Título Atualizado",
-  "body": "Corpo atualizado",
-  "userId": 1
-}
-```
-
-**Quando usar arquivo JSON vs Builder:**
-
-O framework oferece duas estratégias para gerar payloads. A escolha depende do cenário:
-
-- **Arquivo JSON:** Para dados fixos e determinísticos que o cenário valida explicitamente (ex: "o título deve ser X").
-- **Builder + Faker:** Para dados dinâmicos onde o valor exato não importa (ex: teste de performance, carga).
-
-O `PostService.create()` usa arquivo JSON porque a feature valida o título retornado. Se usasse Faker, o título seria aleatório e a asserção `"title" deve ter valor "Post de Teste Automatizado"` falharia.
-
-> **Dica:** Nomeie payloads com o padrão `{ação}-{recurso}.json`. Isso cria uma convenção previsível: `create-user.json`, `update-order.json`, `partial-update-product.json`.
-
----
-
-### 3.9 JSON Schema Validation
-
-A validação de schema garante que a API retorna a estrutura correta independentemente dos VALORES. É um teste de contrato: a API prometeu retornar campos X, Y, Z com tipos específicos.
-
-**post-schema.json:**
-
-```json
-{
-  "type": "object",
-  "required": ["userId", "id", "title", "body"],
-  "properties": {
-    "userId": { "type": "integer", "minimum": 1 },
-    "id": { "type": "integer", "minimum": 1 },
-    "title": { "type": "string", "minLength": 1 },
-    "body": { "type": "string", "minLength": 1 }
-  },
-  "additionalProperties": true
-}
-```
-
-**Step de validação:**
-
-```java
-@E("a resposta deve estar de acordo com o schema {string}")
-public void validateSchema(String schemaFile) {
-    restClient.getResponse().then().assertThat()
-            .body(io.restassured.module.jsv.JsonSchemaValidator
-                    .matchesJsonSchemaInClasspath("schemas/" + schemaFile));
-}
-```
-
-**O que o schema valida:**
-
-| Regra | Significado |
-|-------|-------------|
-| `"required": [...]` | Esses campos DEVEM existir na resposta |
-| `"type": "integer"` | O campo deve ser numérico inteiro |
-| `"type": "string"` | O campo deve ser texto |
-| `"minimum": 1` | O valor numérico deve ser >= 1 |
-| `"minLength": 1` | A string não pode ser vazia |
-| `"additionalProperties": true` | Permite campos extras (não quebra se API adicionar campos) |
-
-A validação de schema é complementar à validação de valores. O schema garante ESTRUTURA, os outros steps garantem CONTEÚDO.
-
-> **Dica:** Coloque `"additionalProperties": true` nos schemas. Isso evita que o teste quebre quando a API adiciona um campo novo (evolução normal de APIs).
-
----
-
-### 3.10 Feature de API em português
-
-A feature de API segue a mesma estrutura BDD da UI, mas sem interação visual. Cada cenário valida um endpoint específico com asserções sobre status code, campos e estrutura.
-
-```gherkin
-# language: pt
-@api
-Funcionalidade: API de Posts
-  Como consumidor da API REST
-  Quero validar os endpoints de posts
-  Para garantir que a API responde corretamente
-
-  Contexto:
-    Dado que estou consumindo a API de posts
-
-  @smoke
-  Cenário: Listar todos os posts
-    Quando busco todos os posts
-    Então o status code da resposta deve ser 200
-    E o Content-Type da resposta deve conter "application/json"
-    E a resposta deve conter 100 posts
-
-  @smoke
-  Cenário: Buscar um post por ID
-    Quando busco o post de ID 1
-    Então o status code da resposta deve ser 200
-    E o campo "userId" deve ter valor inteiro 1
-    E o campo "id" deve ter valor inteiro 1
-    E o campo "title" não deve estar vazio
-    E o campo "body" não deve estar vazio
-
-  Cenário: Buscar posts de um usuário específico
-    Quando busco os posts do usuário 1
-    Então o status code da resposta deve ser 200
-    E todos os posts devem ter "userId" igual a 1
-
-  Cenário: Criar um novo post
-    Dado que tenho os dados de um novo post
-    Quando envio o novo post
-    Então o status code da resposta deve ser 201
-    E o campo "title" deve ter valor de texto "Post de Teste Automatizado"
-    E o campo "userId" deve ter valor inteiro 1
-    E o campo "id" não deve estar vazio
-
-  Cenário: Atualizar um post existente
-    Dado que tenho os dados de atualização do post 1
-    Quando atualizo o post 1
-    Então o status code da resposta deve ser 200
-    E o campo "title" deve ter valor de texto "Título Atualizado"
-
-  Cenário: Deletar um post
-    Quando deleto o post 1
-    Então o status code da resposta deve ser 200
-
-  Cenário: Buscar post inexistente retorna 404
-    Quando busco o post de ID 9999
-    Então o status code da resposta deve ser 404
-
-  @smoke
-  Cenário: Validar contrato (schema) do post
-    Quando busco o post de ID 1
-    Então o status code da resposta deve ser 200
-    E a resposta deve estar de acordo com o schema "post-schema.json"
-```
-
-**Decisões de design:**
-
-- O `Contexto` configura a API uma única vez para todos os cenários (define baseUri).
-- Cenários cobrem o CRUD completo: Create (POST 201), Read (GET 200), Update (PUT 200), Delete (DELETE 200).
-- O cenário 404 valida o caminho negativo — essencial para garantir que a API retorna erro adequado.
-- Steps de validação são genéricos (`"o campo X deve ter valor Y"`) — reútilizáveis para qualquer endpoint.
-
-> **Dica:** Organize cenários do mais simples ao mais complexo: primeiro GETs (sem body), depois POST/PUT (com body), depois DELETE, depois negativos.
-
-
----
-
-### 3.11 PostSteps
-
-O PostSteps é a classe que conecta a feature Gherkin à lógica de negócio. Ele não executa HTTP diretamente — delega para o Service — e não sabe montar payloads — delega para o Builder/JSON. Sua responsabilidade é exclusivamente ORQUESTRAR e VERIFICAR.
+**src/test/java/steps/api/PostSteps.java**
 
 ```java
 package steps.api;
 
-import api.clients.RestClient;
+import api.builders.PostBuilder;
+import api.models.PostRequest;
 import api.services.PostService;
-import config.Environment;
-import io.cucumber.java.pt.Dado;
-import io.cucumber.java.pt.E;
-import io.cucumber.java.pt.Então;
-import io.cucumber.java.pt.Quando;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.And;
+import io.restassured.response.Response;
 import org.junit.Assert;
+import utils.LogUtils;
 
-import java.util.List;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+import static org.hamcrest.Matchers.*;
 
-/**
- * Steps de API Posts.
- * Todas as dependencias injetadas via PicoContainer.
- */
 public class PostSteps {
 
-    private final Environment env;
-    private final RestClient restClient;
     private final PostService postService;
+    private PostRequest postRequest;
+    private Response response;
 
-    public PostSteps(Environment env, RestClient restClient, PostService postService) {
-        this.env = env;
-        this.restClient = restClient;
-        this.postService = postService;
+    public PostSteps() {
+        this.postService = new PostService();
     }
 
-    @Dado("que estou consumindo a API de posts")
-    public void setupApi() {
-        restClient.setBaseUri(env.apiBaseUrl);
+    // === GIVEN ===
+
+    @Given("que tenho um payload de post valido")
+    public void queTenhoUmPayloadDePostValido() {
+        postRequest = PostBuilder.defaultPost();
+        LogUtils.info("Payload criado: {}", postRequest);
     }
 
-    @Dado("que tenho os dados de um novo post")
-    public void prepareNewPost() {
-        postService.create();
+    @Given("que tenho um payload de post atualizado")
+    public void queTenhoUmPayloadDePostAtualizado() {
+        postRequest = new PostBuilder()
+            .withTitle("Titulo Atualizado")
+            .withBody("Body atualizado via PUT")
+            .withUserId(1)
+            .build();
+        LogUtils.info("Payload de atualizacao criado: {}", postRequest);
     }
 
-    @Dado("que tenho os dados de atualização do post {int}")
-    public void prepareUpdate(int id) {
-        postService.update(id);
+    // === WHEN ===
+
+    @When("envio GET para listar posts")
+    public void envioGetParaListarPosts() {
+        response = postService.getAllPosts();
     }
 
-    @Quando("busco todos os posts")
-    public void getAll() {
-        postService.listAll();
+    @When("envio GET para buscar o post com id {int}")
+    public void envioGetParaBuscarPostComId(int id) {
+        response = postService.getPostById(id);
     }
 
-    @Quando("busco o post de ID {int}")
-    public void getById(int id) {
-        postService.getById(id);
+    @When("envio POST para criar o post")
+    public void envioPostParaCriarOPost() {
+        response = postService.createPost(postRequest);
     }
 
-    @Quando("busco os posts do usuário {int}")
-    public void getByUser(int userId) {
-        postService.getByUser(userId);
+    @When("envio PUT para atualizar o post com id {int}")
+    public void envioPutParaAtualizarPostComId(int id) {
+        response = postService.updatePost(id, postRequest);
     }
 
-    @Quando("envio o novo post")
-    public void submitPost() {
-        // POST executado no @Dado via postService.create()
+    @When("envio DELETE para remover o post com id {int}")
+    public void envioDeleteParaRemoverPostComId(int id) {
+        response = postService.deletePost(id);
     }
 
-    @Quando("atualizo o post {int}")
-    public void updatePost(int id) {
-        // PUT executado no @Dado via postService.update()
+    // === THEN ===
+
+    @Then("o status code deve ser {int}")
+    public void oStatusCodeDeveSer(int expectedStatus) {
+        int actualStatus = response.getStatusCode();
+        LogUtils.info("Status code esperado: {} | recebido: {}", expectedStatus, actualStatus);
+        Assert.assertEquals(
+            "Status code diferente do esperado",
+            expectedStatus,
+            actualStatus
+        );
     }
 
-    @Quando("deleto o post {int}")
-    public void deletePost(int id) {
-        postService.delete(id);
+    @Then("a resposta deve conter uma lista de posts")
+    public void aRespostaDeveConterUmaListaDePosts() {
+        int size = response.jsonPath().getList("$").size();
+        LogUtils.info("Quantidade de posts retornados: {}", size);
+        Assert.assertTrue("Lista de posts esta vazia", size > 0);
     }
 
-    @Então("o status code da resposta deve ser {int}")
-    public void validateStatus(int expected) {
-        Assert.assertEquals("Status incorreto", expected, restClient.getStatusCode());
+    @Then("a resposta deve conter o post com id {int}")
+    public void aRespostaDeveConterOPostComId(int expectedId) {
+        int actualId = response.jsonPath().getInt("id");
+        Assert.assertEquals("ID do post diferente", expectedId, actualId);
     }
 
-    @E("o Content-Type da resposta deve conter {string}")
-    public void validateContentType(String expected) {
-        Assert.assertTrue("Content-Type incorreto", restClient.getContentType().contains(expected));
+    @Then("a resposta deve conter o titulo do post criado")
+    public void aRespostaDeveConterOTituloDoPostCriado() {
+        String actualTitle = response.jsonPath().getString("title");
+        Assert.assertEquals(
+            "Titulo do post criado nao confere",
+            postRequest.getTitle(),
+            actualTitle
+        );
+        LogUtils.info("Post criado com titulo: {}", actualTitle);
     }
 
-    @E("a resposta deve conter {int} posts")
-    public void validateCount(int expected) {
-        Assert.assertEquals("Quantidade incorreta", expected,
-                restClient.getResponse().jsonPath().getList("$").size());
+    @Then("a resposta deve conter o titulo atualizado")
+    public void aRespostaDeveConterOTituloAtualizado() {
+        String actualTitle = response.jsonPath().getString("title");
+        Assert.assertEquals(
+            "Titulo atualizado nao confere",
+            postRequest.getTitle(),
+            actualTitle
+        );
     }
 
-    @E("o campo {string} deve ter valor inteiro {int}")
-    public void validateIntField(String field, int expected) {
-        Assert.assertEquals("Campo '" + field + "' incorreto", expected,
-                restClient.getResponse().jsonPath().getInt(field));
-    }
-
-    @E("o campo {string} deve ter valor de texto {string}")
-    public void validateTextField(String field, String expected) {
-        Assert.assertEquals("Campo '" + field + "' incorreto", expected,
-                restClient.getResponse().jsonPath().getString(field));
-    }
-
-    @E("o campo {string} não deve estar vazio")
-    public void validateNotEmpty(String field) {
-        Object value = restClient.getResponse().jsonPath().get(field);
-        Assert.assertNotNull("Campo nulo", value);
-        Assert.assertNotEquals("Campo vazio", "", value.toString().trim());
-    }
-
-    @E("todos os posts devem ter {string} igual a {int}")
-    public void validateAllFields(String field, int expected) {
-        List<Integer> values = restClient.getResponse().jsonPath().getList(field, Integer.class);
-        Assert.assertFalse("Lista vazia", values.isEmpty());
-        for (int i = 0; i < values.size(); i++) {
-            Assert.assertEquals("Post[" + i + "] incorreto", expected, (int) values.get(i));
-        }
-    }
-
-    @E("a resposta deve estar de acordo com o schema {string}")
-    public void validateSchema(String schemaFile) {
-        restClient.getResponse().then().assertThat()
-                .body(io.restassured.module.jsv.JsonSchemaValidator
-                        .matchesJsonSchemaInClasspath("schemas/" + schemaFile));
+    @Then("a resposta deve estar de acordo com o schema {string}")
+    public void aRespostaDeveEstarDeAcordoComOSchema(String schemaFile) {
+        LogUtils.info("Validando resposta contra schema: {}", schemaFile);
+        response.then().assertThat()
+            .body(matchesJsonSchemaInClasspath("schemas/" + schemaFile));
+        LogUtils.info("Schema validation PASSOU");
     }
 }
 ```
 
+### Explicacao do codigo
 
-**Como o PicoContainer injeta as dependências:**
+**posts.feature:**
+- `@api @posts`: tags para filtro — nunca abre browser
+- Cenários cobrem todo o CRUD + schema
+- Parâmetros `{int}` e `{string}` capturam valores dinâmicos
+- `@smoke`: cenários prioritários para CI rápida
 
-O Cucumber usa PicoContainer como container de injeção de dependência. Quando o cenário inicia, o PicoContainer analisa o construtor do `PostSteps` e resolve automaticamente cada parâmetro:
+**ApiHooks:**
+- Mais simples que UiHooks — sem driver, sem screenshot
+- Apenas logging para rastreabilidade
+- `@Before("@api")`: só executa para cenários com tag @api
 
-1. `Environment` — instanciada uma vez por cenário (lê `dev.properties`)
-2. `RestClient` — instanciada uma vez por cenário (garante isolamento)
-3. `PostService` — instanciada uma vez, recebendo o mesmo `RestClient` no SEU construtor
+**PostSteps:**
+- `PostService` no construtor — serviço de API
+- `postRequest` e `response` como estado do cenário — compartilhados entre steps
+- Given prepara dados, When executa ação, Then valida resultado
+- `response.jsonPath()`: acessa campos do JSON com expressão path
+- Schema validation: `matchesJsonSchemaInClasspath` valida contra arquivo em resources
+- Assert com mensagens descritivas — facilita diagnóstico de falha
 
-O resultado é que `PostSteps` e `PostService` compartilham a **mesma instância** de `RestClient`. Quando o Service executa `client.post()`, o Step pode verificar `restClient.getStatusCode()` porque é o mesmo objeto.
+### Fluxo de execucao
 
-```mermaid
-sequenceDiagram
-    participant G as Gherkin Step
-    participant PS as PostSteps
-    participant SV as PostService
-    participant RC as RestClient
-    participant API as JSONPlaceholder
-    participant AL as Allure Report
-
-    G->>PS: "Quando busco o post de ID 1"
-    PS->>SV: postService.getById(1)
-    SV->>RC: client.get("/posts/1")
-    RC->>API: GET https://jsonplaceholder.typicode.com/posts/1
-    API-->>RC: 200 OK + JSON body
-    RC->>AL: attachToAllure("GET", "/posts/1")
-    RC-->>SV: response armazenado
-    SV-->>PS: retorno (void)
-    G->>PS: "Então o status code deve ser 200"
-    PS->>RC: restClient.getStatusCode()
-    RC-->>PS: 200
-    PS->>PS: Assert.assertEquals(200, 200) ✓
+```
+mvn test -Dcucumber.filter.tags="@api"
+    |
+    v
+Cucumber encontra posts.feature
+    |
+    v
+Para cada Scenario:
+    |
+    v
+ApiHooks.setUp() --> log "Iniciando cenario"
+    |
+    v
+Given --> prepara payload (PostBuilder)
+    |
+    v
+When --> chama PostService --> RestClient --> API
+    |
+    v
+Then --> valida status, body, schema
+    |
+    v
+ApiHooks.tearDown() --> log resultado
 ```
 
-**Decisões de design:**
+### Como executar
 
-- Steps genéricos (`"o campo X deve ter valor Y"`) são reutilizáveis em qualquer endpoint — evitam duplicação.
-- Nenhuma lógica HTTP no Step. Se a API mudar de endpoint, apenas o Service muda.
-- Asserções ficam SEMPRE no Step — o Service nunca verifica resultados.
-- O `submitPost()` tem corpo vazio porque o POST real já foi executado no `@Dado`. O Gherkin fica semântico sem duplicar execução.
+```bash
+# Apenas testes de API
+mvn test -Dcucumber.filter.tags="@api"
 
-> **Dica:** Se um Step ficar com mais de 5 linhas de lógica, provavelmente ele deveria delegar para um método no Service ou em uma classe auxiliar.
+# Apenas smoke (UI + API)
+mvn test -Dcucumber.filter.tags="@smoke"
 
+# Todos os testes
+mvn test
+```
+
+### Como confirmar que funcionou
+
+```
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+Nos logs, você verá as requisições HTTP (request e response) graças aos filters do RestClient.
+
+> **Nota**: O cenário de schema validation falhará até criarmos o arquivo `post-schema.json` no Capítulo 16. Execute com `-Dcucumber.filter.tags="@api and not @schema"` até lá.
+
+### Falha guiada
+
+1. Mude o expected status para valor errado:
+   ```
+   AssertionError: Status code diferente do esperado expected:<200> but was:<201>
+   ```
+
+2. Crie post com userId null:
+   ```
+   PostRequest { title="...", body="...", userId=0 }
+   ```
+   A API aceita (jsonplaceholder é permissiva), mas uma API real retornaria 422.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Step undefined` | Texto do Gherkin não bate com annotation | Compare exatamente |
+| `NullPointerException em response` | When não executou | Verifique ordem dos steps |
+| `Connection refused` | API fora do ar | Verifique URL no dev.properties |
+| Schema validation falha | Schema inexistente | Crie no Capítulo 16 |
+| `AssertionError: Lists differ` | API mudou resposta | Atualize expectativas |
+
+### O que nao deve ser feito
+
+- Não misture steps de UI e API na mesma classe
+- Não crie dependência entre cenários (um cria post, outro busca) — são independentes
+- Não hardcode IDs que podem não existir em API real
+- Não ignore o schema validation — é o contrato da API
+- Não faça setup/teardown pesado no ApiHooks — API não precisa de browser
+
+### Exercicio
+
+1. Adicione cenário: "Buscar posts por userId"
+2. Adicione cenário negativo: "Buscar post com id inexistente" (espere 404)
+3. Crie uma Scenario Outline com Examples para testar vários IDs
+
+### Checklist
+
+- [ ] Feature com cenários CRUD (GET, POST, PUT, DELETE)
+- [ ] Tags @api, @posts, @smoke, @schema
+- [ ] ApiHooks com @Before/@After para @api
+- [ ] PostSteps com estado compartilhado (postRequest, response)
+- [ ] Validação de status code
+- [ ] Validação de body com jsonPath
+- [ ] Step de schema validation (usando matchesJsonSchemaInClasspath)
+- [ ] `mvn test -Dcucumber.filter.tags="@api and not @schema"` passa
+- [ ] Logs mostram request/response HTTP
 
 ---
 
-### 3.12 TestData vs Payload
+## Capítulo 16 — JSON Schema Validation
 
-O framework oferece duas estratégias para dados de teste. A escolha depende do contexto:
+### Resultado que construiremos
 
-| Aspecto | Payload (JSON file) | Builder + Faker |
-|---------|--------------------|-----------------| 
-| Localização | `src/test/resources/payloads/` | `api.builders.*` |
-| Dados | Fixos, versionados no Git | Dinâmicos, gerados em runtime |
-| Manutenção | Editar o arquivo JSON | Alterar lógica no Builder |
-| Legibilidade | Alta (JSON é visual) | Média (requer ler código Java) |
-| Cenários ideais | Happy path, contratos fixos, smoke | Testes de carga, fuzzing, cenários negativos |
-| Risco de flakiness | Baixo (determinístico) | Médio (dados aleatórios podem atingir edge cases) |
-| Cobertura | Limitada ao que está no arquivo | Ampla (combinações infinitas) |
-| Debug de falhas | Fácil (dados visíveis no JSON) | Requer log do dado gerado |
+Um arquivo JSON Schema que define o contrato do endpoint de posts. Ao final, o cenário com tag `@schema` do Capítulo 15 passará, validando que a resposta da API segue a estrutura esperada.
 
-**Quando usar Payload (JSON file):**
-- Teste de contrato (schema validation) — dados fixos garantem determinismo
-- Smoke test — precisa ser 100% repetível
-- Cenários com regras de negócio específicas (ex: CPF válido com dígito calculado)
+### Onde estamos na arquitetura
 
-**Quando usar Builder + Faker:**
-- Testes de criação em massa (ex: criar 100 posts diferentes)
-- Testes exploratórios automatizados
-- Quando o backend valida unicidade (ex: email não pode repetir)
+```
++-------------------------------------------------------+
+| resources/schemas/                                    |
+|   +-- post-schema.json         <-- AQUI               |
+|                                                       |
+| Quem usa:                                             |
+|   steps/api/PostSteps (matchesJsonSchemaInClasspath)  |
+|                                                       |
+| Depende de:                                           |
+|   rest-assured json-schema-validator (pom.xml)        |
++-------------------------------------------------------+
+```
 
-**Exemplo de payload fixo — `testdata/login.json`:**
+### Conceito mínimo necessário
+
+**JSON Schema**: é uma especificação que define a estrutura esperada de um JSON. Funciona como um "contrato":
+- Quais campos são obrigatórios
+- Qual o tipo de cada campo (string, integer, array)
+- Limites de valores (minLength, maximum)
+
+**Por que validar schema?**
+- Detecta regressão: se a API remove um campo, o schema falha
+- Documenta o contrato: devs e QAs sabem o que esperar
+- Independe de dados: valida ESTRUTURA, não VALORES
+
+**json-schema-validator do REST Assured**: compara o body da response contra um arquivo .json schema no classpath.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/resources/schemas/post-schema.json` | Contrato do endpoint GET /posts/{id} |
+
+### Construção manual passo a passo
+
+1. Faça uma chamada GET /posts/1 e observe a resposta
+2. Mapeie os campos e tipos no formato JSON Schema Draft-07
+3. Salve em `src/test/resources/schemas/post-schema.json`
+4. Execute o cenário @schema e confirme que passa
+
+### Codigo completo final
+
+**Resposta real de GET /posts/1 (referência):**
 
 ```json
 {
-  "adminUser": {
-    "username": "admin",
-    "password": "admin123"
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati...",
+  "body": "quia et suscipit\nsuscipit recusandae..."
+}
+```
+
+**src/test/resources/schemas/post-schema.json**
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Post",
+  "description": "Schema de validacao para o recurso Post",
+  "type": "object",
+  "required": ["userId", "id", "title", "body"],
+  "properties": {
+    "userId": {
+      "type": "integer",
+      "description": "ID do usuario autor do post",
+      "minimum": 1
+    },
+    "id": {
+      "type": "integer",
+      "description": "ID unico do post",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "description": "Titulo do post",
+      "minLength": 1
+    },
+    "body": {
+      "type": "string",
+      "description": "Conteudo do post",
+      "minLength": 1
+    }
   },
-  "invalidUser": {
-    "username": "wronguser",
-    "password": "wrongpass"
-  }
+  "additionalProperties": false
 }
 ```
 
-Esse JSON é usado por cenários UI que precisam de credenciais determinísticas. Ele fica em `src/test/resources/testdata/` e pode ser lido via `JsonUtils.load("testdata/login.json")`.
-
-> **Dica:** Nunca misture as duas abordagens no mesmo cenário. Ou o cenário usa payload fixo, ou usa Builder. Misturar dificulta debug quando o teste falha.
-
-
----
-
-## Parte 4 — Engenharia do Framework
-
-### 4.1 PicoContainer — Injeção de Dependência
-
-O Cucumber não permite instanciar Steps manualmente — ele cria as instâncias internamente. O PicoContainer resolve isso: ele analisa os construtores, identifica dependências e instancia tudo automaticamente, uma vez por cenário. Isso garante isolamento total entre testes sem nenhuma configuração XML ou anotação especial. Basta declarar a dependência no construtor.
-
-**Exemplo de injeção no PostSteps:**
+**Como o step usa (já implementado no Capítulo 15):**
 
 ```java
-public PostSteps(Environment env, RestClient restClient, PostService postService) {
-    this.env = env;
-    this.restClient = restClient;
-    this.postService = postService;
+@Then("a resposta deve estar de acordo com o schema {string}")
+public void aRespostaDeveEstarDeAcordoComOSchema(String schemaFile) {
+    LogUtils.info("Validando resposta contra schema: {}", schemaFile);
+    response.then().assertThat()
+        .body(matchesJsonSchemaInClasspath("schemas/" + schemaFile));
+    LogUtils.info("Schema validation PASSOU");
 }
 ```
 
-O PicoContainer vê esse construtor e resolve a cadeia completa:
+### Explicacao do codigo
 
-```mermaid
-graph TD
-    PC[PicoContainer] -->|"new Environment()"| ENV[Environment]
-    PC -->|"new RestClient()"| RC[RestClient]
-    PC -->|"new PostService(restClient)"| PS[PostService]
-    PC -->|"new PostSteps(env, rc, ps)"| STEPS[PostSteps]
+**JSON Schema:**
+- `$schema`: versão do JSON Schema (draft-07 é amplamente suportada)
+- `type: "object"`: a resposta raiz é um objeto JSON
+- `required`: campos que DEVEM estar presentes (se um sumir, falha)
+- `properties`: define o tipo e restrições de cada campo
+- `type: "integer"`: valida que userId e id são números inteiros
+- `type: "string"`: valida que title e body são textos
+- `minimum: 1`: IDs devem ser positivos
+- `minLength: 1`: textos não podem ser vazios
+- `additionalProperties: false`: proíbe campos não declarados (schema estrito)
 
-    ENV -.->|"mesmo objeto"| STEPS
-    RC -.->|"mesmo objeto"| PS
-    RC -.->|"mesmo objeto"| STEPS
-```
+**Decisão de design — strict vs permissive:**
+- `additionalProperties: false` → schema ESTRITO — falha se API adicionar campo novo
+- `additionalProperties: true` → schema PERMISSIVO — aceita campos extras
 
-**Regras do PicoContainer:**
+Para testes de contrato, recomenda-se ESTRITO. Para testes de integração, pode ser PERMISSIVO.
 
-| Regra | Descrição |
-|-------|-----------|
-| Um construtor público | Cada classe deve ter exatamente UM construtor público |
-| Sem interface necessária | Não precisa implementar nenhuma interface |
-| Escopo por cenário | Todas as instâncias são destruídas ao final de cada cenário |
-| Singleton por tipo | Dentro de um cenário, cada tipo é instanciado apenas uma vez |
-| Resolução recursiva | Se A depende de B, e B depende de C, resolve C → B → A |
-| Sem configuração | Não precisa de arquivo XML, YAML ou anotação `@Inject` |
-| Construtores sem argumento | Classes sem dependências precisam de construtor padrão |
-
-> **Dica:** Se você receber `PicoContainer cannot resolve`, verifique se a classe dependente tem construtor público e se está no pacote declarado no `glue` do Runner.
-
-
----
-
-### 4.2 ConfigReader
-
-O ConfigReader é a classe de infraestrutura que lê arquivos `.properties` do classpath e oferece override por variável de ambiente. Isso permite que CI/CD sobrescreva valores sem alterar arquivos.
-
-```java
-package config;
-
-import exceptions.FrameworkException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-/**
- * Le arquivos .properties do classpath.
- */
-public class ConfigReader {
-
-    private final Properties props = new Properties();
-
-    public ConfigReader(String fileName) {
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(fileName)) {
-            if (input == null) {
-                throw new FrameworkException("Arquivo nao encontrado no classpath: " + fileName);
-            }
-            props.load(input);
-        } catch (IOException e) {
-            throw new FrameworkException("Erro ao carregar " + fileName, e);
-        }
-    }
-
-    public String get(String key) {
-        String envValue = System.getenv(key.replace(".", "_").toUpperCase());
-        if (envValue != null) return envValue;
-        return props.getProperty(key);
-    }
-
-    public String get(String key, String defaultValue) {
-        String value = get(key);
-        return value != null ? value : defaultValue;
-    }
-
-    public int getInt(String key, int defaultValue) {
-        String value = get(key);
-        return value != null ? Integer.parseInt(value) : defaultValue;
-    }
-}
-```
-
-**Mecanismo de override por variável de ambiente:**
-
-Quando você chama `config.get("api.base.url")`, o ConfigReader faz:
-
-1. Converte a chave: `api.base.url` → `API_BASE_URL`
-2. Busca em `System.getenv("API_BASE_URL")`
-3. Se encontrar → retorna o valor da env var (ignora o .properties)
-4. Se não encontrar → retorna o valor do arquivo .properties
-
-Isso permite que no GitHub Actions você defina `API_BASE_URL=https://staging-api.com` e o framework use automaticamente, sem alterar código.
-
-**Decisões de design:**
-
-- `FrameworkException` é lançada se o arquivo não existir — fail-fast. Melhor quebrar na inicialização do que no meio do teste.
-- `try-with-resources` garante que o InputStream é fechado mesmo se `props.load()` lançar exceção.
-- O método `getInt()` com default evita `NumberFormatException` quando a chave não existe.
-
-> **Dica:** Para adicionar uma nova configuração, basta colocar no `.properties`. Não é necessário alterar o ConfigReader.
-
-
----
-
-### 4.3 Environment
-
-O Environment é a fachada de alto nível para configurações. Ele resolve QUAL ambiente usar (dev, hml, prod) e expõe as propriedades de forma tipada.
-
-```java
-package config;
-
-/**
- * Gerencia configuracoes de ambiente.
- * Carrega o .properties correto com base em -Denvironment=dev|hml|prod
- *
- * Hierarquia:
- *   1. System Property (-Denvironment=hml)
- *   2. Variavel de ambiente (ENVIRONMENT=hml)
- *   3. Padrao: dev
- */
-public class Environment {
-
-    private final ConfigReader config;
-    private final String env;
-
-    public String baseUrl;
-    public String apiBaseUrl;
-
-    public Environment() {
-        this.env = resolveEnvironment();
-        this.config = new ConfigReader("environments/" + env + ".properties");
-        this.baseUrl = config.get("base.url");
-        this.apiBaseUrl = config.get("api.base.url");
-    }
-
-    public String get(String key) {
-        return config.get(key);
-    }
-
-    public String get(String key, String defaultValue) {
-        return config.get(key, defaultValue);
-    }
-
-    public int getInt(String key, int defaultValue) {
-        return config.getInt(key, defaultValue);
-    }
-
-    public String getEnv() {
-        return env;
-    }
-
-    private String resolveEnvironment() {
-        if (System.getProperty("environment") != null) {
-            return System.getProperty("environment");
-        }
-        if (System.getenv("ENVIRONMENT") != null) {
-            return System.getenv("ENVIRONMENT");
-        }
-        return "dev";
-    }
-}
-```
-
-**Hierarquia de resolução do ambiente:**
+### Fluxo de execucao
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ 1. System Property: -Denvironment=hml (mvn test -D...)  │  ← Maior prioridade
-├─────────────────────────────────────────────────────────┤
-│ 2. Env Var: ENVIRONMENT=hml (export / GitHub Secrets)   │
-├─────────────────────────────────────────────────────────┤
-│ 3. Default: "dev"                                       │  ← Menor prioridade
-└─────────────────────────────────────────────────────────┘
+PostSteps: "a resposta deve estar de acordo com o schema 'post-schema.json'"
+    |
+    v
+matchesJsonSchemaInClasspath("schemas/post-schema.json")
+    |
+    v
+REST Assured le o schema de src/test/resources/schemas/
+    |
+    v
+Compara body da response com o schema
+    |
+    v
+Todos os campos presentes? Tipos corretos? Restricoes atendidas?
+    |
+    +-- SIM: step passa
+    +-- NAO: AssertionError com detalhes do campo que violou
 ```
 
-**Decisões de design:**
-
-- `baseUrl` e `apiBaseUrl` são campos públicos por conveniência — acessados com frequência pelos Steps e Hooks.
-- O método `resolveEnvironment()` é privado e chamado apenas no construtor — o ambiente é imutável após inicialização.
-- A delegação para `ConfigReader` centraliza a lógica de leitura + override. O Environment só decide QUAL arquivo carregar.
-
-> **Dica:** Em testes locais, rode `mvn test -Denvironment=hml` para simular o ambiente de homologação sem alterar nenhum arquivo.
-
-
----
-
-### 4.4 Configuração por Ambiente
-
-Cada ambiente tem seu próprio arquivo `.properties` em `src/test/resources/environments/`:
-
-**dev.properties:**
-
-```properties
-# ============================================================
-# Ambiente: DEV
-# ============================================================
-
-base.url=https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
-api.base.url=https://jsonplaceholder.typicode.com
-
-# Navegador
-browser=chrome
-
-# Timeouts (segundos)
-timeout.implicit=10
-timeout.pageLoad=30
-timeout.explicit=10
-
-# Evidencias: always | failure_only
-screenshot.mode=failure_only
-
-# ============================================================
-# Credenciais de TESTE
-# Em CI/CD use variaveis de ambiente (GitHub Secrets).
-# Em producao use um Secrets Manager (Vault, AWS Secrets).
-# ============================================================
-usuario.admin=admin
-senha.admin=admin123
-senha.invalida=senhaErrada
-```
-
-**hml.properties:**
-
-```properties
-# ============================================================
-# Ambiente: HML (Homologacao)
-# ============================================================
-
-base.url=https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
-api.base.url=https://jsonplaceholder.typicode.com
-
-browser=chrome
-timeout.implicit=15
-timeout.pageLoad=45
-timeout.explicit=15
-screenshot.mode=always
-
-usuario.admin=admin
-senha.admin=admin123
-senha.invalida=senhaErrada
-```
-
-**Comparação de timeouts:**
-
-| Propriedade | DEV | HML | Justificativa |
-|-------------|-----|-----|---------------|
-| `timeout.implicit` | 10s | 15s | HML é mais lento (infra compartilhada) |
-| `timeout.pageLoad` | 30s | 45s | Páginas pesadas carregam devagar em HML |
-| `timeout.explicit` | 10s | 15s | Esperas explícitas acompanham o implicit |
-| `screenshot.mode` | failure_only | always | Em HML queremos evidência de TUDO |
-
-**Comando para trocar de ambiente:**
+### Como executar
 
 ```bash
-# Executar em DEV (padrão)
+# Agora o cenario @schema funciona
+mvn test -Dcucumber.filter.tags="@schema"
+
+# Ou todos os de API
+mvn test -Dcucumber.filter.tags="@api"
+```
+
+### Como confirmar que funcionou
+
+```
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+Log mostrará: `Schema validation PASSOU`
+
+### Falha guiada
+
+1. Adicione um campo inexistente ao `required`:
+
+```json
+"required": ["userId", "id", "title", "body", "campoInexistente"]
+```
+
+Erro:
+```
+AssertionError: object has missing required properties (["campoInexistente"])
+```
+
+2. Mude o tipo de `userId` para `"string"`:
+
+```json
+"userId": { "type": "string" }
+```
+
+Erro:
+```
+AssertionError: instance type (integer) does not match any allowed primitive type (allowed: ["string"])
+```
+
+3. Remova `additionalProperties: false` e observe que o schema aceita qualquer campo extra.
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Schema file not found` | Arquivo fora do classpath | Verifique caminho em src/test/resources/schemas |
+| `missing required properties` | Campo não presente na response | Atualize schema ou investigue API |
+| `type does not match` | Campo com tipo diferente | Corrija tipo no schema |
+| `additionalProperties` falha | Campo extra na response | Adicione ao schema ou use true |
+| `null value` para campo required | API retorna null | Use `"type": ["string", "null"]` |
+
+### O que nao deve ser feito
+
+- Não crie schemas manualmente sem observar a API real — use uma response como base
+- Não use draft-03 ou draft-04 — REST Assured suporta draft-07 melhor
+- Não valide dados de negócio no schema — schema é ESTRUTURA, steps validam VALORES
+- Não ignore falhas de schema — são regressões de contrato
+- Não use schema genérico para todos os endpoints — cada um tem seu contrato
+
+### Exercicio
+
+1. Crie `schemas/posts-list-schema.json` para validar o array de GET /posts
+2. Adicione constraint `"maxLength": 500` ao title e veja se a API respeita
+3. Crie um schema para o endpoint de criação (POST response que tem id)
+
+### Checklist
+
+- [ ] `post-schema.json` em `src/test/resources/schemas/`
+- [ ] Draft-07 declarado no $schema
+- [ ] Campos required: userId, id, title, body
+- [ ] Tipos validados: integer e string
+- [ ] Restrições: minimum e minLength
+- [ ] additionalProperties definido (true ou false)
+- [ ] Cenário @schema passa com sucesso
+- [ ] `mvn test -Dcucumber.filter.tags="@api"` sem falhas
+
+---
+
+## Capítulo 17 — Ambiente HML
+
+### Resultado que construiremos
+
+Um segundo arquivo de configuração para homologação (HML), demonstrando como o framework suporta múltiplos ambientes sem alterar código. Ao final, `mvn test -Denv=hml` usará URLs, credenciais e configurações diferentes.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| resources/environments/                               |
+|   +-- dev.properties           (ja existe)            |
+|   +-- hml.properties           <-- AQUI               |
+|                                                       |
+| config/                                               |
+|   +-- ConfigReader.java        (le baseado em -Denv)  |
+|   +-- Environment.java         (fachada)              |
++-------------------------------------------------------+
+
+Fluxo:
+  mvn test -Denv=hml
+      |
+      v
+  System.getProperty("env") --> "hml"
+      |
+      v
+  ConfigReader("hml") --> le hml.properties
+      |
+      v
+  Environment.get("base.url") --> URL de HML
+```
+
+### Conceito mínimo necessário
+
+**Multi-ambiente**: o mesmo código roda contra ambientes diferentes apenas mudando uma variável. Isso permite:
+- Desenvolvimento local (dev) — aplicação local ou stub
+- Homologação (hml) — ambiente compartilhado com equipe
+- Staging (stg) — espelho de produção
+
+Cada ambiente tem suas URLs, credenciais, timeouts e configurações de browser.
+
+**Nenhum código muda** — apenas o parâmetro `-Denv` na linha de comando.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/resources/environments/hml.properties` | Configuração de HML |
+
+### Construção manual passo a passo
+
+1. Copie `dev.properties` para `hml.properties`
+2. Altere as URLs para apontar para HML
+3. Ajuste timeout (HML geralmente é mais lento)
+4. Ajuste headless (HML geralmente roda em CI)
+5. Execute com `-Denv=hml`
+
+### Codigo completo final
+
+**src/test/resources/environments/hml.properties**
+
+```properties
+# === Ambiente de Homologacao ===
+
+# UI
+base.url=https://the-internet.herokuapp.com
+browser=chrome
+timeout=15
+headless=true
+
+# API
+api.base.url=https://jsonplaceholder.typicode.com
+api.timeout=30
+
+# Credenciais (diferentes de DEV em projetos reais)
+username=tomsmith
+password=SuperSecretPassword!
+
+# Configuracoes de execucao
+screenshot.on.failure=true
+retry.count=1
+```
+
+**Comparação DEV vs HML:**
+
+| Propriedade | DEV | HML |
+|-------------|-----|-----|
+| `base.url` | https://the-internet.herokuapp.com | https://the-internet.herokuapp.com |
+| `browser` | chrome | chrome |
+| `timeout` | 10 | 15 |
+| `headless` | false | true |
+| `api.timeout` | (não definido) | 30 |
+| `screenshot.on.failure` | (não definido) | true |
+| `retry.count` | (não definido) | 1 |
+
+> **Nota**: Neste exemplo, as URLs são as mesmas porque usamos aplicações públicas. Em um projeto real, DEV apontaria para `http://localhost:8080` e HML para `https://hml.suaempresa.com`.
+
+### Explicacao do codigo
+
+**Diferenças estratégicas entre ambientes:**
+
+- `timeout=15`: HML costuma ser mais lento (ambiente compartilhado)
+- `headless=true`: em HML geralmente executamos em CI (sem monitor)
+- `api.timeout=30`: APIs de HML podem ter throttling
+- `retry.count=1`: permite uma retry em ambiente instável
+- `screenshot.on.failure=true`: útil para debug remoto
+
+**Como usar propriedades novas (exemplo de retry):**
+
+```java
+// Em UiHooks ou num RetryAnalyzer futuro
+int retries = Environment.getInt("retry.count");
+```
+
+O método `Environment.get(key, defaultValue)` permite leitura segura:
+
+```java
+// Se a propriedade nao existe no dev.properties, usa 0
+int retries = Integer.parseInt(Environment.get("retry.count", "0"));
+```
+
+### Fluxo de execucao
+
+```
+Terminal: mvn test -Denv=hml
+    |
+    v
+Maven seta System property: env=hml
+    |
+    v
+Environment.getConfigReader()
+    |
+    v
+System.getProperty("env", "dev") --> "hml"
+    |
+    v
+new ConfigReader("hml")
+    |
+    v
+Abre environments/hml.properties
+    |
+    v
+Properties carregadas: timeout=15, headless=true, ...
+    |
+    v
+DriverFactory.createDriver()
+    |
+    v
+Environment.getBoolean("headless") --> true
+    |
+    v
+Chrome abre em modo headless
+```
+
+### Como executar
+
+```bash
+# Ambiente DEV (padrao)
 mvn test
 
-# Executar em HML
-mvn test -Denvironment=hml
+# Ambiente HML
+mvn test -Denv=hml
 
-# Executar em HML via variável de ambiente
-export ENVIRONMENT=hml && mvn test
+# HML com filtro de tag
+mvn test -Denv=hml -Dcucumber.filter.tags="@smoke"
 ```
 
-> **Dica:** Para adicionar um novo ambiente (ex: `prod`), basta criar `environments/prod.properties` com as configurações desejadas. Nenhuma alteração em código Java é necessária.
+### Como confirmar que funcionou
 
+1. Execute com `-Denv=hml` e observe nos logs que `headless=true` foi aplicado
+2. O Chrome NÃO aparece visualmente (está headless)
+3. Os testes passam normalmente
+4. Mude `-Denv=dev` e o Chrome aparece (headless=false)
 
----
+### Falha guiada
 
-### 4.5 Logging Corporativo
-
-O framework usa SLF4J como fachada + Logback como implementação. Isso desacopla o código de qualquer implementação de log específica.
-
-**LogUtils.java:**
-
-```java
-package utils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/**
- * Logging corporativo via SLF4J + Logback.
- */
-public class LogUtils {
-
-    private static final Logger log = LoggerFactory.getLogger("automation");
-
-    private LogUtils() {}
-
-    public static void info(String msg) { log.info(msg); }
-    public static void warn(String msg) { log.warn(msg); }
-    public static void error(String msg) { log.error(msg); }
-    public static void error(String msg, Throwable t) { log.error(msg, t); }
-    public static void debug(String msg) { log.debug(msg); }
-}
-```
-
-**logback.xml (`src/test/resources/logback.xml`):**
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss} %-5level - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>target/test-execution.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <logger name="automation" level="INFO"/>
-
-    <root level="WARN">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </root>
-</configuration>
-```
-
-**Tabela de appenders:**
-
-| Appender | Destino | Padrão | Quando usar |
-|----------|---------|--------|-------------|
-| CONSOLE | Terminal (stdout) | `HH:mm:ss LEVEL - mensagem` | Desenvolvimento local, feedback imediato |
-| FILE | `target/test-execution.log` | `yyyy-MM-dd HH:mm:ss [thread] LEVEL logger - msg` | CI/CD, debug pós-execução, evidência |
-
-**Por que NÃO usar System.out.println:**
-
-| Aspecto | System.out.println | SLF4J + Logback |
-|---------|-------------------|-----------------|
-| Níveis de log | Não tem | DEBUG, INFO, WARN, ERROR |
-| Filtrar por nível | Impossível | Configurável no XML |
-| Saída em arquivo | Requer código manual | Configuração declarativa |
-| Timestamp automático | Não | Sim |
-| Thread-safe | Sim, mas sem contexto | Mostra thread name |
-| Desligar em prod | Requer remover/comentar código | Altera 1 linha no XML |
-| Performance | Sempre executa | Lazy evaluation (não monta string se nível desligado) |
-
-> **Dica:** Use `LogUtils.debug()` para informações detalhadas que só serão visíveis se alguém alterar o nível para DEBUG no `logback.xml`. Nunca faça `debug("Resposta: " + objeto.toString())` — em produção isso é overhead desnecessário.
-
-
----
-
-### 4.6 FrameworkException
-
-A FrameworkException é uma exceção customizada para erros de INFRAESTRUTURA do framework — não de teste. Ela sinaliza que algo no framework está mal configurado, não que o sistema sob teste falhou.
-
-```java
-package exceptions;
-
-/**
- * Excecao customizada do framework.
- * Usada para erros de infraestrutura (config nao encontrado, template ausente, etc).
- */
-public class FrameworkException extends RuntimeException {
-
-    public FrameworkException(String message) {
-        super(message);
-    }
-
-    public FrameworkException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-```
-
-**Quando usar FrameworkException vs Assert:**
-
-| Situação | Usar | Exemplo |
-|----------|------|---------|
-| Arquivo de config não encontrado | `FrameworkException` | `throw new FrameworkException("dev.properties ausente")` |
-| Status code diferente do esperado | `Assert` | `Assert.assertEquals(200, actual)` |
-| Driver não inicializou | `FrameworkException` | `throw new FrameworkException("Chrome não iniciou")` |
-| Campo do JSON incorreto | `Assert` | `Assert.assertEquals("titulo", actual)` |
-| Payload JSON não encontrado | `FrameworkException` | `throw new FrameworkException("payload.json ausente")` |
-| Timeout ao carregar página | `Assert` / depende | Se é condição do teste → Assert |
-| Template de email ausente | `FrameworkException` | Erro de setup, não do teste |
-| Schema validation falhou | `Assert` | É o resultado esperado do teste |
-
-**Regra prática:**
-- **FrameworkException** → "O framework está quebrado, nenhum teste vai funcionar até consertar."
-- **Assert** → "O sistema sob teste não se comportou como esperado."
-
-**Decisões de design:**
-
-- Estende `RuntimeException` (unchecked) — não obriga try-catch em cada chamada. O teste simplesmente falha com stack trace claro.
-- Construtor com `Throwable cause` preserva a exceção original — essencial para debug (ex: `IOException` de leitura de arquivo).
-- Mensagem descritiva obrigatória — nunca lance `new FrameworkException("")`.
-
-> **Dica:** No relatório Allure, um teste que falha por FrameworkException aparece como "broken" (ícone roxo), diferente de um teste que falha por Assert (ícone vermelho). Isso ajuda a distinguir bugs do sistema vs problemas de infraestrutura.
-
-
----
-
-### 4.7 Captura de Screenshots
-
-O ScreenshotUtils é uma utility class stateless que captura screenshots do WebDriver. A lógica de QUANDO capturar fica no Hook, não no Utils.
-
-**ScreenshotUtils.java:**
-
-```java
-package utils;
-
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-
-/**
- * Captura de screenshots.
- */
-public class ScreenshotUtils {
-
-    private ScreenshotUtils() {}
-
-    public static byte[] capture(WebDriver driver) {
-        if (driver instanceof TakesScreenshot) {
-            return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-        }
-        return new byte[0];
-    }
-}
-```
-
-**Lógica no UiHooks (trecho relevante):**
-
-```java
-@After(value = "@ui")
-public void closeBrowser(Scenario scenario) {
-    WebDriver driver = DriverManager.getDriver();
-    if (driver == null) return;
-
-    String mode = env.get("screenshot.mode", "failure_only");
-    boolean shouldCapture = "always".equals(mode) || scenario.isFailed();
-
-    if (shouldCapture) {
-        byte[] screenshot = ScreenshotUtils.capture(driver);
-        if (screenshot.length > 0) {
-            String status = scenario.isFailed() ? "FALHA" : "SUCESSO";
-            scenario.attach(screenshot, "image/png", status + " - " + scenario.getName());
-            LogUtils.info("Screenshot [" + status + "]");
-        }
-    }
-
-    DriverManager.quit();
-}
-```
-
-**Modos de captura:**
-
-| Modo | Configuração | Comportamento | Uso ideal |
-|------|-------------|---------------|-----------|
-| `failure_only` | `screenshot.mode=failure_only` | Captura apenas quando `scenario.isFailed()` | DEV (economiza I/O e espaço) |
-| `always` | `screenshot.mode=always` | Captura em todo cenário (passou ou falhou) | HML, CI/CD (evidência completa) |
-
-**Decisões de design:**
-
-- `ScreenshotUtils` retorna `byte[]` — o formato mais versátil. O Hook decide o que fazer: anexar ao Cucumber, ao Allure, salvar em disco.
-- O check `instanceof TakesScreenshot` protege contra drivers que não suportam screenshot (ex: HtmlUnitDriver).
-- O array vazio (`new byte[0]`) como fallback evita NullPointerException no chamador.
-- A lógica condicional fica no Hook (não no Utils) — separation of concerns.
-
-> **Dica:** Para testes API, screenshots não fazem sentido. O hook é filtrado por `@ui`, então cenários `@api` nunca tentam capturar tela.
-
-
----
-
-### 4.8 Allure Report
-
-O Allure é o sistema de relatórios do framework. Ele transforma resultados de teste em um dashboard interativo com gráficos, timelines, anexos e histórico.
-
-**Setup (3 peças necessárias):**
-
-1. **Plugin no pom.xml:**
-
-```xml
-<!-- Allure Cucumber Integration -->
-<dependency>
-    <groupId>io.qameta.allure</groupId>
-    <artifactId>allure-cucumber7-jvm</artifactId>
-    <version>2.24.0</version>
-    <scope>test</scope>
-</dependency>
-
-<!-- AspectJ Weaver (necessario para Allure) -->
-<dependency>
-    <groupId>org.aspectj</groupId>
-    <artifactId>aspectjweaver</artifactId>
-    <version>1.9.19</version>
-    <scope>test</scope>
-</dependency>
-
-<!-- Allure Maven Plugin - gera relatorio -->
-<plugin>
-    <groupId>io.qameta.allure</groupId>
-    <artifactId>allure-maven</artifactId>
-    <version>2.12.0</version>
-    <configuration>
-        <reportVersion>2.24.0</reportVersion>
-        <resultsDirectory>allure-results</resultsDirectory>
-    </configuration>
-</plugin>
-```
-
-2. **Plugin no TestRunner:**
-
-```java
-plugin = {
-    "io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"
-}
-```
-
-3. **AspectJ no Surefire:**
-
-```xml
-<argLine>
-    -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.19/aspectjweaver-1.9.19.jar"
-</argLine>
-<systemPropertyVariables>
-    <allure.results.directory>target/allure-results</allure.results.directory>
-</systemPropertyVariables>
-```
-
-**Comandos:**
+1. Execute com ambiente inexistente:
 
 ```bash
-# Executar testes e gerar relatório (abre no navegador)
-mvn test && mvn allure:serve
+mvn test -Denv=producao
+```
 
-# Apenas gerar sem abrir
-mvn allure:report
+Erro: `FrameworkException: Arquivo de configuracao nao encontrado: environments/producao.properties`
 
-# Limpar resultados anteriores
-mvn clean test
+2. Remova `base.url` do hml.properties:
+
+```bash
+mvn test -Denv=hml
+```
+
+Erro: `FrameworkException: Propriedade 'base.url' nao encontrada no arquivo de configuracao`
+
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| Arquivo não encontrado | Nome errado | Verifique que hml.properties está em environments/ |
+| Testes falham em HML | URLs diferentes | Verifique que a aplicação está no ar |
+| Headless não funciona | ChromeDriver antigo | Atualize ChromeDriver |
+| Timeout em HML | Ambiente lento | Aumente timeout no hml.properties |
+| Credenciais incorretas | Usuário diferente em HML | Atualize username/password |
+
+### O que nao deve ser feito
+
+- Não commite credenciais de produção no repositório
+- Não crie um if/else no código para cada ambiente — use .properties
+- Não deixe propriedades faltando em um .properties — cause erro explícito
+- Não assuma que DEV e HML têm os mesmos dados — use dados dinâmicos (Faker)
+- Não ignore timeouts diferentes — HML e CI são mais lentos
+
+### Exercicio
+
+1. Crie um `stg.properties` para staging com headless=true e timeout=20
+2. Adicione propriedade `parallel=true` no hml.properties para futuro uso
+3. Execute os mesmos testes com `-Denv=dev` e `-Denv=hml` e compare os tempos
+
+### Checklist
+
+- [ ] `hml.properties` em `src/test/resources/environments/`
+- [ ] Todas as propriedades obrigatórias presentes
+- [ ] Timeout maior que DEV
+- [ ] Headless = true
+- [ ] `mvn test -Denv=hml` executa com sucesso
+- [ ] Chrome não aparece (headless)
+- [ ] Logs confirmam ambiente HML
+- [ ] Propriedades extras (retry, screenshot) com valores default seguros
+
+---
+
+## Capítulo 18 — Allure Report
+
+### Resultado que construiremos
+
+Relatórios Allure visuais e interativos gerados automaticamente após execução dos testes. Ao final, `allure serve` abrirá um dashboard com gráficos, timeline, steps detalhados e screenshots de falha.
+
+### Onde estamos na arquitetura
+
+```
++-------------------------------------------------------+
+| Allure Ecosystem                                      |
+|                                                       |
+| pom.xml:                                              |
+|   +-- allure-cucumber7-jvm (captura steps)            |
+|   +-- allure-rest-assured (captura requests)          |
+|   +-- aspectjweaver (intercepta annotations)          |
+|                                                       |
+| TestRunner.java:                                      |
+|   +-- plugin: AllureCucumber7Jvm                      |
+|                                                       |
+| UiHooks.java:                                         |
+|   +-- Allure.addAttachment (screenshots)              |
+|                                                       |
+| Output:                                               |
+|   +-- target/allure-results/ (dados brutos)           |
+|   +-- allure-report/ (HTML gerado)    <-- AQUI        |
++-------------------------------------------------------+
+```
+
+### Conceito mínimo necessário
+
+**Allure** é um framework de relatórios que gera dashboards a partir de dados brutos. Funciona em duas fases:
+1. **Coleta**: durante execução, plugins salvam JSONs em `target/allure-results/`
+2. **Geração**: depois, o CLI do Allure transforma JSONs em HTML interativo
+
+**O que já configuramos nos capítulos anteriores:**
+- pom.xml: dependências allure-cucumber7-jvm + allure-rest-assured + aspectjweaver
+- TestRunner: plugin `AllureCucumber7Jvm`
+- UiHooks: `Allure.addAttachment` para screenshots
+
+Falta: instalar o CLI do Allure e integrar com `allure-rest-assured` filter.
+
+### Arquivos envolvidos
+
+| Arquivo | Função |
+|---------|--------|
+| `src/test/java/api/clients/RestClient.java` | Adicionar Allure filter |
+| Configuração do Allure CLI | Gerar relatórios |
+
+### Construção manual passo a passo
+
+1. Instale o Allure CLI
+2. Adicione o filter do Allure no RestClient
+3. Execute os testes
+4. Gere o relatório com `allure serve`
+
+### Codigo completo final
+
+**Instalação do Allure CLI (escolha uma opção):**
+
+```bash
+# Opcao 1: via npm (mais simples)
+npm install -g allure-commandline
+
+# Opcao 2: via Homebrew (macOS)
+brew install allure
+
+# Opcao 3: via Scoop (Windows)
+scoop install allure
+```
+
+**Atualização em src/test/java/api/clients/RestClient.java** — adicione o import e filter:
+
+```java
+package api.clients;
+
+import config.Environment;
+import io.qameta.allure.restassured.AllureRestAssured;
+import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import utils.LogUtils;
+
+public class RestClient {
+
+    private final String baseUrl;
+
+    public RestClient() {
+        this.baseUrl = Environment.get("api.base.url");
+        LogUtils.info("RestClient inicializado com base URL: {}", baseUrl);
+    }
+
+    private RequestSpecification defaultSpec() {
+        return RestAssured
+            .given()
+            .baseUri(baseUrl)
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .filter(new AllureRestAssured())
+            .filter(new RequestLoggingFilter())
+            .filter(new ResponseLoggingFilter());
+    }
+
+    public Response get(String path) {
+        LogUtils.info("GET {}{}", baseUrl, path);
+        return defaultSpec()
+            .when()
+            .get(path)
+            .then()
+            .extract()
+            .response();
+    }
+
+    public Response get(String path, String paramName, Object paramValue) {
+        LogUtils.info("GET {}{} ?{}={}", baseUrl, path, paramName, paramValue);
+        return defaultSpec()
+            .queryParam(paramName, paramValue)
+            .when()
+            .get(path)
+            .then()
+            .extract()
+            .response();
+    }
+
+    public Response post(String path, Object body) {
+        LogUtils.info("POST {}{}", baseUrl, path);
+        return defaultSpec()
+            .body(body)
+            .when()
+            .post(path)
+            .then()
+            .extract()
+            .response();
+    }
+
+    public Response put(String path, Object body) {
+        LogUtils.info("PUT {}{}", baseUrl, path);
+        return defaultSpec()
+            .body(body)
+            .when()
+            .put(path)
+            .then()
+            .extract()
+            .response();
+    }
+
+    public Response delete(String path) {
+        LogUtils.info("DELETE {}{}", baseUrl, path);
+        return defaultSpec()
+            .when()
+            .delete(path)
+            .then()
+            .extract()
+            .response();
+    }
+}
+```
+
+**A única mudança é adicionar:**
+```java
+import io.qameta.allure.restassured.AllureRestAssured;
+```
+
+E no `defaultSpec()`:
+```java
+.filter(new AllureRestAssured())
+```
+
+Isso faz o Allure capturar request e response de cada chamada API automaticamente.
+
+### Explicacao do codigo
+
+**Fluxo do Allure:**
+
+```
+Teste executa
+    |
+    +-- AllureCucumber7Jvm captura cada step (Given, When, Then)
+    |
+    +-- AllureRestAssured captura cada request/response HTTP
+    |
+    +-- Allure.addAttachment captura screenshots
+    |
+    v
+target/allure-results/
+    +-- xxxxx-result.json (um por cenario)
+    +-- xxxxx-attachment.png (screenshots)
+    +-- xxxxx-attachment.txt (request/response)
+    |
+    v
+allure serve target/allure-results
+    |
+    v
+Browser abre com dashboard interativo
 ```
 
 **O que aparece no relatório:**
+- Overview: gráfico de pizza (passed/failed/broken)
+- Suites: agrupamento por feature
+- Timeline: duração de cada cenário
+- Behaviors: agrupamento por tag
+- Cada cenário: steps expandíveis com timing
+- Steps de API: request e response completos
+- Falhas de UI: screenshot anexado
 
-| Seção | Conteúdo | Origem |
-|-------|----------|--------|
-| Overview | Gráfico de pizza (passed/failed/broken) | Automático |
-| Suites | Agrupamento por feature file | AllureCucumber7Jvm |
-| Timeline | Execução paralela por thread | Automático |
-| Behaviors | Agrupamento por funcionalidade | Tags Gherkin |
-| Attachments | Screenshots, request/response | `scenario.attach()` + `Allure.addAttachment()` |
+### Fluxo de execucao
 
-**Como o RestClient anexa request/response:**
-
-```java
-private void attachToAllure(String method, String endpoint) {
-    String req = method + " " + baseUri + endpoint;
-    if (lastBody != null) req += "\n\nBody:\n" + lastBody;
-    Allure.addAttachment("Request", "text/plain", req);
-    Allure.addAttachment("Response [" + response.getStatusCode() + "]",
-            "application/json", response.getBody().asPrettyString());
-}
+```
+mvn test
+    |
+    v
+Testes executam, Allure coleta dados
+    |
+    v
+target/allure-results/ preenchido com JSONs
+    |
+    v
+allure serve target/allure-results
+    |
+    v
+Allure CLI le JSONs e gera HTML
+    |
+    v
+Browser abre em http://localhost:XXXX
+    |
+    v
+Dashboard interativo
 ```
 
-Cada chamada API gera dois anexos no relatório: o request completo (método + URL + body) e o response (status + JSON formatado). Isso permite debug de falhas sem re-executar o teste.
-
-> **Dica:** O `allure:serve` cria um servidor HTTP temporário e abre o navegador. Para CI/CD, use GitHub Pages (ver seção 5.1) para publicação permanente.
-
-
----
-
-### 4.9 Estratégia de Tags
-
-Tags Cucumber controlam QUAIS testes executar. Elas são declaradas nas features e filtradas via linha de comando.
-
-**Tags disponíveis:**
-
-| Tag | Propósito | Escopo | Comando |
-|-----|-----------|--------|---------|
-| `@ui` | Testes de interface (Selenium) | Hooks de browser | `mvn test -Dcucumber.filter.tags="@ui"` |
-| `@api` | Testes de API (REST Assured) | Sem browser | `mvn test -Dcucumber.filter.tags="@api"` |
-| `@smoke` | Testes rápidos e críticos | Subconjunto de @ui + @api | `mvn test -Dcucumber.filter.tags="@smoke"` |
-| `@wip` | Work in progress (não executar em CI) | Desenvolvimento | `mvn test -Dcucumber.filter.tags="not @wip"` |
-| `@bug` | Cenário que reproduz bug conhecido | Documentação | `mvn test -Dcucumber.filter.tags="@bug"` |
-
-**Combinações úteis:**
+### Como executar
 
 ```bash
-# Apenas smoke de API
-mvn test -Dcucumber.filter.tags="@smoke and @api"
+# 1. Execute os testes
+mvn test
 
-# Tudo exceto WIP
-mvn test -Dcucumber.filter.tags="not @wip"
+# 2. Gere e abra o relatorio (serve = gera + abre)
+allure serve target/allure-results
 
-# UI OU API smoke
-mvn test -Dcucumber.filter.tags="@ui or (@api and @smoke)"
-
-# Específico por feature
-mvn test -Dcucumber.filter.tags="@login"
+# OU gere sem abrir (para CI)
+allure generate target/allure-results -o target/allure-report --clean
 ```
 
-**Onde declarar tags:**
+### Como confirmar que funcionou
 
-```gherkin
-@api
-Funcionalidade: Posts API
+1. Após `mvn test`, a pasta `target/allure-results/` contém arquivos .json
+2. `allure serve` abre o browser com o dashboard
+3. Clique em um cenário e veja os steps detalhados
+4. Para cenários de API, veja request/response nos attachments
+5. Para cenários de UI que falharam, veja screenshot
 
-  @smoke
-  Cenário: Listar todos os posts
-    ...
+### Falha guiada
 
-  Cenário: Criar um novo post
-    ...
-```
+1. Delete `target/allure-results/` e tente `allure serve`:
+   ```
+   Could not find any allure results
+   ```
 
-- Tag na `Funcionalidade` → aplica a todos os cenários dela
-- Tag no `Cenário` → aplica apenas àquele cenário
-- Tags são cumulativas: o cenário "Listar todos" tem `@api` E `@smoke`
+2. Remova `aspectjweaver` do pom.xml:
+   - O relatório mostra cenários mas steps não aparecem detalhados
 
-> **Dica:** No CI/CD, use `@smoke` como gate de qualidade — se o smoke falha, o deploy é bloqueado. Os testes completos rodam em paralelo sem bloquear.
+3. Remova `AllureCucumber7Jvm` do plugin no TestRunner:
+   - `allure-results/` fica vazio
 
+### Erros comuns
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `allure: command not found` | CLI não instalado | Instale via npm/brew/scoop |
+| `No allure results found` | Pasta vazia | Execute mvn test antes |
+| Steps não aparecem | Falta aspectjweaver | Verifique Surefire plugin no pom.xml |
+| Request/Response não aparece | Falta AllureRestAssured | Adicione filter ao RestClient |
+| Screenshot não aparece | Falta addAttachment | Verifique UiHooks |
+| Relatório antigo | Cache | Use `--clean` no generate |
+
+### O que nao deve ser feito
+
+- Não commite `target/allure-results/` — é gerado a cada execução
+- Não use Allure como único registro de falha — logs são mais detalhados
+- Não ignore relatórios vazios — significa que a integração está quebrada
+- Não remova o aspectjweaver — sem ele Allure não intercepta nada
+- Não esqueça de limpar resultados antigos antes de gerar relatório
+
+### Exercicio
+
+1. Execute testes, abra o relatório e explore cada seção
+2. Force uma falha, regenere e encontre o screenshot no relatório
+3. Encontre o request/response de um teste de API no relatório
+4. Adicione `@io.qameta.allure.Severity(SeverityLevel.CRITICAL)` a um step
+
+### Checklist
+
+- [ ] Allure CLI instalado e funcional
+- [ ] AllureRestAssured adicionado ao RestClient
+- [ ] `target/allure-results/` gerado após mvn test
+- [ ] `allure serve` abre dashboard funcional
+- [ ] Steps de UI aparecem com detalhe
+- [ ] Steps de API mostram request/response
+- [ ] Screenshots de falha aparecem
+- [ ] Timeline mostra duração correta
+- [ ] Gráfico de pizza mostra passed/failed
 
 ---
 
-### 4.10 Padrões de Nomenclatura
+## Capítulo 19 — GitHub Actions (progressivo)
 
-Convenções consistentes permitem que qualquer pessoa encontre e entenda o código rapidamente.
+### Resultado que construiremos
 
-**Classes:**
+Uma pipeline CI/CD que executa testes automaticamente a cada push. Construiremos o YAML em 5 versões progressivas, cada uma adicionando uma funcionalidade.
 
-| Tipo | Padrão | Exemplo |
-|------|--------|---------|
-| Page Object | `{Funcionalidade}Page` | `LoginPage`, `DashboardPage` |
-| Steps UI | `{Funcionalidade}Steps` | `LoginSteps`, `InventorySteps` |
-| Steps API | `{Recurso}Steps` | `PostSteps`, `UserSteps` |
-| Service API | `{Recurso}Service` | `PostService`, `AuthService` |
-| Builder | `{Recurso}Builder` | `PostBuilder`, `UserBuilder` |
-| Model/POJO | `{Recurso}Request` | `PostRequest`, `LoginRequest` |
-| Hooks | `{Tipo}Hooks` | `UiHooks`, `ApiHooks` |
-| Runner | `TestRunner` | `TestRunner` (único) |
-| Utils | `{Domínio}Utils` | `LogUtils`, `ScreenshotUtils`, `JsonUtils` |
-| Exception | `{Contexto}Exception` | `FrameworkException` |
+### Onde estamos na arquitetura
 
-**Métodos:**
+```
++-------------------------------------------------------+
+| .github/workflows/                                    |
+|   +-- tests.yml                <-- AQUI               |
+|                                                       |
+| Pipeline:                                             |
+|   Push/PR --> GitHub Actions --> Maven Test -->        |
+|   Allure Report --> GitHub Pages                      |
++-------------------------------------------------------+
+```
 
-| Tipo | Padrão | Exemplo |
-|------|--------|---------|
-| Page - ação | `verbo + Substantivo` | `fillUsername()`, `clickLogin()` |
-| Page - verificação | `is/has + Condição` | `isErrorVisible()`, `hasWelcomeMessage()` |
-| Service - CRUD | `verbo simples` | `create()`, `listAll()`, `getById()`, `delete()` |
-| Step | `verbo descritivo` (match Gherkin) | `setupApi()`, `validateStatus()` |
-| Builder | `with + Campo` | `withTitle()`, `withUserId()` |
-| Utils | `verbo + O quê` | `capture()`, `load()`, `info()` |
+### Conceito mínimo necessário
 
-**Arquivos de recurso:**
+**GitHub Actions**: CI/CD integrado ao GitHub. Um arquivo YAML define jobs que executam em runners (máquinas virtuais) da Microsoft.
 
-| Tipo | Padrão | Exemplo |
-|------|--------|---------|
-| Feature | `{funcionalidade}.feature` | `login.feature`, `posts.feature` |
-| Payload | `{ação}-{recurso}.json` | `create-post.json`, `update-post.json` |
-| Schema | `{recurso}-schema.json` | `post-schema.json`, `user-schema.json` |
-| Properties | `{ambiente}.properties` | `dev.properties`, `hml.properties` |
-| Test data | `{contexto}.json` | `login.json`, `usuarios.json` |
+**Conceitos-chave:**
+- `workflow`: arquivo YAML em `.github/workflows/`
+- `trigger`: evento que dispara (push, pull_request)
+- `job`: conjunto de steps executados em sequência
+- `step`: comando individual (checkout, setup java, mvn test)
+- `runner`: máquina virtual (ubuntu-latest)
+- `artifact`: arquivo salvo após execução (relatórios)
 
-**Pacotes:**
+### Arquivos envolvidos
 
-| Pacote | Conteúdo |
-|--------|----------|
-| `steps.ui` | Steps de interface |
-| `steps.api` | Steps de API |
-| `pages` | Page Objects |
-| `api.clients` | RestClient |
-| `api.services` | Services de negócio |
-| `api.models` | POJOs de request/response |
-| `api.builders` | Builders com Faker |
-| `config` | Environment, ConfigReader |
-| `drivers` | DriverFactory, DriverManager |
-| `hooks` | UiHooks, ApiHooks |
-| `utils` | Utilitários (Log, Screenshot, Json) |
-| `exceptions` | Exceções customizadas |
-| `runners` | TestRunner |
+| Arquivo | Função |
+|---------|--------|
+| `.github/workflows/tests.yml` | Pipeline de CI |
 
-> **Dica:** Se o nome de uma classe não deixa óbvio o que ela faz, o nome está errado. Prefira nomes longos e descritivos a nomes curtos e ambíguos.
+### Construção manual passo a passo
 
+Construiremos o YAML em 5 versões, cada uma adicionando funcionalidade:
+
+1. **V1**: Build mínimo (só compila)
+2. **V2**: Executa testes de API
+3. **V3**: Adiciona testes de UI com Chrome headless
+4. **V4**: Gera relatório Allure como artifact
+5. **V5**: Publica Allure no GitHub Pages + notificação
 
 ---
 
-## Parte 5 — Integração e Manutenção
+### Codigo completo final
 
-### 5.1 GitHub Actions
+#### VERSAO 1 — Build mínimo
 
-O pipeline CI/CD executa os testes automaticamente a cada push/PR e publica os relatórios.
-
-**`.github/workflows/testes.yml`:**
+O que faz: checkout + setup Java + compile. Valida que o projeto compila.
 
 ```yaml
-name: Automacao de Testes - Selenium + REST Assured
+# .github/workflows/tests.yml — VERSAO 1
+name: Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  pages: write
+    branches: [main]
 
 jobs:
-  testes:
-    name: Executar Testes (UI + API)
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do repositorio
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configurar Java 8
+      - name: Setup Java 8
         uses: actions/setup-java@v4
         with:
           java-version: '8'
           distribution: 'temurin'
-          cache: maven
 
-      - name: Instalar Google Chrome
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Compile project
+        run: mvn compile -DskipTests -B
+```
+
+**O que mudará na V2:** adicionar step de execução de testes.
+
+---
+
+#### VERSAO 2 — Testes de API
+
+Adiciona: execução dos testes de API (não precisa de browser).
+
+```yaml
+# .github/workflows/tests.yml — VERSAO 2
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run API tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@api" -B
+```
+
+**O que mudou da V1:**
+- Job renomeado para `api-tests`
+- Step `Run API tests` com filtro de tag @api
+- `-Denv=hml`: usa configuração de homologação
+- `-B`: modo batch (sem interatividade)
+
+**O que mudará na V3:** adicionar job separado para testes de UI.
+
+---
+
+#### VERSAO 3 — Testes de UI com Chrome headless
+
+Adiciona: job de UI com Chrome instalado no runner.
+
+```yaml
+# .github/workflows/tests.yml — VERSAO 3
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run API tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@api" -B
+
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: stable
+          chrome-version: 'stable'
 
-      - name: Configurar ChromeDriver
-        run: |
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          echo "Chrome version: $CHROME_VERSION"
-          DRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}.0/linux64/chromedriver-linux64.zip"
-          wget -q "$DRIVER_URL" -O /tmp/chromedriver.zip || true
-          if [ -f /tmp/chromedriver.zip ]; then
-            unzip -o /tmp/chromedriver.zip -d /tmp/
-            sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/
-            sudo chmod +x /usr/local/bin/chromedriver
-          fi
-          chromedriver --version
+      - name: Run UI tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@ui" -B
+```
 
-      - name: Executar testes Maven
-        run: mvn test --no-transfer-progress
-        env:
-          CI: true
+**O que mudou da V2:**
+- Job `api-tests` permanece igual
+- Novo job `ui-tests` com `Setup Chrome` step
+- Jobs executam EM PARALELO (independentes)
+- `browser-actions/setup-chrome`: instala Chrome estável no runner
 
-      - name: Gerar relatorio Allure
-        uses: simple-elf/allure-report-action@master
-        if: always()
+**O que mudará na V4:** relatório Allure como artifact.
+
+---
+
+#### VERSAO 4 — Allure Report como artifact
+
+Adiciona: upload do relatório Allure como artifact do workflow.
+
+```yaml
+# .github/workflows/tests.yml — VERSAO 4
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
         with:
-          allure_results: target/allure-results
-          allure_history: allure-history
+          java-version: '8'
+          distribution: 'temurin'
 
-      - name: Publicar Allure Report no GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        if: always()
+      - name: Cache Maven packages
+        uses: actions/cache@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: Publicar relatorio Cucumber
+      - name: Run API tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@api" -B
+        continue-on-error: true
+
+      - name: Upload Allure results
+        if: always()
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: cucumber-report-${{ github.run_number }}
-          path: target/cucumber-reports/
+          name: allure-results-api
+          path: target/allure-results/
           retention-days: 30
 
-      - name: Publicar resultado JUnit
-        uses: mikepenz/action-junit-report@v4
-        if: always()
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
         with:
-          report_paths: target/cucumber-reports/cucumber.xml
-          detailed_summary: true
-          include_passed: true
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 'stable'
+
+      - name: Run UI tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@ui" -B
+        continue-on-error: true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-ui
+          path: target/allure-results/
+          retention-days: 30
 ```
 
+**O que mudou da V3:**
+- `continue-on-error: true`: pipeline não para em falha de teste (queremos o relatório)
+- `if: always()`: upload acontece mesmo se tests falharam
+- `actions/upload-artifact@v4`: salva allure-results como download
+- `retention-days: 30`: mantém por 30 dias
 
-**Diagrama do pipeline:**
+**O que mudará na V5:** publicar no GitHub Pages + notificação.
 
-```mermaid
-graph LR
-    A[Push/PR] --> B[Checkout]
-    B --> C[Setup Java 8]
-    C --> D[Setup Chrome]
-    D --> E[Setup ChromeDriver]
-    E --> F[mvn test]
-    F --> G[Allure Report]
-    F --> H[Cucumber Report]
-    F --> I[JUnit Report]
-    G --> J[GitHub Pages]
-    H --> K[Artifacts]
-    I --> L[PR Summary]
+---
+
+#### VERSAO 5 — GitHub Pages + status badge (Final)
+
+Adiciona: job que gera o relatório e publica no GitHub Pages.
+
+```yaml
+# .github/workflows/tests.yml — VERSAO 5 (FINAL)
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run API tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@api" -B
+        continue-on-error: true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-api
+          path: target/allure-results/
+          retention-days: 30
+
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 'stable'
+
+      - name: Run UI tests
+        run: mvn test -Denv=hml -Dcucumber.filter.tags="@ui" -B
+        continue-on-error: true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-ui
+          path: target/allure-results/
+          retention-days: 30
+
+  publish-report:
+    needs: [api-tests, ui-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download API results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-api
+          path: allure-results/
+
+      - name: Download UI results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-ui
+          path: allure-results/
+
+      - name: Setup Allure CLI
+        run: |
+          curl -o allure.tgz -Ls https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+          tar -zxvf allure.tgz
+          echo "$PWD/allure-2.24.0/bin" >> $GITHUB_PATH
+
+      - name: Generate Allure report
+        run: allure generate allure-results -o allure-report --clean
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report/
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
 ```
 
-**Explicação de cada step:**
+**O que mudou da V4:**
+- `permissions`: necessárias para GitHub Pages
+- Novo job `publish-report` com `needs: [api-tests, ui-tests]` (espera ambos)
+- Baixa artifacts dos dois jobs
+- Instala Allure CLI no runner
+- Gera relatório unificado
+- Publica no GitHub Pages
 
-| Step | Ação | Por que é necessário |
-|------|------|---------------------|
-| Checkout | Clona o repositório | Precisa do código para compilar |
-| Setup Java 8 | Instala JDK Temurin + cache Maven | Runtime para compilação e execução |
-| Setup Chrome | Instala Chrome stable | Necessário para testes `@ui` |
-| ChromeDriver | Baixa driver compatível com Chrome | Selenium precisa do driver correto |
-| mvn test | Compila e executa todos os testes | Core do pipeline |
-| Allure Report | Gera HTML interativo | Relatório detalhado para análise |
-| GitHub Pages | Publica relatório online | Acesso permanente via URL |
-| Cucumber Report | Upload do JSON/HTML Cucumber | Backup + histórico |
-| JUnit Report | Mostra resultado no PR | Feedback rápido sem abrir relatório |
+**Badge para o README:**
 
-> **Dica:** O `if: always()` garante que os relatórios são gerados mesmo se os testes falharem. Sem isso, uma falha no `mvn test` impediria a publicação do relatório — justamente quando ele é mais necessário.
+```markdown
+![Tests](https://github.com/SEU-USUARIO/SEU-REPO/actions/workflows/tests.yml/badge.svg)
+```
 
----
+### Explicacao do codigo
 
-### 5.2 Como Adicionar Novo Teste UI
+**Evolução das versões:**
 
-Checklist para criar um novo teste de interface do zero:
+| Versão | Funcionalidade | Complexidade |
+|--------|---------------|--------------|
+| V1 | Compila | Básica |
+| V2 | Testes API | + mvn test |
+| V3 | Testes UI | + Chrome setup |
+| V4 | Artifacts | + upload results |
+| V5 | Pages | + deploy report |
 
-1. **Criar/atualizar Page Object** em `src/test/java/pages/`
-   - Herdar de `BasePage`
-   - Mapear elementos com `By`
-   - Criar métodos de ação e verificação
+**Conceitos-chave do YAML:**
+- `needs`: dependência entre jobs (publish espera api e ui)
+- `if: always()`: executa mesmo se job anterior falhou
+- `continue-on-error: true`: não para pipeline em falha de teste
+- `actions/cache`: reutiliza ~/.m2 entre execuções (economiza ~2min)
+- `upload-artifact/download-artifact`: compartilha dados entre jobs
+- `deploy-pages`: publica HTML estático no GitHub Pages
 
-2. **Criar Feature** em `src/test/resources/features/`
-   - Adicionar tag `@ui` na funcionalidade
-   - Escrever cenários em português (Dado/Quando/Então)
-   - Usar parâmetros `{string}` e `{int}` para reuso
+### Fluxo de execucao
 
-3. **Criar Steps** em `src/test/java/steps/ui/`
-   - Injetar `Environment` e Page(s) no construtor
-   - Mapear cada step Gherkin com `@Dado`, `@Quando`, `@Então`
-   - Delegar ações para o Page Object
+```
+Developer faz Push/PR
+    |
+    v
+GitHub Actions dispara workflow
+    |
+    +--[paralelo]--+
+    |              |
+    v              v
+api-tests       ui-tests
+(~1 min)        (~3 min)
+    |              |
+    +-- upload     +-- upload
+    |              |
+    v              v
+    +------+-------+
+           |
+           v
+    publish-report
+    (baixa + gera + publica)
+           |
+           v
+    Allure Report no GitHub Pages
+    https://seu-user.github.io/seu-repo/
+```
 
-4. **Verificar Hooks** — `UiHooks` já cuida de abrir/fechar browser
+### Como executar
 
-5. **Adicionar tag `@smoke`** nos cenários críticos (opcional)
+```bash
+# 1. Crie a pasta .github/workflows/
+mkdir -p .github/workflows
 
-6. **Executar localmente:**
-   ```bash
-   mvn test -Dcucumber.filter.tags="@ui and @minha-tag"
-   ```
+# 2. Copie a V5 para tests.yml
+# 3. Commit e push
+git add .github/workflows/tests.yml
+git commit -m "ci: adicionar pipeline de testes"
+git push origin main
 
-7. **Verificar relatório:**
-   ```bash
-   mvn allure:serve
-   ```
+# 4. Vá em GitHub > Actions e observe a execucao
+```
 
-8. **Commit e push** — pipeline executa automaticamente
+### Como confirmar que funcionou
 
----
+1. Tab "Actions" no GitHub mostra workflow verde (ou amarelo se testes falharam)
+2. Artifacts disponíveis para download
+3. GitHub Pages com relatório Allure acessível via URL
+4. Badge no README mostra status
 
-### 5.3 Como Adicionar Novo Teste API
+### Falha guiada
 
-Checklist para criar um novo teste de API do zero:
+1. Remova `continue-on-error: true`:
+   - Se um teste falha, o job falha e artifacts não são uploaded
 
-1. **Criar payload JSON** em `src/test/resources/payloads/{recurso}/`
-   - Definir request body para POST/PUT
-   - Usar dados realistas
+2. Esqueça de habilitar GitHub Pages nas Settings:
+   - Deploy falha: "Pages is not enabled"
 
-2. **Criar schema JSON** em `src/test/resources/schemas/`
-   - Definir estrutura esperada da resposta
-   - Incluir `required` fields e `type` corretos
+3. Use `needs: [api-tests]` sem `ui-tests`:
+   - Report só terá resultados de API
 
-3. **Criar Model (POJO)** em `src/test/java/api/models/`
-   - Campos correspondentes ao JSON
-   - Construtor vazio + construtor completo + getters/setters
+### Erros comuns
 
-4. **Criar Builder** em `src/test/java/api/builders/` (se usar dados dinâmicos)
-   - Métodos `withCampo()` + `build()` + `buildRandom()`
-   - Usar `Faker` com locale `pt-BR`
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Permission denied` para Pages | Falta permissions no YAML | Adicione permissions block |
+| `Chrome not found` | Falta setup-chrome | Adicione browser-actions/setup-chrome |
+| Artifact vazio | Tests não geraram results | Verifique plugin Allure no TestRunner |
+| Timeout no job | Teste travou | Adicione timeout-minutes ao job |
+| Cache não funciona | Hash do pom mudou | Normal — recria na próxima execução |
+| `Pages is not enabled` | Settings do repo | Habilite Pages com Source: GitHub Actions |
 
-5. **Criar Service** em `src/test/java/api/services/`
-   - Receber `RestClient` no construtor
-   - Métodos para cada operação (create, get, update, delete)
+### O que nao deve ser feito
 
-6. **Criar Feature** em `src/test/resources/features/`
-   - Adicionar tag `@api`
-   - Contexto com `Dado que estou consumindo a API de {recurso}`
+- Não remova `continue-on-error` — você perderá relatórios em falha
+- Não execute testes UI sem setup do Chrome — falhará sem browser
+- Não use `runs-on: windows-latest` sem motivo — Linux é mais rápido
+- Não commite secrets no YAML — use GitHub Secrets
+- Não esqueça do cache — sem ele, cada run baixa ~500MB de deps
 
-7. **Criar Steps** em `src/test/java/steps/api/`
-   - Injetar `Environment`, `RestClient`, `Service`
-   - Reutilizar steps genéricos de validação quando possível
+### Exercicio
 
-8. **Executar localmente:**
-   ```bash
-   mvn test -Dcucumber.filter.tags="@api"
-   ```
+1. Adicione step de `mvn compile` antes do test (falha rápida se não compila)
+2. Adicione `timeout-minutes: 10` ao job para evitar travamento
+3. Crie um scheduled trigger: `schedule: - cron: '0 8 * * 1-5'` (8am seg-sex)
+4. Adicione step de notificação Slack com `rtCamp/action-slack-notify@v2`
 
-9. **Validar contrato:**
-   ```bash
-   mvn test -Dcucumber.filter.tags="@api and @smoke"
-   ```
+### Checklist
 
-10. **Verificar no Allure** que request/response foram anexados corretamente
-
-
----
-
-### 5.4 Checklist de Code Review
-
-Use esta tabela ao revisar PRs de automação de testes:
-
-**Features (.feature):**
-
-| ✓ | Critério |
-|---|----------|
-| ☐ | Feature tem tag correta (`@ui`, `@api`) |
-| ☐ | Cenários em português com acentuação correta |
-| ☐ | Steps reutilizáveis (parâmetros em vez de hardcoded) |
-| ☐ | Cenário independente (não depende de outro cenário) |
-| ☐ | Contexto (Background) usado quando aplicável |
-| ☐ | Tag `@smoke` nos cenários críticos |
-
-**Steps:**
-
-| ✓ | Critério |
-|---|----------|
-| ☐ | Dependências injetadas via construtor (PicoContainer) |
-| ☐ | Nenhuma lógica HTTP no Step (delegar para Service) |
-| ☐ | Asserções claras com mensagem descritiva |
-| ☐ | Sem `Thread.sleep()` — usar waits explícitos |
-| ☐ | Sem `System.out.println()` — usar `LogUtils` |
-
-**Pages:**
-
-| ✓ | Critério |
-|---|----------|
-| ☐ | Herda de `BasePage` |
-| ☐ | Elementos mapeados como `By` (não WebElement) |
-| ☐ | Métodos de ação retornam `void` ou `this` (fluent) |
-| ☐ | Sem asserções no Page Object |
-| ☐ | Sem lógica de negócio — apenas interação com UI |
-
-**API (Service/Client):**
-
-| ✓ | Critério |
-|---|----------|
-| ☐ | Service recebe RestClient via construtor |
-| ☐ | Payloads em arquivo JSON (não hardcoded no Java) |
-| ☐ | Schema validation para endpoints críticos |
-| ☐ | Sem asserções no Service |
-| ☐ | Builder usado para dados dinâmicos |
-
-**Geral:**
-
-| ✓ | Critério |
-|---|----------|
-| ☐ | Nenhum dado sensível no código (usar properties + env vars) |
-| ☐ | Nomenclatura segue padrões do framework (seção 4.10) |
-| ☐ | Teste executa isoladamente (`mvn test -Dcucumber.filter.tags="@tag"`) |
-| ☐ | Relatório Allure mostra resultado correto |
-| ☐ | Sem dependências novas desnecessárias no pom.xml |
+- [ ] `.github/workflows/tests.yml` criado
+- [ ] Trigger em push e pull_request
+- [ ] Java 8 configurado com temurin
+- [ ] Cache de ~/.m2/repository
+- [ ] Job API separado de job UI
+- [ ] Chrome instalado para testes UI
+- [ ] `continue-on-error: true` para não perder relatório
+- [ ] Upload de allure-results como artifact
+- [ ] Job de publish-report com GitHub Pages
+- [ ] Badge no README
 
 ---
 
-### 5.5 Checklist para Novo Projeto
+## Capítulo 20 — Manutenção e evolução
 
-Use este checklist ao iniciar um novo projeto de automação baseado neste framework.
+### Resultado que construiremos
 
-**Fase 1 — Infraestrutura:**
+Guias práticos para manter e expandir o framework: como adicionar novos testes, fazer code review, diagnosticar problemas e evoluir a arquitetura. Este capítulo é referência permanente para o time.
 
-| ✓ | Tarefa |
-|---|--------|
-| ☐ | Criar repositório Git com .gitignore (Java + Maven) |
-| ☐ | Copiar `pom.xml` base e ajustar groupId/artifactId |
-| ☐ | Criar estrutura de pastas (`src/test/java`, `src/test/resources`) |
-| ☐ | Configurar `environments/dev.properties` com URLs do projeto |
-| ☐ | Configurar `logback.xml` |
-| ☐ | Testar com `mvn compile` (sem testes ainda) |
+### Onde estamos na arquitetura
 
-**Fase 2 — Estrutura do framework:**
+```
++-------------------------------------------------------+
+| FRAMEWORK COMPLETO                                    |
+|                                                       |
+|  [Features] --> [Steps] --> [Pages/Services]          |
+|                     |                                 |
+|                     v                                 |
+|              [Hooks] + [Utils]                        |
+|                     |                                 |
+|                     v                                 |
+|         [Drivers] + [Config] + [Exceptions]           |
+|                     |                                 |
+|                     v                                 |
+|         [Maven] --> [CI/CD] --> [Allure Report]       |
++-------------------------------------------------------+
+```
 
-| ✓ | Tarefa |
-|---|--------|
-| ☐ | Copiar classes base: `DriverFactory`, `DriverManager`, `BasePage` |
-| ☐ | Copiar infra: `ConfigReader`, `Environment`, `LogUtils`, `FrameworkException` |
-| ☐ | Copiar `RestClient` e `JsonUtils` |
-| ☐ | Copiar `UiHooks` e `ScreenshotUtils` |
-| ☐ | Criar `TestRunner` com plugins corretos |
-| ☐ | Executar um cenário "hello world" para validar setup |
+Este capítulo não adiciona código novo. É um guia operacional.
 
-**Fase 3 — CI/CD:**
+### Conceito mínimo necessário
 
-| ✓ | Tarefa |
-|---|--------|
-| ☐ | Criar `.github/workflows/testes.yml` |
-| ☐ | Configurar GitHub Pages para Allure |
-| ☐ | Adicionar secrets necessários (credenciais, URLs) |
-| ☐ | Validar pipeline com push para branch develop |
-| ☐ | Confirmar que relatório Allure está publicado |
+Um framework de automação é um organismo vivo. Ele precisa de:
+- **Padrões** para que qualquer pessoa adicione testes consistentes
+- **Checklists** para evitar erros recorrentes
+- **Troubleshooting** para resolver problemas rapidamente
+- **Estratégia de evolução** para não ficar obsoleto
 
-**Fase 4 — Qualidade:**
+### Arquivos envolvidos
 
-| ✓ | Tarefa |
-|---|--------|
-| ☐ | Escrever primeiro teste `@smoke` (UI + API) |
-| ☐ | Validar que screenshot funciona em falha |
-| ☐ | Validar que Allure mostra request/response da API |
-| ☐ | Documentar URLs (Allure Pages, repositório) |
-| ☐ | Treinar equipe no workflow de criação de testes |
+Nenhum arquivo novo. Este capítulo referencia todos os existentes.
 
+### Construção manual passo a passo
+
+Não há construção — são guias e checklists.
 
 ---
 
-### 5.6 Troubleshooting
+### Codigo completo final
 
-Problemas mais comuns e suas soluções:
+#### Guia 1: Adicionar um novo teste de UI
 
-| # | Erro | Causa | Solução |
-|---|------|-------|---------|
-| 1 | `SessionNotCreatedException: ChromeDriver only supports Chrome version X` | ChromeDriver incompatível com versão do Chrome instalado | Atualizar ChromeDriver ou Chrome para versões compatíveis. Em CI, o workflow já resolve isso automaticamente |
-| 2 | `NoSuchElementException` | Elemento não encontrado na página (timing ou seletor errado) | Usar waits explícitos (`WebDriverWait`). Verificar se o seletor está correto com DevTools |
-| 3 | `PicoContainer cannot resolve` | Classe não tem construtor público ou não está no pacote `glue` | Verificar que a classe tem UM construtor público. Checar `glue = {"steps", "hooks"}` no Runner |
-| 4 | `FrameworkException: Arquivo nao encontrado no classpath` | Arquivo .properties ou JSON não está em `src/test/resources/` | Mover arquivo para `src/test/resources/`. Verificar caminho relativo passado ao `ConfigReader` |
-| 5 | `Connection refused` / `ConnectException` | API alvo fora do ar ou URL incorreta | Verificar URL no `.properties`. Testar com `curl` manualmente. Checar firewall/proxy |
-| 6 | `JsonSchemaValidationException` | Resposta da API não bate com o schema esperado | Atualizar schema ou investigar mudança na API. Comparar JSON real vs schema |
-| 7 | `StaleElementReferenceException` | Elemento foi removido do DOM após ser encontrado | Re-localizar o elemento antes de interagir. Usar PageFactory com @FindBy ou waits |
-| 8 | `TimeoutException` em CI mas não local | CI é mais lento (recursos limitados) | Aumentar timeouts no `hml.properties`. Usar `WebDriverWait` em vez de implicit wait |
-| 9 | `javax.net.ssl.SSLHandshakeException` | Proxy corporativo intercepta SSL | Configurar truststore: `-Djavax.net.ssl.trustStore=...` (já configurado no pom.xml) |
-| 10 | `allure:serve` não abre relatório | Resultados Allure não foram gerados | Verificar se `target/allure-results/` contém arquivos. Re-executar `mvn test` antes |
+```
+1. CRIE a feature file:
+   src/test/resources/features/ui/<funcionalidade>.feature
 
-> **Dica:** Para qualquer erro novo, primeiro verifique o `target/test-execution.log` — ele contém todo o logging com timestamps.
+2. CRIE o Page Object:
+   src/test/java/pages/<funcionalidade>/<Funcionalidade>Page.java
+   - Extenda BasePage
+   - Mapeie locators como By constants
+   - Implemente acoes de negocio
 
----
+3. CRIE a classe de steps:
+   src/test/java/steps/ui/<Funcionalidade>Steps.java
+   - Instancie a Page no construtor
+   - Implemente Given/When/Then
+   - Asserts apenas no @Then
 
-### 5.7 FAQ
+4. ADICIONE tag @ui no cenario (obrigatorio para UiHooks funcionar)
 
-**1. Posso executar testes UI e API ao mesmo tempo?**
+5. EXECUTE:
+   mvn test -Dcucumber.filter.tags="@<sua-tag>"
 
-Sim. O comando `mvn test` executa tudo. Para separar: `mvn test -Dcucumber.filter.tags="@ui"` ou `"@api"`.
+6. VALIDE:
+   - Teste passa localmente
+   - Teste passa em headless
+   - Screenshot funciona em falha
+```
 
-**2. Preciso de banco de dados para rodar os testes?**
+**Exemplo de estrutura para nova funcionalidade "Dashboard":**
 
-Não. Os testes UI interagem com a aplicação web e os testes API usam JSONPlaceholder (API pública). Nenhum banco local necessário.
-
-**3. Como rodar em headless (sem abrir navegador)?**
-
-Adicione a opção no `DriverFactory` ao criar o ChromeOptions: `options.addArguments("--headless")`. Em CI, isso já é recomendado para performance.
-
-**4. Posso usar este framework para testes mobile?**
-
-A arquitetura suporta, mas requer adaptação. O `DriverFactory` precisaria retornar um `AppiumDriver` e as Pages usariam seletores mobile. O padrão Client-Service da API funciona sem alteração.
-
-**5. Por que Java 8 e não 11/17?**
-
-Compatibilidade com ambientes corporativos que ainda usam Java 8. O Selenium 3.x e REST Assured 4.x são as últimas versões que suportam Java 8 oficialmente.
-
-**6. Como adicionar autenticação OAuth/JWT nos testes API?**
-
-Crie um `AuthService` que faz login e extrai o token. No Step de `Contexto`, chame `authService.login()` e depois `restClient.addHeader("Authorization", "Bearer " + token)`.
-
-**7. Os testes podem rodar em paralelo?**
-
-Sim, mas requer configuração adicional: plugin `maven-surefire-plugin` com `<parallel>` e isolamento de estado via PicoContainer (que já é por cenário). Cuidado com dados compartilhados.
-
-**8. Como versionar junto com o código da aplicação?**
-
-Recomendação: repositório separado. O framework de testes tem ciclo de vida próprio. Se ficar junto, use uma pasta `e2e/` na raiz do projeto da aplicação.
-
-**9. Onde colocar credenciais de produção?**
-
-Nunca no código. Use variáveis de ambiente (GitHub Secrets em CI, export local) e o mecanismo de override do `ConfigReader` (seção 4.2).
-
-**10. Como debugar um teste que falha apenas no CI?**
-
-Verifique: 1) Timeouts (CI é mais lento), 2) Resolução de tela (headless padrão: 800x600), 3) Locale/timezone diferente, 4) Relatório Allure publicado no GitHub Pages com screenshot/response da falha.
-
+```
+src/test/resources/features/ui/dashboard.feature
+src/test/java/pages/dashboard/DashboardPage.java
+src/test/java/steps/ui/DashboardSteps.java
+```
 
 ---
 
-### 5.8 Glossário
+#### Guia 2: Adicionar um novo teste de API
 
-| Termo | Definição |
-|-------|-----------|
-| **BDD** | Behavior-Driven Development — metodologia onde testes são escritos em linguagem natural (Gherkin) antes da implementação |
-| **Cucumber** | Framework que conecta cenários Gherkin a código Java via anotações |
-| **Gherkin** | Linguagem estruturada (Dado/Quando/Então) para descrever comportamentos de forma legível por não-técnicos |
-| **Page Object** | Padrão de design que encapsula elementos e ações de uma página em uma classe Java |
-| **PicoContainer** | Container de injeção de dependência usado pelo Cucumber para instanciar Steps e compartilhar estado |
-| **REST Assured** | Biblioteca Java para testes de APIs REST com DSL fluente |
-| **Allure** | Framework de relatórios que gera dashboards interativos a partir de resultados de teste |
-| **Selenium WebDriver** | Ferramenta que automatiza navegadores web via protocolo W3C |
-| **ChromeDriver** | Executável que faz a ponte entre Selenium e o navegador Chrome |
-| **Maven** | Ferramenta de build e gerenciamento de dependências para projetos Java |
-| **Surefire** | Plugin Maven que executa testes unitários/integração e gera relatórios XML |
-| **AspectJ** | Framework de programação orientada a aspectos — usado pelo Allure para interceptar execução |
-| **POJO** | Plain Old Java Object — classe simples sem herança ou framework, usada como modelo de dados |
-| **Builder Pattern** | Padrão criacional que separa a construção de um objeto complexo da sua representação |
-| **Faker** | Biblioteca que gera dados aleatórios realistas (nomes, endereços, textos) para testes |
-| **Schema Validation** | Verificação de que a estrutura JSON da resposta segue um contrato pré-definido |
-| **Headless** | Modo de execução do navegador sem interface gráfica (usado em CI/CD) |
-| **Flaky Test** | Teste instável que às vezes passa e às vezes falha sem alteração no código |
-| **Smoke Test** | Subconjunto mínimo de testes que valida se o sistema está "respirando" |
-| **CI/CD** | Continuous Integration / Continuous Delivery — prática de integrar e entregar código frequentemente com automação |
+```
+1. CRIE (ou atualize) a feature file:
+   src/test/resources/features/api/<recurso>.feature
+
+2. CRIE o model (se necessario):
+   src/test/java/api/models/<Recurso>Request.java
+
+3. CRIE o builder (se necessario):
+   src/test/java/api/builders/<Recurso>Builder.java
+
+4. CRIE o service:
+   src/test/java/api/services/<Recurso>Service.java
+   - Use RestClient para chamadas HTTP
+   - Retorne Response sem validar
+
+5. CRIE o schema (se necessario):
+   src/test/resources/schemas/<recurso>-schema.json
+
+6. CRIE a classe de steps:
+   src/test/java/steps/api/<Recurso>Steps.java
+   - Instancie o Service no construtor
+   - Valide status e body nos @Then
+
+7. ADICIONE tag @api no cenario
+
+8. EXECUTE:
+   mvn test -Dcucumber.filter.tags="@<recurso>"
+```
 
 ---
 
-### 5.9 Comandos Rápidos
+#### Guia 3: Checklist de Code Review
 
-**Execução de testes:**
+```
+FEATURE FILE:
+  [ ] Tags presentes (@ui ou @api + @funcionalidade)
+  [ ] Cenarios independentes (nao dependem de ordem)
+  [ ] Given/When/Then claros e sem detalhes tecnicos
+  [ ] Parametros entre aspas para strings
+  [ ] Sem dados sensiveis hardcoded
 
-| Comando | Descrição |
-|---------|-----------|
-| `mvn test` | Executa TODOS os testes |
-| `mvn test -Dcucumber.filter.tags="@ui"` | Apenas testes de UI |
-| `mvn test -Dcucumber.filter.tags="@api"` | Apenas testes de API |
-| `mvn test -Dcucumber.filter.tags="@smoke"` | Apenas smoke tests |
-| `mvn test -Dcucumber.filter.tags="not @wip"` | Tudo exceto work-in-progress |
-| `mvn test -Dcucumber.filter.tags="@api and @smoke"` | Smoke de API apenas |
-| `mvn test -Denvironment=hml` | Executar em ambiente HML |
-| `mvn test -Denvironment=hml -Dcucumber.filter.tags="@smoke"` | Smoke em HML |
+STEPS:
+  [ ] Sem logica de negocio (delega para Page/Service)
+  [ ] Sem Thread.sleep()
+  [ ] Sem WebDriver direto
+  [ ] Asserts apenas em @Then
+  [ ] Mensagens de erro descritivas nos asserts
+  [ ] Logging nas acoes principais
 
-**Relatórios:**
+PAGE OBJECTS:
+  [ ] Locators privados e constantes
+  [ ] Metodos publicos com nomes de negocio
+  [ ] Usa metodos da BasePage (click, type, waitForVisible)
+  [ ] Nao tem asserts
+  [ ] Nao expoe WebElement
 
-| Comando | Descrição |
-|---------|-----------|
-| `mvn allure:serve` | Gera e abre relatório Allure no navegador |
-| `mvn allure:report` | Gera relatório sem abrir (salva em `target/site/allure-maven-plugin/`) |
-| `open target/cucumber-reports/cucumber.html` | Abre relatório Cucumber (básico) |
+SERVICES:
+  [ ] Usa RestClient (nao REST Assured direto)
+  [ ] Retorna Response sem validar
+  [ ] Endpoints como constantes
+  [ ] Nao faz asserts
 
-**Utilitários Maven:**
+GERAL:
+  [ ] Compila sem warnings
+  [ ] Testes passam localmente
+  [ ] Testes passam em headless
+  [ ] Nao quebra testes existentes
+  [ ] Log Utils usado (nao System.out)
+  [ ] FrameworkException para erros internos
+```
 
-| Comando | Descrição |
-|---------|-----------|
-| `mvn clean` | Limpa `target/` (remove resultados anteriores) |
-| `mvn clean test` | Limpa + executa (fresh start) |
-| `mvn compile` | Apenas compila (sem executar testes) |
-| `mvn dependency:tree` | Mostra árvore de dependências |
-| `mvn versions:display-dependency-updates` | Mostra dependências desatualizadas |
-| `mvn surefire-report:report` | Gera relatório Surefire (JUnit básico) |
+---
 
-**Variáveis de ambiente:**
+#### Guia 4: Troubleshooting — 10 Erros Comuns
 
-| Variável | Efeito | Exemplo |
-|----------|--------|---------|
-| `ENVIRONMENT` | Define qual .properties carregar | `export ENVIRONMENT=hml` |
-| `BASE_URL` | Override da URL base (UI) | `export BASE_URL=https://staging.app.com` |
-| `API_BASE_URL` | Override da URL base (API) | `export API_BASE_URL=https://staging-api.com` |
-| `BROWSER` | Override do navegador | `export BROWSER=firefox` |
-| `CI` | Indica execução em CI (headless) | Setado automaticamente pelo GitHub Actions |
+| # | Sintoma | Causa Provável | Solução |
+|---|---------|---------------|---------|
+| 1 | `NullPointerException` no driver | Hook não executou — falta tag @ui | Adicione @ui ao cenário |
+| 2 | `NoSuchElementException` | Locator errado ou elemento não carregou | Verifique locator no DevTools; use explicit wait |
+| 3 | `StaleElementReferenceException` | Página recarregou e referência invalidou | Use locator (By) em vez de WebElement armazenado |
+| 4 | `TimeoutException` no wait | Elemento nunca apareceu | Aumente timeout ou verifique condição de visibilidade |
+| 5 | `Step undefined` no Cucumber | Texto do Gherkin não bate com @Given/@When/@Then | Compare exatamente incluindo espaços e parâmetros |
+| 6 | `Connection refused` na API | URL errada ou serviço fora do ar | Verifique api.base.url no .properties; teste URL no browser |
+| 7 | `AssertionError: expected 200 but was 404` | Endpoint mudou ou recurso não existe | Verifique documentação da API; confirme path |
+| 8 | Testes passam local mas falham no CI | Headless não configurado ou Chrome incompatível | Verifique headless=true em hml.properties; atualize ChromeDriver |
+| 9 | Allure report vazio | Falta aspectjweaver ou plugin AllureCucumber | Verifique pom.xml (Surefire plugin) e TestRunner (plugins) |
+| 10 | `OutOfMemoryError` em CI | Muitos testes em paralelo | Adicione `-Xmx1024m` ao argLine do Surefire |
 
-> **Dica:** Combine variáveis de ambiente com o comando Maven para máxima flexibilidade: `ENVIRONMENT=hml mvn test -Dcucumber.filter.tags="@smoke"`
+---
+
+#### Guia 5: Estratégia de evolução
+
+**Curto prazo (1-3 meses):**
+- Adicionar mais cenários nos endpoints existentes
+- Criar Scenario Outlines com Examples para variação de dados
+- Implementar retry em cenários flaky (Cucumber `@Retry` plugin)
+
+**Médio prazo (3-6 meses):**
+- Execução paralela com `cucumber-jvm-parallel-plugin` ou JUnit 5
+- Page Object Components para elementos compartilhados (header, menu)
+- Data-driven testing com CSV/Excel
+
+**Longo prazo (6-12 meses):**
+- Migrar para Selenium 4 + BiDi protocol
+- Migrar para JUnit 5 + Cucumber 8
+- Adicionar testes de performance com Gatling
+- Adicionar testes de acessibilidade com axe-core
+- Dockerizar execução com Selenoid/Selenium Grid
+
+**Sinais de que o framework precisa de refactoring:**
+- Mais de 5 locators duplicados entre Pages
+- Steps com mais de 30 linhas
+- BasePage com mais de 20 métodos
+- Tempo de execução total acima de 30 minutos
+- Mais de 10% de testes flaky
+
+### Explicacao do codigo
+
+Este capítulo não tem código novo. A "explicação" é o raciocínio por trás de cada guia:
+
+**Por que checklists?** Reduzem erros cognitivos. Mesmo QAs experientes esquecem tags ou cometem typos em locators.
+
+**Por que troubleshooting?** Os mesmos 10 erros respondem por 90% dos problemas do dia a dia. Ter a solução à mão economiza horas.
+
+**Por que estratégia de evolução?** Frameworks estagnados se tornam legados. Planejar a evolução previne reescrita total.
+
+### Fluxo de execucao
+
+Fluxo de trabalho diário do QA com o framework:
+
+```
+1. Recebe historia/bug para automacao
+    |
+    v
+2. Cria branch: feature/automacao-login-social
+    |
+    v
+3. Escreve feature file (Gherkin)
+    |
+    v
+4. Cria/atualiza Page Object ou Service
+    |
+    v
+5. Implementa Steps
+    |
+    v
+6. Executa localmente (mvn test -Dcucumber.filter.tags="@nova-tag")
+    |
+    v
+7. Valida em headless (mvn test -Denv=hml ...)
+    |
+    v
+8. Commit + Push
+    |
+    v
+9. CI executa automaticamente
+    |
+    v
+10. Code Review seguindo checklist
+    |
+    v
+11. Merge para develop/main
+```
+
+### Como executar
+
+Comandos mais usados no dia a dia:
+
+```bash
+# Rodar todos os testes
+mvn test
+
+# Rodar apenas smoke tests
+mvn test -Dcucumber.filter.tags="@smoke"
+
+# Rodar apenas API
+mvn test -Dcucumber.filter.tags="@api"
+
+# Rodar apenas UI
+mvn test -Dcucumber.filter.tags="@ui"
+
+# Rodar em HML headless
+mvn test -Denv=hml
+
+# Rodar cenario especifico por nome
+mvn test -Dcucumber.filter.tags="@login"
+
+# Gerar relatorio Allure
+allure serve target/allure-results
+
+# Limpar e recompilar
+mvn clean compile -DskipTests
+
+# Ver arvore de dependencias
+mvn dependency:tree
+```
+
+### Como confirmar que funcionou
+
+Este capítulo é validado pela prática:
+1. Siga o Guia 1 e adicione um teste de UI novo
+2. Siga o Guia 2 e adicione um teste de API novo
+3. Faça code review usando o Guia 3
+4. Resolva um problema usando o Guia 4
+5. Planeje o próximo trimestre usando o Guia 5
+
+### Falha guiada
+
+Cenário: você adicionou um teste novo mas ele não executa.
+
+Diagnóstico passo a passo:
+1. O cenário tem tag? (`@ui` ou `@api`)
+2. O glue no TestRunner inclui o pacote do step?
+3. O texto do step no Gherkin bate exatamente com a annotation?
+4. O arquivo está no diretório correto?
+5. Compile: `mvn compile -DskipTests` dá erro?
+
+### Erros comuns
+
+(Consolidado no Guia 4 — Troubleshooting acima)
+
+### O que nao deve ser feito
+
+- Não modifique BasePage sem entender o impacto em TODAS as Pages
+- Não atualize dependências sem rodar a suite completa
+- Não desabilite testes flaky — corrija-os (ou marque como @known-bug)
+- Não deixe código morto (steps sem feature, pages sem steps)
+- Não crie "mega-steps" que fazem 10 coisas — quebre em steps menores
+- Não ignore o relatório Allure — é a documentação viva do sistema
+
+### Exercicio
+
+1. Adicione um novo teste de UI para a página "Secure Area" (logout)
+2. Adicione um novo teste de API para GET /users
+3. Faça code review do seu próprio código usando o Checklist
+4. Simule o erro #3 (StaleElement) e resolva
+5. Crie um plano de 3 meses para evolução do framework
+
+### Checklist
+
+- [ ] Li e entendi todos os 5 guias
+- [ ] Consigo adicionar teste UI seguindo o Guia 1
+- [ ] Consigo adicionar teste API seguindo o Guia 2
+- [ ] Sei usar o checklist de code review
+- [ ] Conheço os 10 erros mais comuns e suas soluções
+- [ ] Tenho um plano de evolução para o framework
+- [ ] Toda a equipe tem acesso a esta documentação
+- [ ] Pipeline CI está verde e publicando relatórios
+
+---
+
+## Arquitetura Final Completa
+
+```
+selenium-cucumber-project/
+|
++-- pom.xml
++-- .github/workflows/tests.yml
+|
++-- src/test/java/
+|   +-- runners/
+|   |   +-- TestRunner.java
+|   |
+|   +-- steps/
+|   |   +-- ui/
+|   |   |   +-- LoginSteps.java
+|   |   +-- api/
+|   |       +-- PostSteps.java
+|   |
+|   +-- pages/
+|   |   +-- base/
+|   |   |   +-- BasePage.java
+|   |   +-- login/
+|   |       +-- LoginPage.java
+|   |
+|   +-- api/
+|   |   +-- clients/
+|   |   |   +-- RestClient.java
+|   |   +-- services/
+|   |   |   +-- PostService.java
+|   |   +-- models/
+|   |   |   +-- PostRequest.java
+|   |   +-- builders/
+|   |       +-- PostBuilder.java
+|   |
+|   +-- hooks/
+|   |   +-- UiHooks.java
+|   |   +-- ApiHooks.java
+|   |
+|   +-- config/
+|   |   +-- Environment.java
+|   |   +-- ConfigReader.java
+|   |
+|   +-- drivers/
+|   |   +-- DriverFactory.java
+|   |   +-- DriverManager.java
+|   |
+|   +-- utils/
+|   |   +-- LogUtils.java
+|   |   +-- JsonUtils.java
+|   |   +-- ScreenshotUtils.java
+|   |
+|   +-- exceptions/
+|       +-- FrameworkException.java
+|
++-- src/test/resources/
+    +-- features/
+    |   +-- ui/
+    |   |   +-- login.feature
+    |   +-- api/
+    |       +-- posts.feature
+    |
+    +-- environments/
+    |   +-- dev.properties
+    |   +-- hml.properties
+    |
+    +-- payloads/
+    |   +-- posts/
+    |       +-- create-post.json
+    |       +-- update-post.json
+    |
+    +-- schemas/
+    |   +-- post-schema.json
+    |
+    +-- testdata/
+    |   +-- login.json
+    |
+    +-- logback.xml
+```
+
+---
+
+## Fluxo de Dependências
+
+```
++------------------+     +------------------+     +------------------+
+|    Features      |     |    TestRunner     |     |  GitHub Actions  |
+|  (Gherkin)       |     |  (JUnit entry)   |     |  (CI trigger)    |
++--------+---------+     +--------+---------+     +--------+---------+
+         |                         |                        |
+         v                         v                        v
++--------+---------+     +--------+---------+     +--------+---------+
+|     Steps        |<----|    Cucumber      |---->|    Maven         |
+| (UI + API)       |     |  (orchestrator)  |     |  (build tool)    |
++--------+---------+     +------------------+     +------------------+
+         |
+    +----+----+
+    |         |
+    v         v
++---+---+ +---+---+
+| Pages | |Service|
+| (UI)  | | (API) |
++---+---+ +---+---+
+    |         |
+    v         v
++---+---+ +---+------+
+|Driver | |RestClient|
+|Manager| |          |
++---+---+ +---+------+
+    |         |
+    v         v
++---+---+ +---+------+
+|Selenium| |REST      |
+|(browser)| |Assured  |
++---------+ +---------+
+
+Transversais (usados por todos):
+  [Environment] [LogUtils] [FrameworkException]
+```
+
+---
+
+*Framework construido. Testes rodando. Pipeline publicando. Agora e com voce.*
