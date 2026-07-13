@@ -29,7 +29,7 @@
         <!-- REST Assured 4.x — última versão com suporte a Java 8 -->
         <rest.assured.version>4.5.1</rest.assured.version>
         <!-- Allure Report -->
-        <allure.version>2.24.0</allure.version>
+        <allure.version>2.35.3</allure.version>
         <!-- WebDriverManager — resolve chromedriver automaticamente -->
         <webdrivermanager.version>5.8.0</webdrivermanager.version>
     </properties>
