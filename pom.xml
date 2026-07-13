@@ -24,7 +24,7 @@
         <!-- Selenium 3.x — última versão compatível com Java 8 -->
         <selenium.version>3.141.59</selenium.version>
         <!-- Cucumber 7.x requer Java 8+ -->
-        <cucumber.version>7.18.0</cucumber.version>
+        <cucumber.version>7.34.4</cucumber.version>
         <junit.version>4.13.2</junit.version>
         <!-- REST Assured 4.x — última versão com suporte a Java 8 -->
         <rest.assured.version>4.5.1</rest.assured.version>
