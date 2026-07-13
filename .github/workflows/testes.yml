@@ -44,7 +44,7 @@ jobs:
           # SENHA_ADMIN: ${{ secrets.SENHA_ADMIN }}
 
       - name: Publicar relatorio Cucumber
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: cucumber-report-${{ github.run_number }}
@@ -60,7 +60,7 @@ jobs:
           include_passed: true
 
       - name: Upload allure-results (para o job de publicacao)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: allure-results
