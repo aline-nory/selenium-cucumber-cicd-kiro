@@ -28,6 +28,25 @@
 
 ---
 
+> **Nota (2026-07-13) — Errata pós-auditoria**
+>
+> Este documento é um tutorial progressivo: cada capítulo constrói sobre o anterior, e por isso alguns
+> trechos mostram código intermediário/temporário que muda em capítulos seguintes (isso já é indicado no texto
+> quando acontece). Além disso, uma auditoria técnica do framework final removeu duas coisas que este tutorial
+> ainda apresenta como parte do resultado:
+>
+> - **`PostRequest` e `PostBuilder`** (Capítulo 14, com JavaFaker) — nunca chegaram a ser usados pelo
+>   `PostService` real, que sempre carregou os payloads de `payloads/posts/*.json`. Ficaram no código como uma
+>   segunda forma (não utilizada) de montar o mesmo payload, então foram removidos junto com a dependência
+>   `javafaker` (não mantida desde ~2019). O capítulo permanece abaixo com valor didático sobre o padrão Builder.
+> - **`testdata/login.json`** (mencionado nos Capítulos 9 e 17) — duplicava as mesmas credenciais já presentes
+>   em `environments/*.properties`, sem nenhum código lendo o arquivo. Removido por ser dado morto/duplicado.
+>
+> A estrutura de pastas e a stack **atuais** estão sempre no [README.md](README.md) — use-o como referência
+> de estado real do projeto; use este documento para entender o raciocínio por trás de cada peça.
+
+---
+
 ## Capítulo 1 — Criar o projeto Maven vazio
 
 ### Resultado que construiremos

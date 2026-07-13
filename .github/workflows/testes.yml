@@ -7,14 +7,17 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Padrao restritivo (least privilege): cada job declara apenas o que precisa.
 permissions:
-  contents: write
-  pages: write
+  contents: read
 
 jobs:
   testes:
     name: Executar Testes (UI + API)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write  # necessario para o mikepenz/action-junit-report publicar o resumo
 
     steps:
       - name: Checkout do repositorio
@@ -27,31 +30,65 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Instalar Google Chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Instalar Google Chrome + ChromeDriver compativel
+        uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
-
-      - name: Configurar ChromeDriver
-        run: |
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          echo "Chrome version: $CHROME_VERSION"
-          DRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}.0/linux64/chromedriver-linux64.zip"
-          wget -q "$DRIVER_URL" -O /tmp/chromedriver.zip || true
-          if [ -f /tmp/chromedriver.zip ]; then
-            unzip -o /tmp/chromedriver.zip -d /tmp/
-            sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/
-            sudo chmod +x /usr/local/bin/chromedriver
-          fi
-          chromedriver --version
+          install-chromedriver: true
 
       - name: Executar testes Maven
         run: mvn test --no-transfer-progress
         env:
           CI: true
+          # Em um ambiente real, credenciais viriam de GitHub Secrets (nunca hardcoded):
+          # SENHA_ADMIN: ${{ secrets.SENHA_ADMIN }}
+
+      - name: Publicar relatorio Cucumber
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-report-${{ github.run_number }}
+          path: target/cucumber-reports/
+          retention-days: 30
+
+      - name: Publicar resultado JUnit
+        uses: mikepenz/action-junit-report@v6
+        if: always()
+        with:
+          report_paths: target/cucumber-reports/cucumber.xml
+          detailed_summary: true
+          include_passed: true
+
+      - name: Upload allure-results (para o job de publicacao)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: target/allure-results
+          retention-days: 7
+
+  publicar-relatorio:
+    name: Publicar Allure Report (GitHub Pages)
+    needs: testes
+    # So publica em push para main - uma PR nunca deve sobrescrever o relatorio publico.
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Baixar allure-results do job de testes
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: target/allure-results
 
       - name: Gerar relatorio Allure
-        uses: simple-elf/allure-report-action@master
+        uses: simple-elf/allure-report-action@v1.14
         if: always()
         with:
           allure_results: target/allure-results
@@ -64,19 +101,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-
-      - name: Publicar relatorio Cucumber
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cucumber-report-${{ github.run_number }}
-          path: target/cucumber-reports/
-          retention-days: 30
-
-      - name: Publicar resultado JUnit
-        uses: mikepenz/action-junit-report@v4
-        if: always()
-        with:
-          report_paths: target/cucumber-reports/cucumber.xml
-          detailed_summary: true
-          include_passed: true

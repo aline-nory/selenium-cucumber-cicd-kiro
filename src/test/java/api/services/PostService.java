@@ -34,8 +34,8 @@ public class PostService {
     }
 
     public void update(int id) {
-        String body = JsonUtils.load("payloads/posts/update-post.json")
-                .replace("\"id\":1", "\"id\":" + id);
+        String rawBody = JsonUtils.load("payloads/posts/update-post.json");
+        String body = JsonUtils.setIntField(rawBody, "id", id);
         client.setBody(body);
         client.put("/posts/" + id);
     }

@@ -30,6 +30,8 @@
         <rest.assured.version>4.5.1</rest.assured.version>
         <!-- Allure Report -->
         <allure.version>2.24.0</allure.version>
+        <!-- WebDriverManager — resolve chromedriver automaticamente -->
+        <webdrivermanager.version>5.8.0</webdrivermanager.version>
     </properties>
 
     <dependencies>
@@ -39,6 +41,14 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- WebDriverManager — resolve chromedriver automaticamente -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${webdrivermanager.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Cucumber JVM -->
@@ -77,6 +87,14 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>json-schema-validator</artifactId>
             <version>${rest.assured.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Jackson Databind - leitura/edicao de payloads JSON (usado em JsonUtils) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -128,14 +146,6 @@
             <version>1.2.12</version>
         </dependency>
 
-        <!-- JavaFaker — geracao de dados de teste dinamicos -->
-        <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>1.0.2</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -150,10 +160,16 @@
                     <includes>
                         <include>**/TestRunner.java</include>
                     </includes>
+                    <!-- Suite depende de servicos publicos de terceiros (JSONPlaceholder, demo OrangeHRM);
+                         uma falha transitoria de rede/latencia dispara 1 nova tentativa antes de reportar falha. -->
+                    <rerunFailingTestsCount>1</rerunFailingTestsCount>
                     <!-- Passa o truststore customizado para a JVM forked do Surefire.
-                         Necessário em ambientes onde um proxy SSL (ex: antivírus)
+                         Necessário em ambientes onde um proxy SSL (ex: antivírus corporativo)
                          intercepta conexões HTTPS e o Java 8 rejeita os certificados.
-                         O arquivo .maven-cacerts deve existir localmente (ver README). -->
+                         ATENCAO: Se ~/.maven-cacerts NAO existir, a JVM usa o cacerts padrao
+                         do sistema (sem erro). Porem, se existir e estiver DESATUALIZADO,
+                         conexoes HTTPS falham com "PKIX path building failed".
+                         Para regenerar: keytool -importcert -keystore ~/.maven-cacerts ... -->
                     <argLine>
                         -Djavax.net.ssl.trustStore=${user.home}/.maven-cacerts
                         -Djavax.net.ssl.trustStorePassword=changeit

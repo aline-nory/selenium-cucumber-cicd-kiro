@@ -1,5 +1,6 @@
 package drivers;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -7,6 +8,8 @@ import utils.LogUtils;
 
 /**
  * Cria instancias de WebDriver.
+ * Usa WebDriverManager para resolver o chromedriver automaticamente,
+ * eliminando a necessidade de manter CHROME_DRIVER_PATH manualmente.
  */
 public class DriverFactory {
 
@@ -22,12 +25,7 @@ public class DriverFactory {
     }
 
     private WebDriver createChrome() {
-        if (!IN_CI) {
-            String path = System.getenv("CHROME_DRIVER_PATH") != null
-                    ? System.getenv("CHROME_DRIVER_PATH")
-                    : "C:\\chromedriver\\chromedriver-win64\\chromedriver.exe";
-            System.setProperty("webdriver.chrome.driver", path);
-        }
+        WebDriverManager.chromedriver().setup();
 
         ChromeOptions options = new ChromeOptions();
         if (IN_CI) {

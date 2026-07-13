@@ -56,6 +56,7 @@ public class RestClient {
             case "POST": response = request.when().post(endpoint).then().extract().response(); break;
             case "PUT": response = request.when().put(endpoint).then().extract().response(); break;
             case "DELETE": response = request.when().delete(endpoint).then().extract().response(); break;
+            default: throw new IllegalArgumentException("Metodo HTTP nao suportado: " + method);
         }
         attachToAllure(method, endpoint);
     }
@@ -68,7 +69,9 @@ public class RestClient {
             Allure.addAttachment("Response [" + response.getStatusCode() + "]",
                     "application/json", response.getBody().asPrettyString());
         } catch (Exception e) {
-            LogUtils.debug("Allure attach falhou: " + e.getMessage());
+            // Falha ao anexar evidencia nao deve derrubar o teste, mas precisa ficar visivel:
+            // pode indicar um corpo de resposta nao serializavel ou um bug real de integracao com o Allure.
+            LogUtils.warn("Allure attach falhou: " + e.getMessage());
         }
     }
 }

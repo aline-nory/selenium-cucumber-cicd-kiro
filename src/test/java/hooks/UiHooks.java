@@ -10,17 +10,17 @@ import org.openqa.selenium.WebDriver;
 import utils.LogUtils;
 import utils.ScreenshotUtils;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Hooks para cenarios @ui.
+ * Environment injetado via PicoContainer - mesma instancia compartilhada
+ * com os demais steps/hooks do cenario (evita reler o .properties varias vezes).
  */
 public class UiHooks {
 
     private final Environment env;
 
-    public UiHooks() {
-        this.env = new Environment();
+    public UiHooks(Environment env) {
+        this.env = env;
     }
 
     @Before(value = "@ui", order = 0)
@@ -30,17 +30,21 @@ public class UiHooks {
 
     @Before(value = "@ui", order = 1)
     public void openBrowser() {
-        if (DriverManager.getDriver() == null) {
-            String browser = env.get("browser", "chrome");
-            int implicitWait = env.getInt("timeout.implicit", 10);
-            int pageLoad = env.getInt("timeout.pageLoad", 30);
+        // Sempre cria um driver novo por cenario para evitar estado residual
+        // de um cenario anterior que falhou de forma inesperada.
+        DriverManager.quit();
 
-            DriverFactory factory = new DriverFactory();
-            WebDriver driver = factory.create(browser);
-            driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.SECONDS);
-            driver.manage().timeouts().pageLoadTimeout(pageLoad, TimeUnit.SECONDS);
-            DriverManager.setDriver(driver);
-        }
+        String browser = env.get("browser", "chrome");
+        int pageLoad = env.getInt("timeout.pageLoad", 30);
+
+        DriverFactory factory = new DriverFactory();
+        WebDriver driver = factory.create(browser);
+
+        // Nao definimos implicitlyWait: a BasePage usa explicit waits (WebDriverWait)
+        // para toda interacao com elementos. Misturar implicit + explicit causa
+        // tempos de espera duplicados e comportamento nao-deterministico.
+        driver.manage().timeouts().pageLoadTimeout(pageLoad, java.util.concurrent.TimeUnit.SECONDS);
+        DriverManager.setDriver(driver);
     }
 
     @After(value = "@ui")

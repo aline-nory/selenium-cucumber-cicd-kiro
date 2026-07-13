@@ -27,9 +27,9 @@ Projeto de automação de testes **Web (UI)** e **API REST** com pipeline CI/CD.
 - **Allure Report** — relatório interativo com gráficos, histórico e screenshots
 - **Screenshots automáticas** — capturadas em cenários de falha (configurável)
 - **Logging corporativo** com SLF4J + Logback — console + arquivo
-- **Configuração por ambiente** — troca entre DEV/HML sem alterar código
+- **Configuração por ambiente** — troca entre DEV/HML sem alterar código, com override via variável de ambiente (pronto para GitHub Secrets)
 - **Detecção automática de CI** — modo headless ativado automaticamente em servidores
-- **Dados dinâmicos** com JavaFaker — geração de massa de teste em português
+- **Reexecução automática de falhas** — mitiga flakiness ao depender de serviços públicos de terceiros (JSONPlaceholder, OrangeHRM demo)
 
 ---
 
@@ -46,7 +46,7 @@ Projeto de automação de testes **Web (UI)** e **API REST** com pipeline CI/CD.
 | Allure Report | 2.24 | Relatório interativo |
 | PicoContainer | 7.18 | Injeção de dependência |
 | SLF4J + Logback | 1.7/1.2 | Logging corporativo |
-| JavaFaker | 1.0.2 | Dados dinâmicos |
+| Jackson Databind | 2.15.2 | Leitura/edição de payloads JSON |
 | GitHub Actions | - | Pipeline CI/CD |
 
 ---
@@ -70,12 +70,8 @@ src/test/java/
 ├── api/
 │   ├── clients/
 │   │   └── RestClient.java          # Cliente HTTP com Allure attachments
-│   ├── services/
-│   │   └── PostService.java         # Lógica de negócio /posts
-│   ├── models/
-│   │   └── PostRequest.java         # POJO de request
-│   └── builders/
-│       └── PostBuilder.java         # Builder com Faker
+│   └── services/
+│       └── PostService.java         # Lógica de negócio /posts
 ├── hooks/
 │   ├── UiHooks.java                 # Ciclo de vida WebDriver (@ui)
 │   └── ApiHooks.java                # Setup de API (@api)
@@ -87,7 +83,7 @@ src/test/java/
 │   └── DriverManager.java           # ThreadLocal para paralelismo
 ├── utils/
 │   ├── LogUtils.java                # Logging SLF4J
-│   ├── JsonUtils.java               # Leitura de payloads do classpath
+│   ├── JsonUtils.java               # Leitura/edição de payloads JSON do classpath
 │   └── ScreenshotUtils.java         # Captura de evidências
 └── exceptions/
     └── FrameworkException.java       # Exceção customizada do framework
@@ -143,6 +139,21 @@ src/test/resources/
 
 ---
 
+## Pré-requisitos locais
+
+- Java 8, Maven 3.9+ e Google Chrome instalados.
+- **ChromeDriver** compatível com a versão do Chrome instalado — baixe em
+  [chrome-for-testing](https://googlechromelabs.github.io/chrome-for-testing/) e aponte a variável de ambiente:
+  ```bash
+  # Windows
+  set CHROME_DRIVER_PATH=C:\chromedriver\chromedriver.exe
+  # Linux/Mac
+  export CHROME_DRIVER_PATH=/usr/local/bin/chromedriver
+  ```
+  Sem essa variável, os cenários `@ui` falham com uma mensagem explicando o que falta.
+  Em CI (`CI=true`), o Chrome roda headless e o ChromeDriver já vem instalado pelo workflow — nada a configurar.
+- Testes `@api` não precisam de Chrome/ChromeDriver.
+
 ## Como executar
 
 ```bash
@@ -152,6 +163,9 @@ mvn test -Dcucumber.filter.tags="@ui"           # só UI
 mvn test -Dcucumber.filter.tags="@smoke"        # smoke
 mvn test -Denvironment=hml                      # outro ambiente
 ```
+
+Cenários com falha são reexecutados automaticamente uma vez (`rerunFailingTestsCount`) antes de reportar
+falha definitiva — mitiga instabilidade transitória dos serviços públicos usados como alvo (JSONPlaceholder, OrangeHRM demo).
 
 ---
 
@@ -173,13 +187,20 @@ mvn allure:report                               # gera em target/site/
 
 ## Pipeline CI/CD
 
-O GitHub Actions executa automaticamente em cada push para `main` ou `develop`.
+O GitHub Actions executa automaticamente em cada push para `main`/`develop` e em pull requests para `main`,
+em dois jobs separados (princípio do menor privilégio — só o job de publicação tem permissão de escrita):
 
-1. Configura Java 8, Chrome e ChromeDriver
+**Job `testes`** (permissão apenas de leitura + `checks: write`)
+1. Configura Java 8 e instala Chrome + ChromeDriver compatível (`browser-actions/setup-chrome`)
 2. Executa `mvn test` com `CI=true` (headless automático)
-3. Gera e publica Allure Report no GitHub Pages
-4. Publica relatório Cucumber como artefato
-5. Exibe resultado JUnit inline no GitHub
+3. Publica relatório Cucumber e resultados Allure como artefatos, e o resumo JUnit inline no GitHub
+
+**Job `publicar-relatorio`** (permissão de escrita — só roda em push para `main`)
+4. Baixa os resultados Allure do job de testes
+5. Gera e publica o Allure Report no GitHub Pages
+
+Ações de terceiros são fixadas em versões imutáveis (nunca `@master`), e o job de publicação
+nunca roda em pull requests — uma PR não pode sobrescrever o relatório público.
 
 ---
 
@@ -199,6 +220,16 @@ mvn test -Denvironment=hml     # usa hml.properties
 ```
 
 Configurações em `src/test/resources/environments/`.
+
+### Credenciais
+
+Os valores em `dev.properties`/`hml.properties` (ex. `senha.admin`) são as credenciais públicas do
+[demo do OrangeHRM](https://opensource-demo.orangehrmlive.com/) — não são segredos reais, por isso ficam
+no repositório para facilitar rodar o projeto localmente sem nenhuma configuração extra.
+
+Qualquer chave pode ser sobrescrita por variável de ambiente sem tocar nos arquivos: `senha.admin` vira
+`SENHA_ADMIN` (ver `ConfigReader`). Em um projeto real, aponte essas variáveis para GitHub Secrets / um
+gerenciador de segredos (Vault, AWS Secrets Manager) em vez de manter valores reais em `.properties`.
 
 ---
 

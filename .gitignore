@@ -5,8 +5,9 @@ target/
 *.war
 
 # IDE
+# (.vscode/settings.json e versionado de proposito: contem config compartilhada
+#  do Cucumber/Java util para qualquer contribuidor abrindo o projeto no VS Code)
 .idea/
-.vscode/
 *.iml
 *.iws
 *.ipr

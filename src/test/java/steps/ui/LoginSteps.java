@@ -6,6 +6,7 @@ import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.Então;
 import io.cucumber.java.pt.Quando;
 import org.junit.Assert;
+import pages.dashboard.DashboardPage;
 import pages.login.LoginPage;
 
 /**
@@ -16,6 +17,7 @@ public class LoginSteps {
 
     private final Environment env;
     private LoginPage loginPage;
+    private DashboardPage dashboardPage;
 
     public LoginSteps(Environment env) {
         this.env = env;
@@ -23,7 +25,9 @@ public class LoginSteps {
 
     @Dado("que estou na página de login")
     public void openLogin() {
-        loginPage = new LoginPage(DriverManager.getDriver());
+        int explicitWait = env.getInt("timeout.explicit", 10);
+        loginPage = new LoginPage(DriverManager.getDriver(), explicitWait);
+        dashboardPage = new DashboardPage(DriverManager.getDriver(), explicitWait);
         loginPage.open(env.baseUrl);
     }
 
@@ -50,7 +54,7 @@ public class LoginSteps {
 
     @Então("devo ser redirecionado para a página inicial")
     public void shouldBeOnDashboard() {
-        Assert.assertTrue("Nao redirecionou para o dashboard", loginPage.isOnDashboard());
+        Assert.assertTrue("Nao redirecionou para o dashboard", dashboardPage.isOnDashboard());
     }
 
     @Então("devo ver a mensagem de erro {string}")

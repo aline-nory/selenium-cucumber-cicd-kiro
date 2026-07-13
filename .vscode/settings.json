@@ -1,0 +1,24 @@
+{
+  // Extensão oficial do Cucumber (cucumber.cucumber-vscode)
+  "cucumber.features": [
+    "src/test/resources/features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    "src/test/java/steps/**/*.java"
+  ],
+
+  // Extensão alternativa (alexkrechik.cucumberautocomplete)
+  "cucumberautocomplete.steps": [
+    "src/test/java/steps/**/*.java"
+  ],
+  "cucumberautocomplete.syncfeatures": "src/test/resources/features/*.feature",
+  "cucumberautocomplete.strictGherkinCompletion": false,
+
+  // Java
+  "java.test.config": {
+    "vmArgs": [
+      "-Djavax.net.ssl.trustStore=${env:USERPROFILE}/.maven-cacerts",
+      "-Djavax.net.ssl.trustStorePassword=changeit"
+    ]
+  }
+}

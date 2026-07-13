@@ -1,6 +1,7 @@
 package config;
 
 import exceptions.FrameworkException;
+import utils.LogUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,10 @@ import java.util.Properties;
 
 /**
  * Le arquivos .properties do classpath.
+ *
+ * Cada chave pode ser sobrescrita por variavel de ambiente: "base.url" vira "BASE_URL"
+ * (pontos -&gt; underscore, maiusculo). Em CI/CD, use isso para injetar valores via
+ * GitHub Secrets sem tocar nos arquivos .properties.
  */
 public class ConfigReader {
 
@@ -25,8 +30,12 @@ public class ConfigReader {
     }
 
     public String get(String key) {
-        String envValue = System.getenv(key.replace(".", "_").toUpperCase());
-        if (envValue != null) return envValue;
+        String envKey = key.replace(".", "_").toUpperCase();
+        String envValue = System.getenv(envKey);
+        if (envValue != null) {
+            LogUtils.debug("Config '" + key + "' resolvida via variavel de ambiente " + envKey);
+            return envValue;
+        }
         return props.getProperty(key);
     }
 
