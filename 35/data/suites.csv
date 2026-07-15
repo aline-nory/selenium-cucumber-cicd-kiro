@@ -1,0 +1,52 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"  Como um administrador do sistema
+  Quero visualizar e buscar empregados na lista
+  Para gerenciar os registros de funcionários","17454","Visualizar tabela de empregados","","2026-07-15","passed","2026-07-15","","Lista de Empregados","Visualizar tabela de empregados",""
+"  Como um administrador do sistema
+  Quero visualizar e buscar empregados na lista
+  Para gerenciar os registros de funcionários","10659","Editar empregado da lista","","2026-07-15","passed","2026-07-15","","Lista de Empregados","Editar empregado da lista",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","50","Buscar post inexistente retorna 404","","2026-07-15","passed","2026-07-15","","API de Posts","Buscar post inexistente retorna 404",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","383","Validar contrato (schema) do post","","2026-07-15","passed","2026-07-15","","API de Posts","Validar contrato (schema) do post",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","2264","Listar todos os posts","","2026-07-15","passed","2026-07-15","","API de Posts","Listar todos os posts",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","117","Atualizar um post existente","","2026-07-15","passed","2026-07-15","","API de Posts","Atualizar um post existente",""
+"  Como um administrador do sistema
+  Quero visualizar e buscar empregados na lista
+  Para gerenciar os registros de funcionários","8006","Buscar empregado inexistente","","2026-07-15","passed","2026-07-15","","Lista de Empregados","Buscar empregado inexistente",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","65","Deletar um post","","2026-07-15","passed","2026-07-15","","API de Posts","Deletar um post",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","442","Criar um novo post","","2026-07-15","passed","2026-07-15","","API de Posts","Criar um novo post",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","618","Buscar um post por ID","","2026-07-15","passed","2026-07-15","","API de Posts","Buscar um post por ID",""
+"  Como um administrador do sistema
+  Quero visualizar e buscar empregados na lista
+  Para gerenciar os registros de funcionários","6638","Navegar para adicionar novo empregado","","2026-07-15","passed","2026-07-15","","Lista de Empregados","Navegar para adicionar novo empregado",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","4361","Login com credenciais inválidas","","2026-07-15","passed","2026-07-15","","Login no sistema","Login com credenciais inválidas",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","4518","Login com credenciais válidas","","2026-07-15","passed","2026-07-15","","Login no sistema","Login com credenciais válidas",""
+"  Como consumidor da API REST
+  Quero validar os endpoints de posts
+  Para garantir que a API responde corretamente","98","Buscar posts de um usuário específico","","2026-07-15","passed","2026-07-15","","API de Posts","Buscar posts de um usuário específico",""
+"  Como um administrador do sistema
+  Quero visualizar e buscar empregados na lista
+  Para gerenciar os registros de funcionários","8227","Buscar empregado por nome existente","","2026-07-15","passed","2026-07-15","","Lista de Empregados","Buscar empregado por nome existente",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","5405","Login com credenciais inválidas","","2026-07-15","passed","2026-07-15","","Login no sistema","Login com credenciais inválidas",""
+"  Como um usuário registrado
+  Quero fazer login na aplicação
+  Para acessar as funcionalidades do sistema","4663","Login com senha incorreta","","2026-07-15","passed","2026-07-15","","Login no sistema","Login com senha incorreta",""
