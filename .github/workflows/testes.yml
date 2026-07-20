@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout do repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar Java 8
         uses: actions/setup-java@v4
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: Checkout do repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Baixar allure-results do job de testes
         uses: actions/download-artifact@v4
