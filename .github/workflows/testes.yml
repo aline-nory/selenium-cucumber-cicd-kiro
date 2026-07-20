@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Baixar allure-results do job de testes
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: allure-results
           path: target/allure-results
